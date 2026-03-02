@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -27,9 +27,8 @@
     }
 
     *{box-sizing:border-box}
-
-    /* FUNDO 100% TRANSPARENTE */
     html, body{ background: transparent !important; }
+
     body{
       margin:0;
       color:var(--text);
@@ -38,10 +37,8 @@
     }
 
     a{color:inherit}
-
     .wrap{max-width:1180px;margin:0 auto}
 
-    /* Top bar */
     .top{
       display:flex; gap:12px; align-items:center; justify-content:space-between;
       padding:12px 12px;
@@ -103,7 +100,6 @@
     .btn-bad{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.35)}
 
-    /* Layout */
     .grid{
       display:grid;
       grid-template-columns:380px 1fr;
@@ -155,7 +151,6 @@
       line-height:1.35;
     }
 
-    /* Market list */
     .toolbar{
       display:flex;align-items:center;justify-content:space-between;
       gap:10px;margin-bottom:10px; flex-wrap:wrap;
@@ -234,7 +229,6 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Modal */
     .backdrop{
       position:fixed; inset:0; display:none;
       background:rgba(0,0,0,.55);
@@ -275,7 +269,6 @@
     .ico img{width:18px;height:18px;object-fit:contain}
     .footerRow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
 
-    /* Mobile polish */
     @media(max-width:520px){
       body{padding:10px}
       .top{flex-direction:column; align-items:stretch}
@@ -296,7 +289,7 @@
       </div>
       <div class="title">
         <h1>INRI P2P — Escrow Market</h1>
-        <div class="sub">Escrow on-chain • Pagamento off-chain em USDT/USDC • Preço/Total ficam gravados no offer</div>
+        <div class="sub">On-chain escrow • Off-chain payment (USDT/USDC) • Price + Total stored in the offer</div>
       </div>
     </div>
 
@@ -308,57 +301,56 @@
   </header>
 
   <section class="grid">
-    <!-- LEFT -->
     <aside class="card">
-      <h2>Criar Oferta</h2>
+      <h2>Create Offer</h2>
       <div class="hint">
-        O vendedor trava <b>INRI</b>. O comprador paga <b>USDT/USDC</b> fora da chain e cola o <b>TxID</b>.
+        Seller locks <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and pastes the <b>TxID</b>.
         <br><br>
-        ✅ Você define <b>Preço por INRI</b> e o site calcula o <b>Total</b> automaticamente. O preço/total fica salvo no offer (sem redeploy).
+        ✅ Set <b>Price per INRI</b>, the app calculates <b>Total</b> automatically and stores it inside the offer.
         <br>
-        ⚠️ Se seu RPC bloquear navegador (CORS), o site funciona lendo via <b>Connect Wallet</b>.
+        ⚠️ If browser RPC logs are blocked, your created offers still appear (saved locally by offerId).
       </div>
 
       <div class="field">
-        <label>Quantidade INRI (native)</label>
-        <input id="inAmount" type="number" step="0.0001" placeholder="ex: 1000" />
+        <label>INRI Amount (native)</label>
+        <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
       </div>
 
       <div class="row" style="flex-wrap:wrap">
         <div class="field" style="flex:1;min-width:160px;margin:10px 0">
-          <label>Moeda</label>
+          <label>Pay Asset</label>
           <select id="payAsset">
             <option value="USDT">USDT</option>
             <option value="USDC">USDC</option>
           </select>
         </div>
         <div class="field" style="flex:1;min-width:180px;margin:10px 0">
-          <label>Rede de Pagamento</label>
+          <label>Pay Network</label>
           <select id="payNetwork"></select>
         </div>
       </div>
 
       <div class="row" style="flex-wrap:wrap">
         <div class="field" style="flex:1;min-width:200px;margin:10px 0">
-          <label>Preço de 1 INRI (em USDT/USDC)</label>
-          <input id="pricePer" type="number" step="0.000001" placeholder="ex: 0.05" />
-          <div class="muted2">Total = INRI × preço</div>
+          <label>Price per 1 INRI (in USDT/USDC)</label>
+          <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
+          <div class="muted2">Total = INRI × price</div>
         </div>
 
         <div class="field" style="flex:1;min-width:200px;margin:10px 0">
-          <label>Total a pagar (auto)</label>
+          <label>Total to pay (auto)</label>
           <div class="pill mono" id="totalPill">—</div>
         </div>
       </div>
 
       <div class="field">
-        <label>Endereço do vendedor para receber (na rede escolhida)</label>
-        <input id="payTo" placeholder="0x... ou T... ou qualquer ID" />
+        <label>Seller Receive Address (on selected network)</label>
+        <input id="payTo" placeholder="0x... / T... / any account id" />
       </div>
 
       <div class="row" style="flex-wrap:wrap">
         <div class="field" style="flex:1;min-width:200px;margin:10px 0">
-          <label>Tempo para pagar (minutos)</label>
+          <label>Payment Window (minutes)</label>
           <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
         </div>
         <div class="field" style="flex:1;min-width:200px;margin:10px 0">
@@ -368,7 +360,7 @@
       </div>
 
       <div class="row" style="flex-wrap:wrap">
-        <button class="btn btn-pri" id="btnCreate" style="flex:1">Criar Oferta (depositar INRI)</button>
+        <button class="btn btn-pri" id="btnCreate" style="flex:1">Create Offer (deposit INRI)</button>
       </div>
 
       <div class="hr"></div>
@@ -386,10 +378,17 @@
       </div>
 
       <div class="hr"></div>
-      <div class="muted2" id="rpcMode">RPC mode: —</div>
+      <div class="muted2" id="rpcMode">Provider mode: —</div>
+
+      <div class="hr"></div>
+      <div class="row" style="flex-wrap:wrap">
+        <button class="btn btn-ghost" id="btnClearSaved" style="flex:1">Clear saved offers (this device)</button>
+      </div>
+      <div class="muted2" style="margin-top:6px">
+        Saved offers are stored only in your browser (localStorage).
+      </div>
     </aside>
 
-    <!-- RIGHT -->
     <main class="card">
       <div class="toolbar">
         <div class="row" style="flex-wrap:wrap">
@@ -413,7 +412,7 @@
       <ul class="offers" id="offers"></ul>
 
       <div class="footerRow">
-        <div class="muted2" id="syncInfo">Conecte a wallet e clique Refresh para carregar (se RPC bloquear navegador).</div>
+        <div class="muted2" id="syncInfo">Tip: Connect Wallet, then Refresh.</div>
         <div class="row">
           <button class="btn btn-ghost" id="prev">◀</button>
           <div class="pill" id="pageInfo">1 / 1</div>
@@ -424,10 +423,8 @@
   </section>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Modal -->
 <div class="backdrop" id="backdrop">
   <div class="modal">
     <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
@@ -442,7 +439,7 @@
 
     <div class="modalGrid">
       <div class="card" style="background:rgba(0,0,0,.18);box-shadow:none">
-        <h2 style="margin:0 0 8px 0">Detalhes</h2>
+        <h2 style="margin:0 0 8px 0">Details</h2>
         <div id="mDetails" class="muted"></div>
         <div class="hr"></div>
         <div class="hint" id="mPayHint">—</div>
@@ -450,12 +447,12 @@
       </div>
 
       <div class="card" style="background:rgba(0,0,0,.18);box-shadow:none">
-        <h2 style="margin:0 0 8px 0">Ações</h2>
+        <h2 style="margin:0 0 8px 0">Actions</h2>
 
         <div class="field">
-          <label>TxID (obrigatório para marcar como pago)</label>
-          <input id="mTxid" placeholder="Cole o hash/txid aqui" />
-          <div class="muted2">Somente o comprador consegue marcar como pago.</div>
+          <label>TxID (required to mark as paid)</label>
+          <input id="mTxid" placeholder="Paste transaction hash / txid here" />
+          <div class="muted2">Only the buyer can mark as paid.</div>
         </div>
 
         <div class="row" style="flex-wrap:wrap">
@@ -508,8 +505,12 @@
     INRI: "https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png"
   };
 
-  const DEFAULT_SCAN_BLOCKS = 120000;
+  // If getLogs works, we also scan recent history to find offers from all users.
+  const DEFAULT_SCAN_BLOCKS = 300000;
   const PAGE_SIZE = 9;
+
+  // local storage (device only)
+  const LS_KEY = "inri_p2p_saved_offer_ids_v1";
 
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
@@ -556,6 +557,7 @@
     btnWithdraw: $("btnWithdraw"),
 
     rpcMode: $("rpcMode"),
+    btnClearSaved: $("btnClearSaved"),
 
     filter: $("filter"),
     q: $("q"),
@@ -600,7 +602,7 @@
   // =============================
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
 
-  let readProvider = rpcProvider;     // may switch to wallet provider
+  let readProvider = rpcProvider;
   let browserProvider = null;
   let signer = null;
   let me = null;
@@ -618,6 +620,31 @@
 
   let modalId = null;
   let modalOffer = null;
+
+  const iface = new ethers.Interface(ABI);
+
+  // =============================
+  // Local saved offers
+  // =============================
+  function loadSavedIds(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.map(x=>String(x)) : [];
+    }catch{
+      return [];
+    }
+  }
+
+  function saveId(idStr){
+    const cur = new Set(loadSavedIds());
+    cur.add(String(idStr));
+    localStorage.setItem(LS_KEY, JSON.stringify([...cur]));
+  }
+
+  function clearSaved(){
+    localStorage.removeItem(LS_KEY);
+  }
 
   // =============================
   // Helpers
@@ -668,8 +695,6 @@
     return `<span class="ico"><img src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
   }
 
-  // Pack/unpack offer meta without redeploy:
-  // payTo stored as: "<address> || price=0.05 || total=50.000000"
   function packPayTo(addr, priceStr, totalStr){
     const a = (addr||"").trim();
     const p = (priceStr||"").trim();
@@ -710,13 +735,13 @@
       el.previewPill.textContent = "—";
       return;
     }
-    const pr = price ? ` • preço ${price}` : "";
+    const pr = price ? ` • price ${price}` : "";
     const tt = total ? ` • total ${total} ${el.payAsset.value}` : "";
     el.previewPill.textContent = `${amt} INRI${pr}${tt} • ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
   }
 
   async function ensureNetwork(){
-    if (!window.ethereum) throw new Error("Sem wallet (MetaMask/Rabby).");
+    if (!window.ethereum) throw new Error("No wallet found (MetaMask/Rabby).");
     const cur = await window.ethereum.request({method:"eth_chainId"});
     if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()){
       el.netPill.textContent = `Network: ${CHAIN_NAME}`;
@@ -751,19 +776,19 @@
     signer = await browserProvider.getSigner();
     me = await signer.getAddress();
 
-    // Switch reads to wallet provider (avoids CORS issues on Pages)
+    // Use wallet provider for reads to avoid CORS issues on Pages
     readProvider = browserProvider;
     contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
     contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
 
     el.btnConnect.textContent = short(me);
     el.meAddr.textContent = me;
-    el.rpcMode.textContent = "RPC mode: Wallet Provider (sem CORS)";
+    el.rpcMode.textContent = "Provider mode: Wallet Provider (no CORS)";
 
     await detectWithdrawSupport();
     await refreshWithdrawable();
 
-    toast("Wallet conectada ✅");
+    toast("Wallet connected ✅");
   }
 
   async function detectWithdrawSupport(){
@@ -795,33 +820,51 @@
   // =============================
   // Market loading
   // =============================
-  async function loadOfferIds(){
-    const latest = await contractRead.runner.provider.getBlockNumber();
-    lastBlock = latest;
-    const from = Math.max(0, latest - DEFAULT_SCAN_BLOCKS);
-
-    const iface = new ethers.Interface(ABI);
-    const topic0 = iface.getEvent("OfferCreated").topicHash;
-
-    const logs = await contractRead.runner.provider.getLogs({
-      address: CONTRACT,
-      fromBlock: from,
-      toBlock: latest,
-      topics: [topic0]
+  function mergeIds(aStr, bStr){
+    const set = new Set();
+    for (const x of aStr) set.add(String(x));
+    for (const x of bStr) set.add(String(x));
+    // newest first sort by numeric desc
+    return [...set].sort((x,y)=> {
+      try { return BigInt(y) > BigInt(x) ? 1 : -1; } catch { return 0; }
     });
+  }
 
-    const ids = [];
-    const seen = new Set();
-    for (const lg of logs){
-      const parsed = iface.parseLog(lg);
-      const id = parsed.args.offerId.toString();
-      if (!seen.has(id)){
-        seen.add(id);
-        ids.push(BigInt(id));
+  async function loadOfferIds(){
+    // Always load local saved offers first (so they never "disappear" on refresh)
+    const saved = loadSavedIds();
+
+    // Try scanning logs (may fail on wallet provider)
+    let fromLogs = [];
+    try{
+      const provider = contractRead.runner.provider;
+      const latest = await provider.getBlockNumber();
+      lastBlock = latest;
+      const from = Math.max(0, latest - DEFAULT_SCAN_BLOCKS);
+
+      const topic0 = iface.getEvent("OfferCreated").topicHash;
+      const logs = await provider.getLogs({
+        address: CONTRACT,
+        fromBlock: from,
+        toBlock: latest,
+        topics: [topic0]
+      });
+
+      const seen = new Set();
+      for (const lg of logs){
+        const parsed = iface.parseLog(lg);
+        const id = parsed.args.offerId.toString();
+        if (!seen.has(id)){
+          seen.add(id);
+          fromLogs.push(id);
+        }
       }
+    }catch(e){
+      console.warn("getLogs failed (provider limitation). Showing saved offers only.", e);
     }
-    ids.sort((a,b)=> (a>b ? -1 : 1));
-    offerIds = ids;
+
+    const merged = mergeIds(saved, fromLogs);
+    offerIds = merged.map(x=>BigInt(x));
   }
 
   async function loadOffersDetails(){
@@ -857,6 +900,7 @@
     if (f === "locked") x = x.filter(o=>o.status===1);
     if (f === "paid") x = x.filter(o=>o.status===2);
     if (f === "disputed") x = x.filter(o=>o.status===3);
+
     if (f === "mine"){
       if (!me) x = [];
       else {
@@ -898,8 +942,8 @@
       const div = document.createElement("div");
       div.className = "muted";
       div.textContent = (el.filter.value==="mine" && !me)
-        ? "Conecte a wallet para ver suas ofertas."
-        : "Nenhuma oferta encontrada. Clique Refresh.";
+        ? "Connect wallet to view your offers."
+        : "No offers found. Click Refresh.";
       el.offers.appendChild(div);
       return;
     }
@@ -908,13 +952,11 @@
       const li = document.createElement("li");
       li.className = "offer";
 
-      const st = statusLabel(o.status);
-
       const netLogo = PAY_NETWORKS.find(n=>n.key===o.payNetwork)?.logo;
       const assetLogo = TOKEN_LOGO[o.payAsset] || "";
 
       const meta = unpackPayTo(o.payTo);
-      const priceLine = meta.price ? `• preço ${meta.price} ${o.payAsset}` : "";
+      const priceLine = meta.price ? `• price ${meta.price} ${o.payAsset}` : "";
       const totalLine = meta.total ? `• total ${meta.total} ${o.payAsset}` : "";
 
       li.innerHTML = `
@@ -927,7 +969,7 @@
             </div>
 
             <div style="margin-top:10px;font-weight:900;font-size:16px">${fmtInri(o.amount)} INRI</div>
-            <div class="muted2">Oferta <span class="mono">#${o.id.toString()}</span></div>
+            <div class="muted2">Offer <span class="mono">#${o.id.toString()}</span></div>
             <div class="muted2" style="margin-top:6px">${priceLine} ${totalLine}</div>
           </div>
 
@@ -941,18 +983,18 @@
 
         <div class="kvs">
           <div class="kv">
-            <div class="k">Janela</div>
+            <div class="k">Payment Window</div>
             <div class="v">${Math.round(o.payWindowSec/60)} min</div>
           </div>
           <div class="kv">
-            <div class="k">Tempo</div>
+            <div class="k">Time Left</div>
             <div class="v">${o.status===1 ? timeLeft(o.expiresAt) : "—"}</div>
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn btn-ghost" data-act="view" data-id="${o.id.toString()}">Ver</button>
-          <button class="btn btn-pri" data-act="quick" data-id="${o.id.toString()}">${(st==="OPEN" ? "Accept" : "Abrir")}</button>
+          <button class="btn btn-ghost" data-act="view" data-id="${o.id.toString()}">View</button>
+          <button class="btn btn-pri" data-act="quick" data-id="${o.id.toString()}">${(statusLabel(o.status)==="OPEN" ? "Accept" : "Open")}</button>
         </div>
       `;
       el.offers.appendChild(li);
@@ -960,16 +1002,18 @@
   }
 
   async function refresh(){
-    toast("Sincronizando ofertas…");
+    toast("Syncing offers…");
 
     await loadOfferIds();
     await loadOffersDetails();
 
-    el.syncInfo.textContent = `Sync no bloco ${lastBlock} • Provider: ${(readProvider===rpcProvider) ? "RPC" : "Wallet"}`;
+    const providerName = (readProvider===rpcProvider) ? "Public RPC" : "Wallet Provider";
+    const savedCount = loadSavedIds().length;
+    el.syncInfo.textContent = `Synced • Provider: ${providerName} • Saved offers on this device: ${savedCount} ${lastBlock ? ("• block "+lastBlock) : ""}`;
     render();
 
     await refreshWithdrawable();
-    toast("Atualizado ✅", 1400);
+    toast("Updated ✅", 1400);
   }
 
   // =============================
@@ -1007,13 +1051,12 @@
 
     const note = [];
     note.push(`Status: ${st}`);
-    if (isSeller) note.push("Você é o seller.");
-    if (isBuyer) note.push("Você é o buyer.");
-    if (!me) note.push("Conecte a wallet para interagir.");
+    if (isSeller) note.push("You are the seller.");
+    if (isBuyer) note.push("You are the buyer.");
+    if (!me) note.push("Connect wallet to interact.");
     if (st==="LOCKED") note.push(`Deadline: ${new Date(modalOffer.expiresAt*1000).toLocaleString()} (${timeLeft(modalOffer.expiresAt)})`);
-    if (st==="PAID") note.push("Seller deve confirmar e liberar.");
-    if (st==="DISPUTED") note.push("Disputa aberta. Owner/mods decidem.");
-
+    if (st==="PAID") note.push("Seller must confirm payment and release.");
+    if (st==="DISPUTED") note.push("Dispute opened. Owner/mods decide.");
     el.mNote.textContent = note.join(" ");
   }
 
@@ -1038,7 +1081,7 @@
     };
 
     const st = statusLabel(modalOffer.status);
-    el.mTitle.textContent = `Oferta #${idStr} — ${st}`;
+    el.mTitle.textContent = `Offer #${idStr} — ${st}`;
     el.mSub.textContent = `Seller ${short(modalOffer.seller)} • Amount ${fmtInri(modalOffer.amount)} INRI`;
 
     const payNet = PAY_NETWORKS.find(n=>n.key===modalOffer.payNetwork);
@@ -1054,21 +1097,21 @@
       </div>
       <div class="hr"></div>
       <div><b>Amount</b>: ${fmtInri(modalOffer.amount)} INRI</div>
-      <div><b>Preço</b>: <span class="mono">${meta.price || "—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Price</b>: <span class="mono">${meta.price || "—"}</span> ${modalOffer.payAsset}</div>
       <div><b>Total</b>: <span class="mono">${meta.total || "—"}</span> ${modalOffer.payAsset}</div>
       <div class="hr"></div>
       <div><b>Seller</b>: <span class="mono">${modalOffer.seller}</span></div>
       <div><b>Buyer</b>: <span class="mono">${modalOffer.buyer && modalOffer.buyer!==ethers.ZeroAddress ? modalOffer.buyer : "—"}</span></div>
-      <div><b>Janela</b>: ${Math.round(modalOffer.payWindowSec/60)} min</div>
-      <div><b>Expira</b>: ${modalOffer.status===1 ? new Date(modalOffer.expiresAt*1000).toLocaleString() : "—"}</div>
+      <div><b>Window</b>: ${Math.round(modalOffer.payWindowSec/60)} min</div>
+      <div><b>Expires</b>: ${modalOffer.status===1 ? new Date(modalOffer.expiresAt*1000).toLocaleString() : "—"}</div>
       <div><b>TxID</b>: <span class="mono">${modalOffer.txid ? modalOffer.txid : "—"}</span></div>
     `;
 
     el.mPayHint.innerHTML = `
-      <b>Instruções de pagamento</b><br>
-      Pague exatamente <b>${meta.total || "—"} ${modalOffer.payAsset || "—"}</b> na rede <b>${modalOffer.payNetwork || "—"}</b> para:<br>
+      <b>Payment instructions</b><br>
+      Pay exactly <b>${meta.total || "—"} ${modalOffer.payAsset || "—"}</b> on <b>${modalOffer.payNetwork || "—"}</b> to:<br>
       <span class="mono">${meta.address || "—"}</span><br>
-      Depois, cole o <b>TxID</b> e clique <b>I Paid</b>.
+      Then paste the <b>TxID</b> and click <b>I Paid</b>.
     `;
 
     el.mLogos.innerHTML = `
@@ -1086,7 +1129,7 @@
   // =============================
   async function requireConnected(){
     if (!me) await connect();
-    if (!contractWrite) throw new Error("Não conectado.");
+    if (!contractWrite) throw new Error("Not connected.");
   }
 
   el.btnConnect.addEventListener("click", async ()=>{
@@ -1104,17 +1147,16 @@
       const price = (el.pricePer.value||"").trim();
       const total = calcTotal();
 
-      if (!amt || Number(amt) <= 0) throw new Error("Quantidade INRI inválida");
-      if (!price || Number(price) <= 0) throw new Error("Preço por INRI é obrigatório");
-      if (!total) throw new Error("Não foi possível calcular o total");
-      if (!payTo) throw new Error("Endereço de recebimento é obrigatório");
+      if (!amt || Number(amt) <= 0) throw new Error("Invalid INRI amount");
+      if (!price || Number(price) <= 0) throw new Error("Price per INRI is required");
+      if (!total) throw new Error("Could not calculate total");
+      if (!payTo) throw new Error("Seller receive address is required");
 
       const payWindowSec = Math.max(60, Math.floor(mins*60));
       const valueWei = ethers.parseEther(amt);
-
       const payToPacked = packPayTo(payTo, price, total);
 
-      toast("Criando oferta (deposito INRI)…");
+      toast("Creating offer (deposit INRI)…");
       const tx = await contractWrite.createOffer(
         payWindowSec,
         el.payAsset.value,
@@ -1122,7 +1164,23 @@
         payToPacked,
         { value: valueWei }
       );
-      await tx.wait();
+
+      const receipt = await tx.wait();
+
+      // Extract offerId from receipt logs and SAVE IT (so it won't disappear on refresh)
+      try{
+        for (const lg of receipt.logs){
+          if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
+          const parsed = iface.parseLog(lg);
+          if (parsed && parsed.name === "OfferCreated"){
+            const idStr = parsed.args.offerId.toString();
+            saveId(idStr);
+            break;
+          }
+        }
+      }catch(e){
+        console.warn("Could not parse OfferCreated from receipt. Offer still created.", e);
+      }
 
       el.inAmount.value = "";
       el.pricePer.value = "";
@@ -1130,7 +1188,7 @@
       renderPreview();
 
       await refresh();
-      toast("Oferta criada ✅");
+      toast("Offer created ✅");
     }catch(e){
       console.error(e);
       alert("Create error: " + (e.shortMessage || e.message || e));
@@ -1140,11 +1198,11 @@
   el.btnWithdraw.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      toast("Withdraw…");
+      toast("Withdrawing…");
       const tx = await contractWrite.withdraw();
       await tx.wait();
       await refreshWithdrawable();
-      toast("Withdraw completo ✅");
+      toast("Withdraw complete ✅");
     }catch(e){
       console.error(e);
       alert("Withdraw error: " + (e.shortMessage || e.message || e));
@@ -1152,12 +1210,14 @@
   });
 
   el.btnRefresh.addEventListener("click", async ()=>{
-    try{
-      await refresh();
-    }catch(e){
-      console.error(e);
-      alert("Refresh error: " + (e.shortMessage || e.message || e) + "\n\nDica: conecte a wallet primeiro.");
-    }
+    try{ await refresh(); }
+    catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); }
+  });
+
+  el.btnClearSaved.addEventListener("click", ()=>{
+    if (!confirm("Clear saved offers from this device?")) return;
+    clearSaved();
+    toast("Saved offers cleared ✅");
   });
 
   el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
@@ -1186,7 +1246,7 @@
   el.btnAccept.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      toast("Accept…");
+      toast("Accepting offer…");
       const tx = await contractWrite.acceptOffer(modalId);
       await tx.wait();
       await refresh();
@@ -1202,13 +1262,13 @@
     try{
       await requireConnected();
       const txid = (el.mTxid.value||"").trim();
-      if (txid.length < 6) throw new Error("TxID muito curto");
-      toast("Mark Paid…");
+      if (txid.length < 6) throw new Error("TxID too short");
+      toast("Marking as paid…");
       const tx = await contractWrite.markPaid(modalId, txid);
       await tx.wait();
       await refresh();
       await showOffer(modalId.toString());
-      toast("Paid ✅");
+      toast("Marked paid ✅");
     }catch(e){
       console.error(e);
       alert("Mark Paid error: " + (e.shortMessage || e.message || e));
@@ -1218,7 +1278,7 @@
   el.btnRelease.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      toast("Release…");
+      toast("Releasing to buyer…");
       const tx = await contractWrite.releaseToBuyer(modalId);
       await tx.wait();
       await refresh();
@@ -1233,7 +1293,7 @@
   el.btnDispute.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      toast("Open dispute…");
+      toast("Opening dispute…");
       const tx = await contractWrite.openDispute(modalId);
       await tx.wait();
       await refresh();
@@ -1248,7 +1308,7 @@
   el.btnReclaim.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      toast("Reclaim…");
+      toast("Reclaiming…");
       const tx = await contractWrite.reclaimIfUnpaid(modalId);
       await tx.wait();
       await refresh();
@@ -1263,8 +1323,8 @@
   el.btnCancel.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      if (!confirm("Cancelar esta oferta? (somente OPEN)")) return;
-      toast("Cancel…");
+      if (!confirm("Cancel this offer? (Only possible while OPEN)")) return;
+      toast("Cancelling…");
       const tx = await contractWrite.cancelOffer(modalId);
       await tx.wait();
       await refresh();
@@ -1281,37 +1341,42 @@
   // =============================
   (async function init(){
     el.contractPill.textContent = "Contract: " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4);
+    renderPreview();
 
-    // Try show network status (no wallet required)
     try{
       if (window.ethereum){
         const cid = await window.ethereum.request({method:"eth_chainId"});
         el.netPill.textContent = (cid && cid.toLowerCase()===CHAIN_HEX.toLowerCase())
-          ? `Network: ${CHAIN_NAME}` : `Network: troque para ${CHAIN_NAME}`;
+          ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
       } else {
-        el.netPill.textContent = "Network: (sem wallet)";
+        el.netPill.textContent = "Network: (no wallet)";
       }
     }catch{
       el.netPill.textContent = "Network: —";
     }
 
-    renderPreview();
-
-    // Try RPC once (some RPCs block browser CORS)
+    // Try public RPC quickly (may be blocked by browser CORS)
     try{
       await rpcProvider.getBlockNumber();
-      el.rpcMode.textContent = "RPC mode: Public RPC OK";
+      el.rpcMode.textContent = "Provider mode: Public RPC OK";
       contractRead = new ethers.Contract(CONTRACT, ABI, rpcProvider);
       readProvider = rpcProvider;
-      // optional auto-refresh
+    }catch(e){
+      console.warn("Public RPC blocked for browser (CORS).", e);
+      el.rpcMode.textContent = "Provider mode: Public RPC blocked (use Connect Wallet)";
+    }
+
+    // Always show saved offers even without logs
+    try{
       await refresh();
     }catch(e){
-      console.warn("RPC blocked for browser (CORS?)", e);
-      el.rpcMode.textContent = "RPC mode: RPC bloqueia navegador (use Connect Wallet)";
-      el.syncInfo.textContent = "Clique Connect Wallet e depois Refresh para carregar ofertas.";
+      console.error(e);
+      el.syncInfo.textContent = "Could not load offers. Connect wallet and click Refresh.";
+      toast("Provider error: cannot load offers");
     }
   })();
 })();
 </script>
 </body>
 </html>
+
