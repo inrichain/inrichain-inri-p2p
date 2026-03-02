@@ -20,22 +20,21 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%; background:transparent!important;}
+    html,body{height:100%; background:transparent!important; overflow:hidden !important;}
+    body{margin:0;color:var(--text);}
 
-    /* ✅ SEM BARRA DE ROLAGEM (mas continua rolando) */
-    body{overflow:auto; -ms-overflow-style:none; scrollbar-width:none;}
-    body::-webkit-scrollbar{width:0;height:0;display:none}
-    *{scrollbar-width:none}
-    *::-webkit-scrollbar{width:0;height:0;display:none}
-
-    body{
-      margin:0; color:var(--text);
+    .app{
+      height:100vh;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:10px;
       padding:10px;
     }
 
-    .wrap{max-width:1180px;margin:0 auto}
+    .wrap{max-width:1180px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;height:100%}
     a{color:inherit}
 
+    /* Header */
     .top{
       display:flex; gap:10px; align-items:center; justify-content:space-between;
       padding:10px;
@@ -45,7 +44,6 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(10px);
     }
-
     .brand{display:flex; gap:10px; align-items:center; min-width:0}
     .logo{
       width:38px;height:38px;border-radius:999px;
@@ -76,7 +74,16 @@
       font-size:11.5px;
       white-space:nowrap;
     }
+    .pill b{color:#fff}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
+    .badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-width:18px;height:18px;padding:0 6px;border-radius:999px;
+      font-size:11px;font-weight:900;
+      background:rgba(239,68,68,.20); border:1px solid rgba(239,68,68,.35); color:#fff;
+    }
+    .badge-ok{background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35)}
+    .badge-warn{background:rgba(245,158,11,.16); border-color:rgba(245,158,11,.35)}
 
     .btn{
       border:none; cursor:pointer; font-weight:900;
@@ -94,15 +101,46 @@
     .btn-bad{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.35)}
 
-    .grid{
+    /* Main area: zero scroll, fit screen */
+    .main{
+      height:100%;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:10px;
+      min-height:0;
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex; gap:8px; align-items:center; justify-content:space-between;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background: rgba(10,14,30,.55);
+      box-shadow: var(--shadow);
+      padding:8px;
+      backdrop-filter: blur(10px);
+    }
+    .tabRow{display:flex;gap:8px;align-items:center}
+    .tab{
+      padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06); color:#fff; font-weight:900; font-size:12.5px;
+      cursor:pointer;
+    }
+    .tab.active{
+      background:linear-gradient(90deg,var(--pri),var(--pri2));
+      border-color:rgba(255,255,255,.10);
+    }
+
+    /* Panels */
+    .panelWrap{
+      height:100%;
+      min-height:0;
       display:grid;
       grid-template-columns:360px 1fr;
       gap:10px;
-      margin-top:10px
     }
     @media(max-width:980px){
-      .grid{grid-template-columns:1fr}
-      .title .sub{max-width:100%}
+      .panelWrap{grid-template-columns:1fr}
     }
 
     .card{
@@ -112,13 +150,12 @@
       box-shadow: var(--shadow);
       padding:10px;
       backdrop-filter: blur(10px);
+      min-height:0;
     }
     .card h2{margin:0 0 8px 0; font-size:13px}
     .muted{color:var(--muted);font-size:11.5px}
     .muted2{color:var(--muted2);font-size:11.5px}
     .hr{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
-
-    .col{display:flex;flex-direction:column;gap:6px}
 
     .field{display:flex;flex-direction:column;gap:6px;margin:8px 0}
     label{font-size:11.5px;color:var(--muted)}
@@ -136,7 +173,6 @@
       border-color: rgba(59,130,246,.60);
       box-shadow: 0 0 0 3px rgba(59,130,246,.14);
     }
-
     .hint{
       border:1px solid rgba(59,130,246,.22);
       background:rgba(59,130,246,.07);
@@ -145,20 +181,34 @@
       line-height:1.32;
     }
 
+    /* Market list: NO SCROLL (overflow hidden) */
     .toolbar{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:8px;margin-bottom:8px; flex-wrap:wrap;
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+      margin-bottom:8px;
     }
-    .search{display:flex;gap:8px;align-items:center; flex-wrap:wrap}
-    .search input{width:240px}
+    .search{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .search input{width:220px}
+    @media(max-width:520px){
+      .app{padding:8px}
+      .top{flex-direction:column; align-items:stretch}
+      .row.topRight{justify-content:space-between; flex-wrap:wrap}
+      .btn{width:100%}
+      .pill{width:100%; justify-content:center}
+      .search{width:100%}
+      .search input{width:100%}
+    }
 
     .offers{
+      height:calc(100% - 56px); /* roughly footer area reserved; JS also tunes page size */
+      min-height:0;
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns:repeat(2, minmax(0,1fr));
       gap:10px;
       list-style:none;
       padding:0; margin:0;
+      overflow:hidden; /* ✅ no scroll */
     }
+    @media(max-width:720px){ .offers{grid-template-columns:1fr} }
 
     .offer{
       border:1px solid rgba(255,255,255,.12);
@@ -184,6 +234,7 @@
       padding:5px 9px;border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
+      white-space:nowrap;
     }
     .tag-open{border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.12)}
     .tag-locked{border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10)}
@@ -204,9 +255,30 @@
     .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
     .right{text-align:right}
 
+    .footerRow{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      margin-top:8px;flex-wrap:wrap;
+    }
+
+    .ico{
+      width:18px;height:18px;border-radius:999px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.12);
+      overflow:hidden;
+    }
+    .ico img{width:18px;height:18px;object-fit:contain}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 9px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:11.5px; font-weight:900;
+    }
+    .netList{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+
     .toast{
       position:fixed; right:12px; bottom:12px;
-      background:rgba(10,14,30,.88);
+      background:rgba(10,14,30,.92);
       border:1px solid rgba(255,255,255,.12);
       box-shadow:var(--shadow);
       padding:9px 10px; border-radius:12px;
@@ -216,6 +288,7 @@
       backdrop-filter: blur(10px);
     }
 
+    /* Modal */
     .backdrop{
       position:fixed; inset:0; display:none;
       background:rgba(0,0,0,.55);
@@ -231,180 +304,208 @@
       box-shadow:0 30px 110px rgba(0,0,0,.60);
       padding:12px;
       backdrop-filter: blur(12px);
-      max-height: 92vh;
-      overflow:auto; /* sem barra (escondida) */
+      height:min(92vh, 720px);
+      overflow:hidden; /* ✅ no scroll in modal */
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:10px;
     }
     .modal h3{margin:0;font-size:13px}
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
-    .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
-
-    .netList{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
-    .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 9px;border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      font-size:11.5px; font-weight:900;
-    }
-    .ico{
-      width:18px;height:18px;border-radius:999px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.12);
+    .modalGrid{
+      min-height:0;
+      display:grid; grid-template-columns:1fr 1fr; gap:10px;
       overflow:hidden;
     }
-    .ico img{width:18px;height:18px;object-fit:contain}
-    .footerRow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+    @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
 
-    @media(max-width:520px){
-      .top{flex-direction:column; align-items:stretch}
-      .row.topRight{justify-content:space-between}
-      .btn{width:100%}
-      .pill{width:100%; justify-content:center}
-      .actions .btn{flex:1}
-      .search{width:100%}
-      .search input{width:100%}
-      .offers{grid-template-columns:1fr}
+    .modal .card{
+      background:rgba(0,0,0,.18);
+      box-shadow:none;
+      overflow:hidden;
     }
+    .modal .cardInner{
+      height:100%;
+      overflow:hidden; /* ✅ no scroll */
+      display:flex;
+      flex-direction:column;
+    }
+    .modal .cardInner .grow{
+      flex:1;
+      min-height:0;
+      overflow:hidden; /* ✅ no scroll */
+    }
+
+    /* embed mode */
+    .embedHide{display:none!important}
   </style>
 </head>
 
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="logo" title="INRI">
-        <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
+<div class="app">
+  <div class="wrap">
+    <header class="top" id="topHeader">
+      <div class="brand">
+        <div class="logo" title="INRI">
+          <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
+        </div>
+        <div class="title">
+          <h1>INRI P2P — Escrow Market</h1>
+          <div class="sub">On-chain escrow • Off-chain payment (USDT/USDC) • Alerts for PAID/DISPUTE</div>
+        </div>
       </div>
-      <div class="title">
-        <h1>INRI P2P — Escrow Market</h1>
-        <div class="sub">On-chain escrow • Off-chain payment (USDT/USDC) • Price + Total stored in the offer</div>
+
+      <div class="row topRight" style="justify-content:flex-end;flex-wrap:wrap">
+        <div class="pill" id="netPill">Network: —</div>
+        <div class="pill mono" id="contractPill">Contract: —</div>
+
+        <div class="pill" title="Live activity alerts">
+          Alerts
+          <span class="badge" id="alertBadge" style="display:none">0</span>
+        </div>
+
+        <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
+      </div>
+    </header>
+
+    <div class="main">
+      <div class="tabs">
+        <div class="tabRow">
+          <button class="tab active" id="tabCreate">Create</button>
+          <button class="tab" id="tabMarket">Market</button>
+        </div>
+
+        <div class="row" style="flex-wrap:wrap;justify-content:flex-end">
+          <span class="pill"><b id="paidCount">0</b> paid</span>
+          <span class="pill"><b id="disputeCount">0</b> disputes</span>
+          <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
+        </div>
+      </div>
+
+      <div class="panelWrap" id="panelWrap">
+        <!-- CREATE PANEL -->
+        <aside class="card" id="createPanel">
+          <h2>Create Offer</h2>
+          <div class="hint">
+            Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.
+            Your offers are saved locally by <b>offerId</b> (won’t disappear).
+          </div>
+
+          <div class="field">
+            <label>INRI Amount (native)</label>
+            <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
+          </div>
+
+          <div class="row" style="flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:160px;margin:8px 0">
+              <label>Pay Asset</label>
+              <select id="payAsset">
+                <option value="USDT">USDT</option>
+                <option value="USDC">USDC</option>
+              </select>
+            </div>
+            <div class="field" style="flex:1;min-width:180px;margin:8px 0">
+              <label>Pay Network</label>
+              <select id="payNetwork"></select>
+            </div>
+          </div>
+
+          <div class="row" style="flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
+              <label>Price per 1 INRI (USDT/USDC)</label>
+              <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
+              <div class="muted2">Total = INRI × price</div>
+            </div>
+
+            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
+              <label>Total to pay (auto)</label>
+              <div class="pill mono" id="totalPill">—</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Seller Receive Address (on selected network)</label>
+            <input id="payTo" placeholder="0x... / T... / any account id" />
+          </div>
+
+          <div class="row" style="flex-wrap:wrap">
+            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
+              <label>Payment Window (minutes)</label>
+              <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
+            </div>
+            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
+              <label>Preview</label>
+              <div class="pill" id="previewPill">—</div>
+            </div>
+          </div>
+
+          <div class="row" style="flex-wrap:wrap">
+            <button class="btn btn-pri" id="btnCreate" style="flex:1">Create Offer (deposit INRI)</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+            <div>
+              <div class="muted">Wallet</div>
+              <div class="mono" id="meAddr">—</div>
+            </div>
+            <div style="text-align:right">
+              <div class="muted">Withdrawable</div>
+              <div class="pill mono" id="withdrawPill">—</div>
+              <button class="btn btn-ok" id="btnWithdraw" style="display:none;margin-top:6px">Withdraw</button>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+          <div class="muted2" id="rpcMode">Provider mode: —</div>
+
+          <div class="hr"></div>
+          <div class="row" style="flex-wrap:wrap">
+            <button class="btn btn-ghost" id="btnClearSaved" style="flex:1">Clear saved offers (this device)</button>
+          </div>
+          <div class="muted2" style="margin-top:6px">Saved offers live only in your browser (localStorage).</div>
+        </aside>
+
+        <!-- MARKET PANEL -->
+        <main class="card" id="marketPanel">
+          <div class="toolbar">
+            <div class="row" style="flex-wrap:wrap">
+              <span class="pill"><b id="count">0</b> offers</span>
+              <span class="pill mono">chainId 3777</span>
+              <span class="pill" title="Last activity seen">
+                Activity <span class="mono" id="activityPill">—</span>
+              </span>
+            </div>
+
+            <div class="search">
+              <select id="filter">
+                <option value="all">All</option>
+                <option value="open">Open</option>
+                <option value="locked">Locked</option>
+                <option value="paid">Paid</option>
+                <option value="disputed">Disputed</option>
+                <option value="mine">Mine</option>
+              </select>
+              <input id="q" placeholder="Search offerId / seller / buyer" />
+              <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
+            </div>
+          </div>
+
+          <ul class="offers" id="offers"></ul>
+
+          <div class="footerRow">
+            <div class="muted2" id="syncInfo">Connect wallet for best sync.</div>
+            <div class="row">
+              <button class="btn btn-ghost" id="prev">◀</button>
+              <div class="pill" id="pageInfo">1 / 1</div>
+              <button class="btn btn-ghost" id="next">▶</button>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
-
-    <div class="row topRight" style="justify-content:flex-end;flex-wrap:wrap">
-      <div class="pill" id="netPill">Network: —</div>
-      <div class="pill mono" id="contractPill">Contract: —</div>
-      <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
-    </div>
-  </header>
-
-  <section class="grid">
-    <aside class="card">
-      <h2>Create Offer</h2>
-      <div class="hint">
-        Seller locks <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and pastes the <b>TxID</b>.
-        ✅ Set <b>Price</b>, app calculates <b>Total</b> and stores it inside the offer.
-      </div>
-
-      <div class="field">
-        <label>INRI Amount (native)</label>
-        <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
-      </div>
-
-      <div class="row" style="flex-wrap:wrap">
-        <div class="field" style="flex:1;min-width:160px;margin:8px 0">
-          <label>Pay Asset</label>
-          <select id="payAsset">
-            <option value="USDT">USDT</option>
-            <option value="USDC">USDC</option>
-          </select>
-        </div>
-        <div class="field" style="flex:1;min-width:180px;margin:8px 0">
-          <label>Pay Network</label>
-          <select id="payNetwork"></select>
-        </div>
-      </div>
-
-      <div class="row" style="flex-wrap:wrap">
-        <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-          <label>Price per 1 INRI (in USDT/USDC)</label>
-          <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
-          <div class="muted2">Total = INRI × price</div>
-        </div>
-
-        <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-          <label>Total to pay (auto)</label>
-          <div class="pill mono" id="totalPill">—</div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Seller Receive Address (on selected network)</label>
-        <input id="payTo" placeholder="0x... / T... / any account id" />
-      </div>
-
-      <div class="row" style="flex-wrap:wrap">
-        <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-          <label>Payment Window (minutes)</label>
-          <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
-        </div>
-        <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-          <label>Preview</label>
-          <div class="pill" id="previewPill">—</div>
-        </div>
-      </div>
-
-      <div class="row" style="flex-wrap:wrap">
-        <button class="btn btn-pri" id="btnCreate" style="flex:1">Create Offer (deposit INRI)</button>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
-        <div class="col">
-          <div class="muted">Wallet</div>
-          <div class="mono" id="meAddr">—</div>
-        </div>
-        <div class="col" style="align-items:flex-end">
-          <div class="muted">Withdrawable</div>
-          <div class="pill mono" id="withdrawPill">—</div>
-          <button class="btn btn-ok" id="btnWithdraw" style="display:none">Withdraw</button>
-        </div>
-      </div>
-
-      <div class="hr"></div>
-      <div class="muted2" id="rpcMode">Provider mode: —</div>
-
-      <div class="hr"></div>
-      <div class="row" style="flex-wrap:wrap">
-        <button class="btn btn-ghost" id="btnClearSaved" style="flex:1">Clear saved offers (this device)</button>
-      </div>
-      <div class="muted2" style="margin-top:6px">Saved offers are stored only in your browser (localStorage).</div>
-    </aside>
-
-    <main class="card">
-      <div class="toolbar">
-        <div class="row" style="flex-wrap:wrap">
-          <span class="pill"><b id="count">0</b> offers</span>
-          <span class="pill mono">chainId 3777</span>
-        </div>
-        <div class="search">
-          <select id="filter">
-            <option value="all">All</option>
-            <option value="open">Open</option>
-            <option value="locked">Locked</option>
-            <option value="paid">Paid</option>
-            <option value="disputed">Disputed</option>
-            <option value="mine">Mine</option>
-          </select>
-          <input id="q" placeholder="Search offerId / seller / buyer" />
-          <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
-        </div>
-      </div>
-
-      <ul class="offers" id="offers"></ul>
-
-      <div class="footerRow">
-        <div class="muted2" id="syncInfo">Tip: Connect Wallet, then Refresh.</div>
-        <div class="row">
-          <button class="btn btn-ghost" id="prev">◀</button>
-          <div class="pill" id="pageInfo">1 / 1</div>
-          <button class="btn btn-ghost" id="next">▶</button>
-        </div>
-      </div>
-    </main>
-  </section>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -422,39 +523,47 @@
     </div>
 
     <div class="modalGrid">
-      <div class="card" style="background:rgba(0,0,0,.18);box-shadow:none">
-        <h2 style="margin:0 0 8px 0">Details</h2>
-        <div id="mDetails" class="muted"></div>
-        <div class="hr"></div>
-        <div class="hint" id="mPayHint">—</div>
-        <div class="netList" id="mLogos"></div>
+      <div class="card">
+        <div class="cardInner">
+          <div class="grow">
+            <h2 style="margin:0 0 8px 0">Details</h2>
+            <div id="mDetails" class="muted"></div>
+            <div class="hr"></div>
+            <div class="hint" id="mPayHint">—</div>
+            <div class="netList" id="mLogos"></div>
+          </div>
+        </div>
       </div>
 
-      <div class="card" style="background:rgba(0,0,0,.18);box-shadow:none">
-        <h2 style="margin:0 0 8px 0">Actions</h2>
+      <div class="card">
+        <div class="cardInner">
+          <div class="grow">
+            <h2 style="margin:0 0 8px 0">Actions</h2>
 
-        <div class="field">
-          <label>TxID (required to mark as paid)</label>
-          <input id="mTxid" placeholder="Paste transaction hash / txid here" />
-          <div class="muted2">Only the buyer can mark as paid.</div>
+            <div class="field">
+              <label>TxID (required to mark as paid)</label>
+              <input id="mTxid" placeholder="Paste transaction hash / txid here" />
+              <div class="muted2">Only the buyer can mark as paid.</div>
+            </div>
+
+            <div class="row" style="flex-wrap:wrap">
+              <button class="btn btn-pri" id="btnAccept">Accept</button>
+              <button class="btn btn-ok" id="btnPaid">I Paid</button>
+              <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
+              <button class="btn btn-bad" id="btnDispute">Open Dispute</button>
+            </div>
+
+            <div class="hr"></div>
+
+            <div class="row" style="flex-wrap:wrap">
+              <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
+              <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
+            </div>
+
+            <div class="hr"></div>
+            <div class="muted2" id="mNote">—</div>
+          </div>
         </div>
-
-        <div class="row" style="flex-wrap:wrap">
-          <button class="btn btn-pri" id="btnAccept">Accept</button>
-          <button class="btn btn-ok" id="btnPaid">I Paid</button>
-          <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
-          <button class="btn btn-bad" id="btnDispute">Open Dispute</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row" style="flex-wrap:wrap">
-          <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
-          <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
-        </div>
-
-        <div class="hr"></div>
-        <div class="muted2" id="mNote">—</div>
       </div>
     </div>
   </div>
@@ -462,6 +571,9 @@
 
 <script>
 (() => {
+  // =============================
+  // CONFIG
+  // =============================
   const CHAIN_ID = 3777;
   const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
@@ -500,8 +612,7 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const PAGE_SIZE = 9;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v1";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v2";
 
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
@@ -523,51 +634,166 @@
     "event Released(uint256 indexed offerId,address indexed buyer,uint256 netToBuyer,uint256 feeAmount)",
     "event DisputeResolved(uint256 indexed offerId,bool releasedToBuyer)"
   ];
+  const iface = new ethers.Interface(ABI);
 
+  // =============================
+  // DOM
+  // =============================
   const $ = (id)=>document.getElementById(id);
   const el = {
-    netPill:$("netPill"), contractPill:$("contractPill"), btnConnect:$("btnConnect"),
-    inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
-    pricePer:$("pricePer"), totalPill:$("totalPill"), payTo:$("payTo"), payWindow:$("payWindow"),
-    previewPill:$("previewPill"), btnCreate:$("btnCreate"),
-    meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
-    rpcMode:$("rpcMode"), btnClearSaved:$("btnClearSaved"),
-    filter:$("filter"), q:$("q"), btnRefresh:$("btnRefresh"),
-    offers:$("offers"), count:$("count"), syncInfo:$("syncInfo"),
-    prev:$("prev"), next:$("next"), pageInfo:$("pageInfo"),
+    topHeader:$("topHeader"),
+    netPill:$("netPill"),
+    contractPill:$("contractPill"),
+    btnConnect:$("btnConnect"),
+
+    alertBadge:$("alertBadge"),
+    activityPill:$("activityPill"),
+
+    tabCreate:$("tabCreate"),
+    tabMarket:$("tabMarket"),
+    createPanel:$("createPanel"),
+    marketPanel:$("marketPanel"),
+    btnRefreshTop:$("btnRefreshTop"),
+
+    paidCount:$("paidCount"),
+    disputeCount:$("disputeCount"),
+
+    inAmount:$("inAmount"),
+    payAsset:$("payAsset"),
+    payNetwork:$("payNetwork"),
+    pricePer:$("pricePer"),
+    totalPill:$("totalPill"),
+    payTo:$("payTo"),
+    payWindow:$("payWindow"),
+    previewPill:$("previewPill"),
+    btnCreate:$("btnCreate"),
+
+    meAddr:$("meAddr"),
+    withdrawPill:$("withdrawPill"),
+    btnWithdraw:$("btnWithdraw"),
+
+    rpcMode:$("rpcMode"),
+    btnClearSaved:$("btnClearSaved"),
+
+    filter:$("filter"),
+    q:$("q"),
+    btnRefresh:$("btnRefresh"),
+    offers:$("offers"),
+    count:$("count"),
+    syncInfo:$("syncInfo"),
+
+    prev:$("prev"),
+    next:$("next"),
+    pageInfo:$("pageInfo"),
+
     toast:$("toast"),
-    backdrop:$("backdrop"), mClose:$("mClose"), mTitle:$("mTitle"), mSub:$("mSub"),
-    mDetails:$("mDetails"), mPayHint:$("mPayHint"), mLogos:$("mLogos"), mTxid:$("mTxid"), mNote:$("mNote"),
-    btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
-    btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel"),
+
+    backdrop:$("backdrop"),
+    mClose:$("mClose"),
+    mTitle:$("mTitle"),
+    mSub:$("mSub"),
+    mDetails:$("mDetails"),
+    mPayHint:$("mPayHint"),
+    mLogos:$("mLogos"),
+    mTxid:$("mTxid"),
+    mNote:$("mNote"),
+    btnAccept:$("btnAccept"),
+    btnPaid:$("btnPaid"),
+    btnRelease:$("btnRelease"),
+    btnDispute:$("btnDispute"),
+    btnReclaim:$("btnReclaim"),
+    btnCancel:$("btnCancel"),
   };
 
+  // =============================
+  // iframe / embed mode
+  // =============================
+  const qs = new URLSearchParams(location.search);
+  const EMBED = qs.get("embed")==="1";
+  if (EMBED){
+    // compact embed: hide header + shrink paddings
+    el.topHeader.classList.add("embedHide");
+    document.querySelector(".app").style.padding = "0";
+    document.querySelector(".app").style.gap = "0";
+    document.querySelector(".wrap").style.gap = "8px";
+    document.querySelector(".app").style.padding = "8px";
+  }
+
+  // =============================
+  // Setup networks select
+  // =============================
   for (const n of PAY_NETWORKS){
     const opt = document.createElement("option");
-    opt.value = n.key;
-    opt.textContent = n.label;
+    opt.value = n.key; opt.textContent = n.label;
     el.payNetwork.appendChild(opt);
   }
   el.payNetwork.value = "TRON";
 
+  // =============================
+  // State / Providers
+  // =============================
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
-  let readProvider = rpcProvider, browserProvider=null, signer=null, me=null;
+  let readProvider = rpcProvider;
+  let browserProvider = null;
+  let signer = null;
+  let me = null;
+
   let contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
   let contractWrite = null;
-  let supportsWithdraw=false;
 
-  let offerIds=[], offersCache=[], page=1, totalPages=1, lastBlock=0;
-  let modalId=null, modalOffer=null;
+  let supportsWithdraw = false;
 
-  const iface = new ethers.Interface(ABI);
+  let offerIds = [];
+  let offersCache = [];
+  let page = 1;
+  let totalPages = 1;
+  let lastBlock = 0;
 
-  function loadSavedIds(){
-    try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(String) : []; }
-    catch{ return []; }
+  let modalId = null;
+  let modalOffer = null;
+
+  // Alerts / Activity (paid + disputes)
+  let alertCount = 0;
+  let lastSeenBlock = 0;     // used for live logs
+  let pollTimer = null;
+
+  // ✅ PAGE_SIZE = auto by screen height, so never needs scroll
+  let PAGE_SIZE = 4;
+
+  function computePageSize(){
+    const h = window.innerHeight;
+    const w = window.innerWidth;
+    // rough heuristic: bigger screens show more cards
+    if (w <= 720){
+      PAGE_SIZE = (h >= 780) ? 3 : 2;
+    } else {
+      PAGE_SIZE = (h >= 860) ? 6 : (h >= 740 ? 4 : 2);
+    }
+    // reset page to avoid blank
+    page = 1;
   }
-  function saveId(idStr){ const cur = new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
+  window.addEventListener("resize", ()=>{ computePageSize(); render(); });
+
+  // =============================
+  // Local saved offers
+  // =============================
+  function loadSavedIds(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.map(x=>String(x)) : [];
+    }catch{ return []; }
+  }
+  function saveId(idStr){
+    const cur = new Set(loadSavedIds());
+    cur.add(String(idStr));
+    localStorage.setItem(LS_KEY, JSON.stringify([...cur]));
+  }
   function clearSaved(){ localStorage.removeItem(LS_KEY); }
 
+  // =============================
+  // Helpers
+  // =============================
   function toast(msg, ms=2300){
     el.toast.textContent = msg;
     el.toast.style.display = "block";
@@ -575,10 +801,25 @@
     toast._t = setTimeout(()=> el.toast.style.display="none", ms);
   }
 
+  function bumpAlert(msg){
+    alertCount++;
+    el.alertBadge.style.display = "inline-flex";
+    el.alertBadge.textContent = String(alertCount);
+    toast(msg, 3200);
+  }
+  function clearAlerts(){
+    alertCount = 0;
+    el.alertBadge.style.display = "none";
+    el.alertBadge.textContent = "0";
+  }
+
   const short = (a)=> a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
   const fmtInri = (wei)=> { try{ return ethers.formatEther(wei); }catch{ return String(wei); } };
 
-  function statusLabel(s){ return ["OPEN","LOCKED","PAID","DISPUTED","RELEASED","CANCELLED"][Number(s)] || "UNKNOWN"; }
+  function statusLabel(s){
+    // 0 OPEN, 1 LOCKED, 2 PAID, 3 DISPUTED, 4 RELEASED, 5 CANCELLED
+    return ["OPEN","LOCKED","PAID","DISPUTED","RELEASED","CANCELLED"][Number(s)] || "UNKNOWN";
+  }
   function statusTag(s){
     const st = statusLabel(s);
     if (st==="OPEN") return `<span class="tag tag-open">✅ OPEN</span>`;
@@ -633,18 +874,48 @@
     el.previewPill.textContent = `${amt} INRI${pr}${tt} • ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
   }
 
+  // =============================
+  // Tabs (zero scroll: swap panels)
+  // =============================
+  function showTab(which){
+    const createOn = which==="create";
+    el.tabCreate.classList.toggle("active", createOn);
+    el.tabMarket.classList.toggle("active", !createOn);
+
+    // On desktop we keep both columns, but in mobile we switch focus:
+    if (window.innerWidth <= 980){
+      el.createPanel.style.display = createOn ? "block" : "none";
+      el.marketPanel.style.display = createOn ? "none" : "block";
+    } else {
+      // desktop: show both always
+      el.createPanel.style.display = "block";
+      el.marketPanel.style.display = "block";
+    }
+  }
+
+  // =============================
+  // Network / Connect
+  // =============================
   async function ensureNetwork(){
     if (!window.ethereum) throw new Error("No wallet found (MetaMask/Rabby).");
     const cur = await window.ethereum.request({method:"eth_chainId"});
-    if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()){ el.netPill.textContent = `Network: ${CHAIN_NAME}`; return; }
+    if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()){
+      el.netPill.textContent = `Network: ${CHAIN_NAME}`;
+      return;
+    }
     try{
       await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId: CHAIN_HEX}]});
     }catch(e){
       if (e && e.code === 4902){
         await window.ethereum.request({
           method:"wallet_addEthereumChain",
-          params:[{ chainId: CHAIN_HEX, chainName: CHAIN_NAME, rpcUrls:[RPC_URL],
-            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18}, blockExplorerUrls:[] }]
+          params:[{
+            chainId: CHAIN_HEX,
+            chainName: CHAIN_NAME,
+            rpcUrls:[RPC_URL],
+            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18},
+            blockExplorerUrls:[]
+          }]
         });
         await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId: CHAIN_HEX}]});
       } else { throw e; }
@@ -659,18 +930,21 @@
     signer = await browserProvider.getSigner();
     me = await signer.getAddress();
 
-    readProvider = browserProvider;
+    readProvider = browserProvider; // best for browser CORS
     contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
     contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
 
     el.btnConnect.textContent = short(me);
     el.meAddr.textContent = me;
-    el.rpcMode.textContent = "Provider mode: Wallet Provider (no CORS)";
+    el.rpcMode.textContent = "Provider mode: Wallet Provider (best)";
 
     await detectWithdrawSupport();
     await refreshWithdrawable();
 
     toast("Wallet connected ✅");
+
+    // Start live polling for events (Paid/Dispute)
+    startLiveActivity();
   }
 
   async function detectWithdrawSupport(){
@@ -697,6 +971,9 @@
     }catch{ el.withdrawPill.textContent = "—"; }
   }
 
+  // =============================
+  // Market loading
+  // =============================
   function mergeIds(aStr, bStr){
     const set = new Set([...aStr.map(String), ...bStr.map(String)]);
     return [...set].sort((x,y)=> { try{ return BigInt(y) > BigInt(x) ? 1 : -1; } catch { return 0; } });
@@ -712,7 +989,7 @@
       const from = Math.max(0, latest - DEFAULT_SCAN_BLOCKS);
 
       const topic0 = iface.getEvent("OfferCreated").topicHash;
-      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: latest, topics: [topic0] });
+      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: latest, topics:[topic0] });
 
       const seen = new Set();
       for (const lg of logs){
@@ -750,7 +1027,11 @@
 
     if (f==="open") x = x.filter(o=>o.status===0);
     if (f==="locked") x = x.filter(o=>o.status===1);
+
+    // ✅ Paid filter: always show status==2
     if (f==="paid") x = x.filter(o=>o.status===2);
+
+    // ✅ Disputed filter: always show status==3
     if (f==="disputed") x = x.filter(o=>o.status===3);
 
     if (f==="mine"){
@@ -778,7 +1059,16 @@
     return list.slice(start, start + PAGE_SIZE);
   }
 
+  function updateCounters(){
+    const paid = offersCache.filter(o=>o.status===2).length;
+    const disp = offersCache.filter(o=>o.status===3).length;
+    el.paidCount.textContent = String(paid);
+    el.disputeCount.textContent = String(disp);
+  }
+
   function render(){
+    updateCounters();
+
     const filtered = applyFilters(offersCache);
     el.count.textContent = String(filtered.length);
 
@@ -831,7 +1121,7 @@
 
         <div class="kvs">
           <div class="kv">
-            <div class="k">Payment Window</div>
+            <div class="k">Window</div>
             <div class="v">${Math.round(o.payWindowSec/60)} min</div>
           </div>
           <div class="kv">
@@ -850,21 +1140,97 @@
   }
 
   async function refresh(){
-    toast("Syncing offers…");
+    toast("Syncing…");
     await loadOfferIds();
     await loadOffersDetails();
 
     const providerName = (readProvider===rpcProvider) ? "Public RPC" : "Wallet Provider";
     const savedCount = loadSavedIds().length;
-    el.syncInfo.textContent = `Synced • Provider: ${providerName} • Saved: ${savedCount} ${lastBlock ? ("• block "+lastBlock) : ""}`;
-    render();
 
+    el.syncInfo.textContent = `Synced • Provider: ${providerName} • Saved: ${savedCount} ${lastBlock ? ("• block "+lastBlock) : ""}`;
+    el.activityPill.textContent = lastSeenBlock ? ("block "+lastSeenBlock) : (lastBlock ? ("block "+lastBlock) : "—");
+
+    render();
     await refreshWithdrawable();
     toast("Updated ✅", 1200);
+
+    // initialize lastSeenBlock for live
+    if (!lastSeenBlock && lastBlock) lastSeenBlock = lastBlock;
   }
 
+  // =============================
+  // Live activity: detect PAID / DISPUTE
+  // =============================
+  async function pollActivity(){
+    try{
+      const provider = contractRead.runner.provider;
+      const latest = await provider.getBlockNumber();
+      if (!lastSeenBlock) lastSeenBlock = latest;
+
+      if (latest <= lastSeenBlock) return;
+
+      const from = lastSeenBlock + 1;
+      const to = latest;
+
+      const tPaid = iface.getEvent("MarkedPaid").topicHash;
+      const tDisp = iface.getEvent("DisputeOpened").topicHash;
+
+      const logs = await provider.getLogs({
+        address: CONTRACT,
+        fromBlock: from,
+        toBlock: to,
+        topics: [[tPaid, tDisp]]
+      });
+
+      // If any activity happened, refresh and notify
+      let sawPaid = 0, sawDisp = 0;
+
+      for (const lg of logs){
+        const parsed = iface.parseLog(lg);
+        if (!parsed) continue;
+
+        if (parsed.name === "MarkedPaid"){
+          sawPaid++;
+          const id = parsed.args.offerId?.toString?.() ?? "";
+          bumpAlert(`💠 Offer #${id} marked as PAID`);
+        }
+        if (parsed.name === "DisputeOpened"){
+          sawDisp++;
+          const id = parsed.args.offerId?.toString?.() ?? "";
+          bumpAlert(`⚠ Dispute opened on offer #${id}`);
+        }
+      }
+
+      lastSeenBlock = latest;
+      el.activityPill.textContent = "block " + latest;
+
+      if (sawPaid || sawDisp){
+        // keep list perfect without waiting manual refresh
+        await refresh();
+      }
+    }catch(e){
+      // some providers may block getLogs
+      console.warn("pollActivity failed:", e);
+    }
+  }
+
+  function startLiveActivity(){
+    if (pollTimer) return;
+    // clear alerts on connect to start fresh
+    clearAlerts();
+    pollTimer = setInterval(pollActivity, 9000);
+  }
+
+  // =============================
+  // Modal
+  // =============================
   function openModal(){ el.backdrop.style.display = "flex"; }
-  function closeModal(){ el.backdrop.style.display = "none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
+  function closeModal(){
+    el.backdrop.style.display = "none";
+    modalId = null;
+    modalOffer = null;
+    el.mTxid.value = "";
+  }
 
   function setModalButtonsState(){
     if (!modalOffer){
@@ -889,7 +1255,7 @@
     if (!me)      note.push("Connect wallet to interact.");
     if (st==="LOCKED") note.push(`Deadline: ${new Date(modalOffer.expiresAt*1000).toLocaleString()} (${timeLeft(modalOffer.expiresAt)})`);
     if (st==="PAID") note.push("Seller must confirm payment and release.");
-    if (st==="DISPUTED") note.push("Dispute opened. Owner/mods decide.");
+    if (st==="DISPUTED") note.push("Dispute opened. Admin/mods decide.");
     el.mNote.textContent = note.join(" ");
   }
 
@@ -950,13 +1316,20 @@
     openModal();
   }
 
-  async function requireConnected(){ if (!me) await connect(); if (!contractWrite) throw new Error("Not connected."); }
+  // =============================
+  // Actions
+  // =============================
+  async function requireConnected(){
+    if (!me) await connect();
+    if (!contractWrite) throw new Error("Not connected.");
+  }
 
   el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage || e.message || e)); } });
 
   el.btnCreate.addEventListener("click", async ()=>{
     try{
       await requireConnected();
+
       const amt = (el.inAmount.value||"").trim();
       const payTo = (el.payTo.value||"").trim();
       const mins = Number(el.payWindow.value||30);
@@ -976,19 +1349,33 @@
       const tx = await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, { value: valueWei });
       const receipt = await tx.wait();
 
+      // Save offerId locally
       try{
         for (const lg of receipt.logs){
           if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
           const parsed = iface.parseLog(lg);
-          if (parsed && parsed.name === "OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
+          if (parsed && parsed.name === "OfferCreated"){
+            const idStr = parsed.args.offerId.toString();
+            saveId(idStr);
+            break;
+          }
         }
-      }catch(e){ console.warn("Could not parse OfferCreated from receipt.", e); }
+      }catch(e){ console.warn("Could not parse OfferCreated.", e); }
 
-      el.inAmount.value=""; el.pricePer.value=""; el.payTo.value="";
+      el.inAmount.value = "";
+      el.pricePer.value = "";
+      el.payTo.value = "";
       renderPreview();
+
       await refresh();
       toast("Offer created ✅");
-    }catch(e){ console.error(e); alert("Create error: " + (e.shortMessage || e.message || e)); }
+
+      // go to market automatically in mobile
+      if (window.innerWidth <= 980) showTab("market");
+    }catch(e){
+      console.error(e);
+      alert("Create error: " + (e.shortMessage || e.message || e));
+    }
   });
 
   el.btnWithdraw.addEventListener("click", async ()=>{
@@ -999,12 +1386,20 @@
       await tx.wait();
       await refreshWithdrawable();
       toast("Withdraw complete ✅");
-    }catch(e){ console.error(e); alert("Withdraw error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){
+      console.error(e);
+      alert("Withdraw error: " + (e.shortMessage || e.message || e));
+    }
   });
 
   el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
+  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
 
-  el.btnClearSaved.addEventListener("click", ()=>{ if (!confirm("Clear saved offers from this device?")) return; clearSaved(); toast("Saved offers cleared ✅"); });
+  el.btnClearSaved.addEventListener("click", ()=>{
+    if (!confirm("Clear saved offers from this device?")) return;
+    clearSaved();
+    toast("Saved offers cleared ✅");
+  });
 
   el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
   el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
@@ -1021,7 +1416,8 @@
   document.addEventListener("click", async (ev)=>{
     const btn = ev.target.closest("button[data-act]");
     if (!btn) return;
-    try{ await showOffer(btn.getAttribute("data-id")); }
+    const id = btn.getAttribute("data-id");
+    try{ await showOffer(id); }
     catch(e){ console.error(e); alert("Open offer error: " + (e.shortMessage || e.message || e)); }
   });
 
@@ -1029,8 +1425,16 @@
   el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) closeModal(); });
 
   el.btnAccept.addEventListener("click", async ()=>{
-    try{ await requireConnected(); toast("Accepting…"); const tx = await contractWrite.acceptOffer(modalId); await tx.wait(); await refresh(); await showOffer(modalId.toString()); toast("Accepted ✅"); }
-    catch(e){ console.error(e); alert("Accept error: " + (e.shortMessage || e.message || e)); }
+    try{
+      await requireConnected();
+      toast("Accepting…");
+      const tx = await contractWrite.acceptOffer(modalId);
+      await tx.wait();
+      await refresh();
+      await showOffer(modalId.toString());
+      toast("Accepted ✅");
+      // acceptance changes status to LOCKED, good to show
+    }catch(e){ console.error(e); alert("Accept error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnPaid.addEventListener("click", async ()=>{
@@ -1038,28 +1442,63 @@
       await requireConnected();
       const txid = (el.mTxid.value||"").trim();
       if (txid.length < 6) throw new Error("TxID too short");
-      toast("Marking as paid…");
+      toast("Marking as PAID…");
       const tx = await contractWrite.markPaid(modalId, txid);
       await tx.wait();
+
+      // ✅ immediate UX: show paid + make it appear in Paid filter
+      bumpAlert(`💠 Offer #${modalId.toString()} marked as PAID`);
       await refresh();
+      el.filter.value = "paid";
+      page = 1;
+      render();
+
       await showOffer(modalId.toString());
-      toast("Marked paid ✅");
+      toast("Marked PAID ✅");
     }catch(e){ console.error(e); alert("Mark Paid error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnRelease.addEventListener("click", async ()=>{
-    try{ await requireConnected(); toast("Releasing…"); const tx = await contractWrite.releaseToBuyer(modalId); await tx.wait(); await refresh(); await showOffer(modalId.toString()); toast("Released ✅"); }
-    catch(e){ console.error(e); alert("Release error: " + (e.shortMessage || e.message || e)); }
+    try{
+      await requireConnected();
+      toast("Releasing…");
+      const tx = await contractWrite.releaseToBuyer(modalId);
+      await tx.wait();
+      await refresh();
+      await showOffer(modalId.toString());
+      toast("Released ✅");
+    }catch(e){ console.error(e); alert("Release error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnDispute.addEventListener("click", async ()=>{
-    try{ await requireConnected(); toast("Opening dispute…"); const tx = await contractWrite.openDispute(modalId); await tx.wait(); await refresh(); await showOffer(modalId.toString()); toast("Dispute opened ✅"); }
-    catch(e){ console.error(e); alert("Dispute error: " + (e.shortMessage || e.message || e)); }
+    try{
+      await requireConnected();
+      toast("Opening dispute…");
+      const tx = await contractWrite.openDispute(modalId);
+      await tx.wait();
+
+      // ✅ instant alert + switch filter to disputed
+      bumpAlert(`⚠ Dispute opened on offer #${modalId.toString()}`);
+      await refresh();
+      el.filter.value = "disputed";
+      page = 1;
+      render();
+
+      await showOffer(modalId.toString());
+      toast("Dispute opened ✅");
+    }catch(e){ console.error(e); alert("Dispute error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnReclaim.addEventListener("click", async ()=>{
-    try{ await requireConnected(); toast("Reclaiming…"); const tx = await contractWrite.reclaimIfUnpaid(modalId); await tx.wait(); await refresh(); closeModal(); toast("Reclaimed ✅"); }
-    catch(e){ console.error(e); alert("Reclaim error: " + (e.shortMessage || e.message || e)); }
+    try{
+      await requireConnected();
+      toast("Reclaiming…");
+      const tx = await contractWrite.reclaimIfUnpaid(modalId);
+      await tx.wait();
+      await refresh();
+      closeModal();
+      toast("Reclaimed ✅");
+    }catch(e){ console.error(e); alert("Reclaim error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnCancel.addEventListener("click", async ()=>{
@@ -1075,7 +1514,17 @@
     }catch(e){ console.error(e); alert("Cancel error: " + (e.shortMessage || e.message || e)); }
   });
 
+  // Tabs events
+  el.tabCreate.addEventListener("click", ()=>showTab("create"));
+  el.tabMarket.addEventListener("click", ()=>showTab("market"));
+
+  // =============================
+  // Init
+  // =============================
   (async function init(){
+    computePageSize();
+    showTab("create");
+
     el.contractPill.textContent = "Contract: " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4);
     renderPreview();
 
@@ -1084,9 +1533,12 @@
         const cid = await window.ethereum.request({method:"eth_chainId"});
         el.netPill.textContent = (cid && cid.toLowerCase()===CHAIN_HEX.toLowerCase())
           ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
-      } else el.netPill.textContent = "Network: (no wallet)";
+      } else {
+        el.netPill.textContent = "Network: (no wallet)";
+      }
     }catch{ el.netPill.textContent = "Network: —"; }
 
+    // Public RPC probe
     try{
       await rpcProvider.getBlockNumber();
       el.rpcMode.textContent = "Provider mode: Public RPC OK";
@@ -1097,6 +1549,7 @@
       el.rpcMode.textContent = "Provider mode: Public RPC blocked (use Connect Wallet)";
     }
 
+    // initial refresh
     try{ await refresh(); }
     catch(e){
       console.error(e);
