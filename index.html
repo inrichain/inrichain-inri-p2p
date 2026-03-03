@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,9 +15,6 @@
 
   <style>
     :root{
-      --bg:#000;
-      --panel:rgba(10,14,30,.62);
-      --panel2:rgba(0,0,0,.20);
       --border:rgba(255,255,255,.12);
       --muted:rgba(255,255,255,.72);
       --muted2:rgba(255,255,255,.55);
@@ -28,37 +26,33 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;color:var(--text);background:var(--bg);overflow:auto}
+    body{margin:0;color:var(--text);background:#000;overflow:auto}
     a{color:inherit;text-decoration:none}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
     .muted{color:var(--muted);font-size:12px}
     .muted2{color:var(--muted2);font-size:12px}
+    .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
+
     .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-
-    /* Ultra production: sticky header + tabs */
-    .sticky{
-      position:sticky; top:0; z-index:50;
-      background:linear-gradient(180deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.55) 100%);
-      backdrop-filter: blur(10px);
-      border-bottom:1px solid rgba(255,255,255,.08);
-      padding:10px 0 8px 0;
-      margin:-12px -12px 0 -12px;
-    }
-    .stickyInner{max-width:1180px;margin:0 auto;padding:0 12px;display:flex;flex-direction:column;gap:8px}
-
-    .hero{
+    .p2pHero{
       width:100%;display:flex;justify-content:center;align-items:center;
-      padding:10px 12px;background:var(--panel);border:1px solid rgba(255,255,255,.10);
+      padding:18px 12px 12px;background:rgba(10,14,30,.55);
+      border:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(10px);
       border-radius:14px;
+      position:sticky; top:0; z-index:20;
     }
-    .hero .t{font-family:"Ubuntu",system-ui,sans-serif;font-weight:700;font-size:40px;letter-spacing:.8px;line-height:1;margin:0}
+    .p2pHero .p2pText{font-family:"Ubuntu",system-ui,sans-serif;font-weight:700;font-size:40px;letter-spacing:.8px;line-height:1;margin:0}
 
     .top{
       display:flex;gap:10px;align-items:center;justify-content:space-between;
       padding:10px;border:1px solid var(--border);border-radius:var(--radius);
-      background:var(--panel);
+      background:rgba(10,14,30,.55);backdrop-filter:blur(10px);
       flex-wrap:wrap;
+      position:sticky; top:78px; z-index:19;
     }
+    @media(max-width:520px){ .top{ top:70px; } }
+
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .brand{display:flex;gap:10px;align-items:center;min-width:0}
     .logo{
@@ -84,21 +78,25 @@
     .btn{
       border:none;cursor:pointer;font-weight:900;padding:9px 11px;border-radius:12px;
       background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.12);
-      transition:transform .12s ease, opacity .12s ease; font-size:12.5px;display:inline-flex;align-items:center;gap:8px
+      transition:transform .12s ease, opacity .12s ease;font-size:12.5px;display:inline-flex;align-items:center;gap:8px
     }
     .btn:hover{transform:translateY(-1px)}
-    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
     .btn-pri{background:linear-gradient(90deg,var(--pri),var(--pri2));border:1px solid rgba(255,255,255,.10)}
     .btn-ghost{background:rgba(255,255,255,.06)}
     .btn-bad{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.35)}
-    .btnLogo{width:18px;height:18px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);display:inline-flex;align-items:center;justify-content:center}
+
+    .btnLogo{
+      width:18px;height:18px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);
+      display:inline-flex;align-items:center;justify-content:center
+    }
     .btnLogo img{width:18px;height:18px;object-fit:contain}
 
     .tabs{
       display:flex;gap:8px;align-items:center;justify-content:space-between;
       border:1px solid var(--border);border-radius:var(--radius);
-      background:var(--panel);padding:8px;
+      background:rgba(10,14,30,.55);padding:8px;backdrop-filter:blur(10px);
       flex-wrap:wrap;
     }
     .tabRow{display:flex;gap:8px;align-items:center}
@@ -111,7 +109,7 @@
     .panelWrap{display:grid;grid-template-columns:360px 1fr;gap:10px}
     @media(max-width:980px){.panelWrap{grid-template-columns:1fr}}
 
-    .card{border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);padding:10px}
+    .card{border:1px solid var(--border);border-radius:var(--radius);background:rgba(10,14,30,.55);padding:10px;backdrop-filter:blur(10px)}
     .card h2{margin:0 0 8px 0;font-size:13px}
     .hr{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
 
@@ -121,6 +119,7 @@
       width:100%;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
       background:rgba(0,0,0,.35);color:var(--text);outline:none;font-size:13px
     }
+
     .hint{
       border:1px solid rgba(59,130,246,.22);background:rgba(59,130,246,.07);
       padding:8px;border-radius:12px;font-size:11.5px;color:var(--muted);line-height:1.32
@@ -137,7 +136,7 @@
     }
     @media(max-width:720px){.offers{grid-template-columns:1fr;max-height:58vh}}
 
-    .offer{border:1px solid rgba(255,255,255,.12);background:var(--panel2);border-radius:14px;padding:10px;position:relative;overflow:hidden}
+    .offer{border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);border-radius:14px;padding:10px;position:relative;overflow:hidden}
     .tag{
       display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:900;
       padding:5px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.14);
@@ -188,67 +187,61 @@
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
     .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
-
-    .smallNote{font-size:11px;color:var(--muted2)}
   </style>
 </head>
 
 <body>
-  <div class="sticky">
-    <div class="stickyInner">
-      <div class="hero"><div class="t">P2P</div></div>
+  <div class="wrap">
+    <div class="p2pHero"><div class="p2pText">P2P</div></div>
 
-      <header class="top">
-        <div class="brand">
-          <div class="logo" title="INRI">
-            <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
-          </div>
-          <div class="title">
-            <h1>INRI P2P — Escrow Market</h1>
-            <div class="sub">On-chain escrow • Off-chain payment • Buyer fee 0.2% in INRI (deducted on release) • Alerts for PAID/DISPUTE</div>
-          </div>
+    <header class="top">
+      <div class="brand">
+        <div class="logo" title="INRI">
+          <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
         </div>
-
-        <div class="row" style="justify-content:flex-end">
-          <a class="btn btn-ghost" href="https://www.inri.life/">
-            <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
-            Back to INRI.life
-          </a>
-
-          <div class="pill" id="netPill">Network: —</div>
-          <div class="pill mono" id="contractPill">Contract: —</div>
-          <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
-
-          <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open MetaMask</button>
-          <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open Trust</button>
-
-          <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
-        </div>
-      </header>
-
-      <div class="tabs">
-        <div class="tabRow">
-          <button class="tab active" id="tabCreate">Create</button>
-          <button class="tab" id="tabMarket">Market</button>
-        </div>
-
-        <div class="row" style="justify-content:flex-end">
-          <span class="pill"><b id="paidCount">0</b> paid</span>
-          <span class="pill"><b id="disputeCount">0</b> disputes</span>
-          <span class="pill"><b id="doneCount">0</b> finalized</span>
-          <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
+        <div class="title">
+          <h1>INRI P2P — Escrow Market</h1>
+          <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% in INRI (deducted on release) • Alerts for PAID/DISPUTE</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="wrap">
+      <div class="row" style="justify-content:flex-end">
+        <a class="btn btn-ghost" href="https://www.inri.life/" target="_self" rel="noopener">
+          <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
+          Back to INRI.life
+        </a>
+
+        <div class="pill" id="netPill">Network: —</div>
+        <div class="pill mono" id="contractPill">Contract: —</div>
+        <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
+
+        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open MetaMask</button>
+        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open Trust</button>
+
+        <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <div class="tabRow">
+        <button class="tab active" id="tabCreate">Create</button>
+        <button class="tab" id="tabMarket">Market</button>
+      </div>
+
+      <div class="row" style="justify-content:flex-end">
+        <span class="pill"><b id="paidCount">0</b> paid</span>
+        <span class="pill"><b id="disputeCount">0</b> disputes</span>
+        <span class="pill"><b id="doneCount">0</b> finalized</span>
+        <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
+      </div>
+    </div>
+
     <div class="panelWrap">
       <aside class="card" id="createPanel">
         <h2>Create Offer</h2>
         <div class="hint">
           Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.<br>
-          <b>Buyer fee: 0.2% in INRI</b> (deducted when seller releases; buyer withdraws net).
+          <b>Buyer fee: 0.2% in INRI</b> (deducted when seller releases; buyer withdraws net INRI).
         </div>
 
         <div class="field">
@@ -310,9 +303,6 @@
         </div>
 
         <button class="btn btn-pri" id="btnCreate" style="width:100%">Create Offer (deposit INRI)</button>
-        <div class="smallNote" style="margin-top:8px">
-          Ultra production mode: anti-spam, safer tx sending, RPC fallback.
-        </div>
       </aside>
 
       <main class="card" id="marketPanel">
@@ -425,19 +415,19 @@
 
 <script>
 (() => {
-  // =========================
-  // CONFIG
-  // =========================
-  const CHAIN_ID = 3777;
-  const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
+  // =======================
+  // CONFIG (ULTRA-PROD)
+  // =======================
+  const CHAIN_ID   = 3777;
+  const CHAIN_HEX  = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
 
-  // RPC fallback list (first = primary)
-  const RPCS = [
+  // ✅ RPC FALLBACK LIST (auto switch if one fails)
+  const RPC_URLS = [
     "https://rpc-chain.inri.life/",
     // add more later if you have:
     // "https://rpc2.inri.life/",
-    // "https://rpc3.inri.life/"
+    // "https://rpc3.inri.life/",
   ];
 
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
@@ -446,9 +436,12 @@
   const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, "");
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_ultra_v1";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v9_ultra";
   const PAGE_SIZE = 8;
 
+  // =======================
+  // Logos
+  // =======================
   const LOGOS = {
     NET: {
       TRON:     "https://raw.githubusercontent.com/inrichain/logotron/main/TRON.png",
@@ -479,6 +472,9 @@
   ];
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
+  // =======================
+  // ABI
+  // =======================
   const ABI = [
     "function feeBps() view returns (uint16)",
     "function feeRecipient() view returns (address)",
@@ -499,9 +495,9 @@
   ];
   const iface = new ethers.Interface(ABI);
 
-  // =========================
+  // =======================
   // DOM
-  // =========================
+  // =======================
   const $ = (id)=>document.getElementById(id);
   const el = {
     netPill:$("netPill"), contractPill:$("contractPill"),
@@ -538,86 +534,98 @@
   }
   el.payNetwork.value="TRON";
 
-  // =========================
-  // ULTRA PRO: anti-spam lock
-  // =========================
-  const inFlight = new Map(); // key -> timestamp
-  function lockAction(key, ms=1200){
-    const now=Date.now();
-    const last=inFlight.get(key)||0;
-    if(now-last < ms) return false;
-    inFlight.set(key, now);
-    return true;
-  }
-  async function withButtonLock(btn, key, fn){
-    if(btn && btn.disabled) return;
-    if(!lockAction(key, 1200)) return;
-    const prevTxt = btn ? btn.textContent : "";
-    try{
-      if(btn){ btn.disabled=true; btn.textContent="Working…"; }
-      return await fn();
-    } finally {
-      if(btn){ btn.disabled=false; btn.textContent=prevTxt; }
-    }
-  }
+  // =======================
+  // Wallet Detection (ANY wallet)
+  // - supports window.ethereum
+  // - supports EIP-6963 providers (best coverage)
+  // =======================
+  let discoveredProviders = []; // { info, provider }
+  function discoverWallets(){
+    discoveredProviders = [];
 
-  // =========================
-  // WALLET AUTO-DETECT (EIP-6963 + priority)
-  // =========================
-  const detectedProviders = []; // {provider, info?}
-  let chosenProvider = null;
+    // EIP-6963 discovery
+    window.addEventListener("eip6963:announceProvider", (event) => {
+      try{
+        const { info, provider } = event.detail || {};
+        if(!provider) return;
+        // avoid duplicates
+        if(discoveredProviders.some(x => x.provider === provider)) return;
+        discoveredProviders.push({ info, provider });
+      }catch{}
+    });
 
-  function providerScore(p){
-    try{
-      // priority
-      if(p?.isMetaMask) return 100;
-      if(p?.isTrust) return 90;
-      if(p?.isCoinbaseWallet) return 80;
-      if(p?.isRabby) return 70;
-      if(p?.isOKExWallet) return 60;
-      if(p?.isTokenPocket) return 55;
-      return 10;
-    }catch{ return 10; }
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
   }
 
   function pickBestProvider(){
-    const list = [];
-    for(const x of detectedProviders){
-      if(x?.provider) list.push(x.provider);
-    }
-    if(window.ethereum) list.push(window.ethereum);
+    // Prefer MetaMask / Trust if available, else first
+    const byName = (name) => discoveredProviders.find(p => (p.info?.name||"").toLowerCase().includes(name));
+    const mm = byName("metamask");
+    const tw = byName("trust");
+    const cb = byName("coinbase");
+    const okx = byName("okx");
+    const rabby = byName("rabby");
 
-    // unique by reference
-    const uniq = [];
-    for(const p of list){
-      if(!p) continue;
-      if(uniq.includes(p)) continue;
-      uniq.push(p);
-    }
-    uniq.sort((a,b)=>providerScore(b)-providerScore(a));
-    chosenProvider = uniq[0] || null;
-    return chosenProvider;
+    const best = mm || tw || rabby || cb || okx || discoveredProviders[0];
+    if(best?.provider) return best.provider;
+
+    // fallback to legacy
+    if(window.ethereum) return window.ethereum;
+    return null;
   }
 
-  // EIP-6963 listeners
-  window.addEventListener("eip6963:announceProvider", (event) => {
-    try{
-      const detail = event.detail || {};
-      if(detail.provider){
-        detectedProviders.push({provider: detail.provider, info: detail.info || null});
-        pickBestProvider();
-      }
-    }catch{}
-  });
-  window.dispatchEvent(new Event("eip6963:requestProvider"));
+  // =======================
+  // Providers (RPC read-only + wallet write)
+  // =======================
+  let rpcProvider = null;
+  let activeRpcUrl = null;
 
-  function hasProvider(){ return !!pickBestProvider(); }
-  function isMobile(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||""); }
+  let browserProvider=null, signer=null, me=null;
+  let readProvider=null;     // ALWAYS rpcProvider
+  let contractRead=null;     // ALWAYS rpcProvider
+  let contractWrite=null;    // wallet signer
+
+  let supportsWithdraw=false;
+
+  // market state
+  let offerIds=[], offersCache=[];
+  let page=1, totalPages=1, lastBlock=0;
+  let modalId=null, modalOffer=null;
+  let alertCount=0, lastSeenBlock=0, pollTimer=null;
+  let feeBps = 20;
+  let feeRecipient = null;
+
+  // =======================
+  // Anti Double-Click / Spam Guard
+  // =======================
+  const guard = {
+    locks: new Set(),
+    async run(key, btnEl, fn){
+      if(this.locks.has(key)) return;
+      this.locks.add(key);
+      const prevTxt = btnEl?.textContent;
+      try{
+        if(btnEl){ btnEl.disabled = true; btnEl.style.opacity="0.65"; }
+        await fn();
+      } finally {
+        this.locks.delete(key);
+        if(btnEl){ btnEl.disabled = false; btnEl.style.opacity=""; if(prevTxt) btnEl.textContent = prevTxt; }
+      }
+    }
+  };
+
+  // =======================
+  // Utils
+  // =======================
+  const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
+  const hasProvider = ()=> !!pickBestProvider();
+
   const openMetaMaskDapp = ()=>{ window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH; };
-  const openTrustDapp = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
+  const openTrustDapp   = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
 
   function maybeShowMobileButtons(){
-    if (isMobile() && !hasProvider()){
+    // show only if mobile and NO injected provider
+    if (isMobile() && !window.ethereum && discoveredProviders.length===0){
       el.btnOpenMM.style.display="inline-flex";
       el.btnOpenTW.style.display="inline-flex";
     } else {
@@ -626,78 +634,35 @@
     }
   }
 
-  // =========================
-  // TOAST + ERROR PARSER (fix "could not coalesce error" UX)
-  // =========================
-  function toast(msg, ms=2400){
+  function toast(msg, ms=2300){
     el.toast.textContent=msg;
     el.toast.style.display="block";
     clearTimeout(toast._t);
     toast._t=setTimeout(()=>el.toast.style.display="none", ms);
   }
-
   function bumpAlert(msg){
-    bumpAlert.count = (bumpAlert.count||0)+1;
+    alertCount++;
     el.alertBadge.style.display="inline-flex";
-    el.alertBadge.textContent=String(bumpAlert.count);
+    el.alertBadge.textContent=String(alertCount);
     toast(msg, 3200);
   }
 
   function prettyErr(e){
-    const msg = (e?.shortMessage || e?.message || String(e||"")).trim();
-
-    // common wallet errors
-    if(/user rejected|denied|rejected/i.test(msg)) return "User rejected the request in the wallet.";
-    if(/unsupported chain|unrecognized chain|4902/i.test(msg)) return "Wallet does not know this network. Try adding INRI CHAIN and reconnect.";
-    if(/could not coalesce error/i.test(msg)) return "Wallet RPC/provider had a request formatting issue. Try reconnecting or use another wallet/browser.";
-    if(/missing revert data/i.test(msg)) return "Transaction reverted (no revert reason). Check permissions / status / balances.";
-    if(/insufficient funds/i.test(msg)) return "Insufficient funds for gas or value.";
-    return msg || "Unknown error";
+    return (e?.shortMessage || e?.message || String(e||"Error")).slice(0,220);
   }
 
-  // =========================
-  // RPC FALLBACK (auto)
-  // =========================
-  let rpcProvider = null;
-  let rpcUrlActive = null;
-
-  async function buildRpcProvider(){
-    for(const url of RPCS){
-      try{
-        const p = new ethers.JsonRpcProvider(url, CHAIN_ID);
-        await p.getBlockNumber();
-        rpcProvider = p;
-        rpcUrlActive = url;
-        return p;
-      }catch(e){}
-    }
-    throw new Error("All RPC endpoints failed.");
+  function loadSavedIds(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      const arr=raw?JSON.parse(raw):[];
+      return Array.isArray(arr)?arr.map(x=>String(x)):[];
+    }catch{ return []; }
   }
-
-  // Providers / contracts
-  let readProvider = null;     // wallet or rpc
-  let browserProvider = null;  // wallet provider wrapper
-  let signer = null;
-  let me = null;
-
-  let contractRead = null;
-  let contractWrite = null;
-  let supportsWithdraw = false;
-
-  // Market cache
-  let offerIds = [], offersCache = [];
-  let page = 1, totalPages = 1;
-  let lastBlock = 0, lastSeenBlock = 0, pollTimer = null;
-
-  // Fee info
-  let feeBps = 20;
-  let feeRecipient = null;
-
-  // =========================
-  // Helpers
-  // =========================
-  function loadSavedIds(){ try{ const raw=localStorage.getItem(LS_KEY); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.map(x=>String(x)):[]; }catch{ return []; } }
-  function saveId(idStr){ const cur=new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
+  function saveId(idStr){
+    const cur=new Set(loadSavedIds());
+    cur.add(String(idStr));
+    localStorage.setItem(LS_KEY, JSON.stringify([...cur]));
+  }
   function clearSaved(){ localStorage.removeItem(LS_KEY); }
 
   const short=(a)=>a?a.slice(0,6)+"…"+a.slice(-4):"—";
@@ -714,6 +679,8 @@
   }
 
   const nowSec=()=>Math.floor(Date.now()/1000);
+
+  // Time Left (always meaningful)
   function formatLeftSeconds(left){
     if (left <= 0) return "Expired";
     const h = Math.floor(left / 3600);
@@ -788,7 +755,7 @@
     const feeInri = calcFeeInriFromInriAmount(amtStr);
     const netInri = calcNetInri(amtStr, feeInri);
 
-    el.feePill.textContent   = feeInri ? `${feeInri} INRI` : "—";
+    el.feePill.textContent     = feeInri ? `${feeInri} INRI` : "—";
     el.netInriPill.textContent = netInri ? `${netInri} INRI` : "—";
 
     if(!amtStr){ el.previewPill.textContent="—"; return; }
@@ -833,38 +800,114 @@
     }
   }
 
-  // =========================
-  // Network + Connect (auto wallet detect)
-  // =========================
-  async function ensureNetwork(provider){
-    const cur=await provider.request({method:"eth_chainId"});
+  // =======================
+  // RPC builder with fallback
+  // =======================
+  async function buildRpcProvider(){
+    for(const url of RPC_URLS){
+      try{
+        const p = new ethers.JsonRpcProvider(url, CHAIN_ID);
+        await p.getBlockNumber(); // test
+        rpcProvider = p;
+        activeRpcUrl = url;
+        readProvider = rpcProvider;
+        contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+        el.rpcMode.textContent = `Provider mode: Public RPC OK (${new URL(url).host})`;
+        return;
+      }catch(e){
+        // try next
+      }
+    }
+    // no RPC works
+    rpcProvider = null;
+    activeRpcUrl = null;
+    el.rpcMode.textContent = "Provider mode: RPC DOWN (connect wallet)";
+  }
+
+  // =======================
+  // Wallet connect (ANY wallet) + stable mode
+  // ✅ RPC = READ (always)
+  // ✅ Wallet = WRITE (only)
+  // =======================
+  let walletListenersAttached = false;
+
+  async function ensureNetwork(prov){
+    const cur=await prov.request({method:"eth_chainId"});
     if(cur && cur.toLowerCase()===CHAIN_HEX.toLowerCase()){
       el.netPill.textContent=`Network: ${CHAIN_NAME}`;
       return;
     }
     try{
-      await provider.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+      await prov.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
     }catch(e){
       if(e && e.code===4902){
-        await provider.request({
+        await prov.request({
           method:"wallet_addEthereumChain",
           params:[{
             chainId:CHAIN_HEX,
             chainName:CHAIN_NAME,
-            rpcUrls:[rpcUrlActive || RPCS[0]],
+            rpcUrls:[activeRpcUrl || RPC_URLS[0]],
             nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18},
             blockExplorerUrls:[]
           }]
         });
-        await provider.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+        await prov.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
       } else throw e;
     }
     el.netPill.textContent=`Network: ${CHAIN_NAME}`;
   }
 
+  function attachWalletListeners(prov){
+    if(walletListenersAttached) return;
+    walletListenersAttached = true;
+
+    prov.on?.("accountsChanged", (accs)=>{
+      try{
+        if(!accs || !accs.length){
+          me=null; signer=null; contractWrite=null;
+          el.btnConnect.textContent="Connect Wallet";
+          el.meAddr.textContent="—";
+          el.btnWithdraw.style.display="none";
+          toast("Wallet disconnected. RPC mode active.", 3000);
+          renderMarket();
+          return;
+        }
+        me = accs[0];
+        el.btnConnect.textContent=short(me);
+        el.meAddr.textContent=me;
+        refreshWithdrawable().catch(()=>{});
+        renderMarket();
+      }catch{}
+    });
+
+    prov.on?.("chainChanged", (cid)=>{
+      try{
+        if(String(cid).toLowerCase() !== CHAIN_HEX.toLowerCase()){
+          toast("Wrong network. Switch to INRI CHAIN.", 3500);
+          el.netPill.textContent = "Network: switch to INRI CHAIN";
+        } else {
+          el.netPill.textContent = `Network: ${CHAIN_NAME}`;
+        }
+      }catch{}
+    });
+
+    prov.on?.("disconnect", ()=>{
+      try{
+        me=null; signer=null; contractWrite=null;
+        el.btnConnect.textContent="Connect Wallet";
+        el.meAddr.textContent="—";
+        el.btnWithdraw.style.display="none";
+        toast("Wallet disconnected. RPC mode active.", 3500);
+        renderMarket();
+      }catch{}
+    });
+  }
+
   async function loadFeeInfo(){
-    try{ feeBps = Number(await contractRead.feeBps()); }catch{ feeBps = 20; }
-    try{ feeRecipient = await contractRead.feeRecipient(); }catch{ feeRecipient = null; }
+    try{ feeBps = Number(await contractRead.feeBps()); }
+    catch{ feeBps = 20; }
+    try{ feeRecipient = await contractRead.feeRecipient(); }
+    catch{ feeRecipient = null; }
     renderPreview();
   }
 
@@ -872,7 +915,7 @@
     supportsWithdraw=false;
     el.btnWithdraw.style.display="none";
     el.withdrawPill.textContent="—";
-    if(!me) return;
+    if(!me) { el.withdrawPill.textContent="—"; return; }
     try{
       await contractRead.pendingWithdrawals(me);
       supportsWithdraw=true;
@@ -896,59 +939,47 @@
   async function connectWallet(){
     const prov = pickBestProvider();
     if(!prov){
-      if(isMobile()) { openMetaMaskDapp(); return; }
-      alert("No wallet provider found. Install MetaMask/Trust/Coinbase extension, or open in wallet browser on mobile.");
+      if(isMobile()){ openMetaMaskDapp(); return; }
+      alert("No wallet provider found. Install a wallet extension (MetaMask/Trust/Rabby/Coinbase/OKX) or open this site inside a wallet browser.");
       return;
     }
-    try{
-      await ensureNetwork(prov);
-      browserProvider = new ethers.BrowserProvider(prov);
-      await browserProvider.send("eth_requestAccounts", []);
-      signer = await browserProvider.getSigner();
-      me = await signer.getAddress();
 
-      readProvider = browserProvider;
-      contractRead  = new ethers.Contract(CONTRACT, ABI, readProvider);
-      contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
+    // always ensure RPC for read
+    if(!rpcProvider) await buildRpcProvider();
 
-      el.btnConnect.textContent = short(me);
-      el.meAddr.textContent = me;
-      el.rpcMode.textContent = "Provider mode: Wallet (writes enabled)";
+    await ensureNetwork(prov);
 
-      await loadFeeInfo();
-      await detectWithdrawSupport();
-      await refreshWithdrawable();
-      toast("Wallet connected ✅");
-      startLiveActivity();
+    browserProvider = new ethers.BrowserProvider(prov);
+    await browserProvider.send("eth_requestAccounts", []);
+    signer = await browserProvider.getSigner();
+    me = await signer.getAddress();
 
-      // auto-refresh after connect
-      await refreshMarket();
-    }catch(e){
-      // fallback: stay on RPC
-      console.error(e);
-      toast("Wallet connect failed — using RPC fallback.", 3000);
+    // ✅ read = RPC; write = wallet
+    readProvider = rpcProvider || browserProvider; // if RPC dead, fallback to wallet
+    contractRead  = new ethers.Contract(CONTRACT, ABI, readProvider);
+    contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
 
-      // keep RPC read mode
-      me = null; signer = null; contractWrite = null;
-      el.btnConnect.textContent="Connect Wallet";
-      el.meAddr.textContent="—";
-      el.rpcMode.textContent = "Provider mode: Public RPC (read-only)";
-      alert("Connect error: " + prettyErr(e));
-    }
+    el.btnConnect.textContent = short(me);
+    el.meAddr.textContent = me;
+
+    el.rpcMode.textContent = rpcProvider
+      ? `Provider mode: RPC(read) + Wallet(write) (${new URL(activeRpcUrl).host})`
+      : "Provider mode: Wallet Provider (RPC fallback failed)";
+
+    attachWalletListeners(prov);
+
+    await loadFeeInfo();
+    await detectWithdrawSupport();
+    await refreshWithdrawable();
+
+    toast("Wallet connected ✅");
+    startLiveActivity();
+    await refreshMarket();
   }
 
-  async function requireConnected(){
-    if(!me || !contractWrite){
-      await connectWallet();
-    }
-    if(!me || !contractWrite){
-      throw new Error("Wallet not connected.");
-    }
-  }
-
-  // =========================
-  // Market load / render
-  // =========================
+  // =======================
+  // Market load/render
+  // =======================
   function mergeIds(aStr,bStr){
     const set=new Set([...aStr.map(String),...bStr.map(String)]);
     return [...set].sort((x,y)=>{ try{ return BigInt(y)>BigInt(x)?1:-1; }catch{ return 0; }});
@@ -961,10 +992,10 @@
       const provider = contractRead.runner.provider;
       const latest = await provider.getBlockNumber();
       lastBlock = latest;
-      const from = Math.max(0, latest - DEFAULT_SCAN_BLOCKS);
+      const from = Math.max(0, latest-DEFAULT_SCAN_BLOCKS);
 
-      const topic0 = iface.getEvent("OfferCreated").topicHash;
-      const logs = await provider.getLogs({address:CONTRACT, fromBlock:from, toBlock:latest, topics:[topic0]});
+      const topic0=iface.getEvent("OfferCreated").topicHash;
+      const logs=await provider.getLogs({address:CONTRACT,fromBlock:from,toBlock:latest,topics:[topic0]});
 
       const seen=new Set();
       for(const lg of logs){
@@ -973,7 +1004,7 @@
         if(!seen.has(id)){ seen.add(id); fromLogs.push(id); }
       }
     }catch(e){
-      console.warn("getLogs failed; showing saved only.", e);
+      console.warn("getLogs failed. Showing saved only.", e);
     }
 
     offerIds = mergeIds(saved, fromLogs).map(x=>BigInt(x));
@@ -985,8 +1016,7 @@
       try{
         const o=await contractRead.offers(id);
         out.push({
-          id,
-          seller:o.seller, buyer:o.buyer, amount:o.amount,
+          id, seller:o.seller, buyer:o.buyer, amount:o.amount,
           createdAt:Number(o.createdAt), expiresAt:Number(o.expiresAt),
           payWindowSec:Number(o.payWindowSec), status:Number(o.status),
           payAsset:o.payAsset, payNetwork:o.payNetwork, payTo:o.payTo, txid:o.txid
@@ -1067,6 +1097,8 @@
       const priceLine = meta.price ? `• price ${meta.price} ${o.payAsset}` : "";
       const totalLine = meta.total ? `• pay ${meta.total} ${o.payAsset}` : "";
 
+      const expiresAttr = Number(o.expiresAt||0);
+
       li.innerHTML=`
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
           <div style="min-width:200px">
@@ -1092,7 +1124,12 @@
 
         <div class="kvs">
           <div class="kv"><div class="k">Window</div><div class="v">${Math.round(o.payWindowSec/60)} min</div></div>
-          <div class="kv"><div class="k">Time Left</div><div class="v">${timeLeftForOffer(o.status, o.expiresAt)}</div></div>
+          <div class="kv">
+            <div class="k">Time Left</div>
+            <div class="v mono timeLeftCell" data-status="${o.status}" data-expires="${expiresAttr}">
+              ${timeLeftForOffer(o.status, o.expiresAt)}
+            </div>
+          </div>
         </div>
 
         <div class="actions">
@@ -1106,38 +1143,46 @@
 
   async function refreshMarket(){
     toast("Syncing…");
+    if(!contractRead){
+      await buildRpcProvider();
+      if(!rpcProvider){
+        toast("RPC is down. Connect wallet.", 3200);
+        return;
+      }
+    }
+
     await loadFeeInfo();
     await loadOfferIds();
     await loadOffersDetails();
 
-    const providerName = me ? "Wallet" : "Public RPC";
-    const savedCount = loadSavedIds().length;
+    const providerName = rpcProvider ? `Public RPC (${new URL(activeRpcUrl).host})` : "Wallet Provider";
+    const savedCount=loadSavedIds().length;
 
-    el.syncInfo.textContent = `Synced • Provider: ${providerName} • Saved: ${savedCount} ${lastBlock?("• block "+lastBlock):""}`;
-    if(!lastSeenBlock && lastBlock) lastSeenBlock = lastBlock;
-    el.activityPill.textContent = lastSeenBlock ? ("block "+lastSeenBlock) : (lastBlock?("block "+lastBlock):"—");
+    el.syncInfo.textContent=`Synced • Provider: ${providerName} • Saved: ${savedCount} ${lastBlock?("• block "+lastBlock):""}`;
+    if(!lastSeenBlock && lastBlock) lastSeenBlock=lastBlock;
+    el.activityPill.textContent=lastSeenBlock?("block "+lastSeenBlock):(lastBlock?("block "+lastBlock):"—");
 
     renderMarket();
     await refreshWithdrawable();
     toast("Updated ✅", 1200);
   }
 
-  // =========================
-  // Live activity (alerts)
-  // =========================
+  // =======================
+  // Live activity (RPC)
+  // =======================
   async function pollActivity(){
     try{
-      const provider = contractRead.runner.provider;
-      const latest = await provider.getBlockNumber();
-      if(!lastSeenBlock) lastSeenBlock = latest;
-      if(latest <= lastSeenBlock) return;
+      if(!contractRead) return;
+      const provider=contractRead.runner.provider;
+      const latest=await provider.getBlockNumber();
+      if(!lastSeenBlock) lastSeenBlock=latest;
+      if(latest<=lastSeenBlock) return;
 
-      const from = lastSeenBlock + 1;
-      const to = latest;
-      const tPaid = iface.getEvent("MarkedPaid").topicHash;
-      const tDisp = iface.getEvent("DisputeOpened").topicHash;
+      const from=lastSeenBlock+1, to=latest;
+      const tPaid=iface.getEvent("MarkedPaid").topicHash;
+      const tDisp=iface.getEvent("DisputeOpened").topicHash;
 
-      const logs = await provider.getLogs({address:CONTRACT, fromBlock:from, toBlock:to, topics:[[tPaid,tDisp]]});
+      const logs=await provider.getLogs({address:CONTRACT,fromBlock:from,toBlock:to,topics:[[tPaid,tDisp]]});
 
       let touched=false;
       for(const lg of logs){
@@ -1146,17 +1191,19 @@
         if(parsed.name==="MarkedPaid"){ touched=true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
         if(parsed.name==="DisputeOpened"){ touched=true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
       }
-      lastSeenBlock = latest;
-      el.activityPill.textContent = "block " + latest;
+      lastSeenBlock=latest;
+      el.activityPill.textContent="block "+latest;
       if(touched) await refreshMarket();
     }catch(e){}
   }
-  function startLiveActivity(){ if(pollTimer) return; pollTimer=setInterval(pollActivity, 9000); }
+  function startLiveActivity(){
+    if(pollTimer) return;
+    pollTimer=setInterval(pollActivity, 9000);
+  }
 
-  // =========================
+  // =======================
   // Modal
-  // =========================
-  let modalId=null, modalOffer=null;
+  // =======================
   function openModal(){ el.backdrop.style.display="flex"; }
   function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
   el.mClose.addEventListener("click", closeModal);
@@ -1179,11 +1226,11 @@
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
 
     const note=[];
-    note.push(`Status: ${st}.`);
+    note.push(`Status: ${st}`);
     if(isSeller) note.push("You are the seller.");
     if(isBuyer) note.push("You are the buyer.");
     if(!me) note.push("Connect wallet to interact.");
-    note.push(`Time left: ${timeLeftForOffer(modalOffer.status, modalOffer.expiresAt)}.`);
+    note.push(`Time left: ${timeLeftForOffer(modalOffer.status, modalOffer.expiresAt)}`);
     if(st==="PAID") note.push("Seller must confirm payment and release.");
     if(st==="DISPUTED") note.push("Dispute opened. Owner/mods decide.");
     el.mNote.textContent=note.join(" ");
@@ -1213,6 +1260,7 @@
     const amtInriStr = (()=>{ try{return ethers.formatEther(modalOffer.amount);}catch{return "0";} })();
     const feeInri = calcFeeInriFromInriAmount(amtInriStr);
     const netInri = calcNetInri(amtInriStr, feeInri);
+
     const feeRecipientLine = feeRecipient ? `Fee recipient: <span class="mono">${feeRecipient}</span><br>` : "";
 
     el.mDetails.innerHTML=`
@@ -1254,43 +1302,151 @@
     openModal();
   }
 
-  // =========================
-  // Safer tx send (fallback gasLimit)
-  // =========================
-  async function sendTxSafe(contract, method, args=[], overrides={}){
-    // fallback gasLimit to avoid wallets that break estimateGas/coalesce
-    // try normal first, then retry with gasLimit
-    try{
-      const tx = await contract[method](...args, overrides);
-      return tx;
-    }catch(e1){
-      const msg = (e1?.message||"");
-      // second attempt only if it looks like estimation/provider formatting
-      if(/coalesce|estimateGas|intrinsic gas|UNPREDICTABLE_GAS_LIMIT/i.test(msg)){
-        const gasLimit = overrides.gasLimit || 800000; // safe upper bound (adjust if needed)
-        const tx = await contract[method](...args, {...overrides, gasLimit});
-        return tx;
-      }
-      throw e1;
+  async function requireConnected(){
+    if(!me || !contractWrite){
+      await connectWallet();
     }
+    if(!contractWrite) throw new Error("Not connected.");
   }
 
-  // =========================
-  // EVENTS
-  // =========================
+  // =======================
+  // Actions (guarded)
+  // =======================
+  async function txCreate(){
+    await requireConnected();
+
+    const amt=(el.inAmount.value||"").trim();
+    const payTo=(el.payTo.value||"").trim();
+    const mins=Number(el.payWindow.value||30);
+    const price=(el.pricePer.value||"").trim();
+    const total=calcTotalOffchain();
+
+    if(!amt || Number(amt)<=0) throw new Error("Invalid INRI amount");
+    if(!price || Number(price)<=0) throw new Error("Price per INRI required");
+    if(!total) throw new Error("Could not calculate off-chain total");
+    if(!payTo) throw new Error("Seller receive address required");
+
+    const payWindowSec=Math.max(60, Math.floor(mins*60));
+    const valueWei=ethers.parseEther(amt);
+    const payToPacked=packPayTo(payTo, price, total);
+
+    toast("Creating offer…");
+    const tx=await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, {value:valueWei});
+    const receipt=await tx.wait();
+
+    try{
+      for(const lg of receipt.logs){
+        if((lg.address||"").toLowerCase()!==CONTRACT.toLowerCase()) continue;
+        const parsed=iface.parseLog(lg);
+        if(parsed && parsed.name==="OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
+      }
+    }catch{}
+
+    el.inAmount.value=""; el.pricePer.value=""; el.payTo.value="";
+    renderPreview();
+    await refreshMarket();
+    toast("Offer created ✅");
+    if(window.innerWidth<=980) showTab("market");
+  }
+
+  async function txWithdraw(){
+    await requireConnected();
+    toast("Withdrawing…");
+    const tx=await contractWrite.withdraw();
+    await tx.wait();
+    await refreshWithdrawable();
+    toast("Withdraw complete ✅");
+  }
+
+  async function txAccept(){
+    await requireConnected();
+    toast("Accepting…");
+    const tx=await contractWrite.acceptOffer(modalId);
+    await tx.wait();
+    await refreshMarket();
+    await showOffer(modalId.toString());
+    toast("Accepted ✅");
+  }
+
+  async function txPaid(){
+    await requireConnected();
+    const txid=(el.mTxid.value||"").trim();
+    if(txid.length<6) throw new Error("TxID too short");
+
+    toast("Marking PAID…");
+    const tx=await contractWrite.markPaid(modalId, txid);
+    await tx.wait();
+
+    bumpAlert(`💠 Offer #${modalId.toString()} marked as PAID`);
+    await refreshMarket();
+    el.filter.value="paid"; page=1; renderMarket();
+    await showOffer(modalId.toString());
+    toast("Marked PAID ✅");
+  }
+
+  async function txRelease(){
+    await requireConnected();
+    toast("Releasing…");
+    const tx=await contractWrite.releaseToBuyer(modalId);
+    await tx.wait();
+    await refreshMarket();
+    await showOffer(modalId.toString());
+    toast("Released ✅");
+  }
+
+  async function txDispute(){
+    await requireConnected();
+    toast("Opening dispute…");
+    const tx=await contractWrite.openDispute(modalId);
+    await tx.wait();
+    bumpAlert(`⚠ Dispute opened on offer #${modalId.toString()}`);
+    await refreshMarket();
+    el.filter.value="disputed"; page=1; renderMarket();
+    await showOffer(modalId.toString());
+    toast("Dispute opened ✅");
+  }
+
+  async function txReclaim(){
+    await requireConnected();
+    toast("Reclaiming…");
+    const tx=await contractWrite.reclaimIfUnpaid(modalId);
+    await tx.wait();
+    await refreshMarket();
+    closeModal();
+    toast("Reclaimed ✅");
+  }
+
+  async function txCancel(){
+    await requireConnected();
+    if(!confirm("Cancel this offer? (Only while OPEN)")) return;
+    toast("Cancelling…");
+    const tx=await contractWrite.cancelOffer(modalId);
+    await tx.wait();
+    await refreshMarket();
+    closeModal();
+    toast("Cancelled ✅");
+  }
+
+  // =======================
+  // Events
+  // =======================
   el.btnOpenMM.addEventListener("click", openMetaMaskDapp);
   el.btnOpenTW.addEventListener("click", openTrustDapp);
 
-  el.btnConnect.addEventListener("click", ()=>withButtonLock(el.btnConnect, "connect", connectWallet));
+  el.btnConnect.addEventListener("click", ()=>guard.run("connect", el.btnConnect, async ()=>{
+    await connectWallet();
+  }));
 
-  el.btnRefresh.addEventListener("click", ()=>withButtonLock(el.btnRefresh, "refresh", refreshMarket));
-  el.btnRefreshTop.addEventListener("click", ()=>withButtonLock(el.btnRefreshTop, "refreshTop", refreshMarket));
+  el.btnRefresh.addEventListener("click", ()=>guard.run("refresh", el.btnRefresh, async ()=>{
+    await refreshMarket();
+  }));
+  el.btnRefreshTop.addEventListener("click", ()=>guard.run("refreshTop", el.btnRefreshTop, async ()=>{
+    await refreshMarket();
+  }));
 
   el.btnClearSaved.addEventListener("click", ()=>{
     if(!confirm("Clear saved offers from this device?")) return;
-    clearSaved();
-    toast("Saved cleared ✅");
-    refreshMarket().catch(()=>{});
+    clearSaved(); toast("Saved cleared ✅"); refreshMarket().catch(()=>{});
   });
 
   el.prev.addEventListener("click", ()=>{ page=Math.max(1,page-1); renderMarket(); });
@@ -1311,169 +1467,93 @@
     const btn=ev.target.closest("button[data-act]");
     if(!btn) return;
     const id=btn.getAttribute("data-id");
-    try{
-      await withButtonLock(btn, "open-"+id, ()=>showOffer(id));
-    }catch(e){
-      console.error(e);
-      alert("Open offer error: " + prettyErr(e));
-    }
+    try{ await showOffer(id); }
+    catch(e){ console.error(e); alert("Open offer error: "+prettyErr(e)); }
   });
 
-  // Create
-  el.btnCreate.addEventListener("click", ()=>withButtonLock(el.btnCreate, "create", async ()=>{
-    await requireConnected();
+  // guarded buttons
+  el.btnCreate.addEventListener("click", ()=>guard.run("create", el.btnCreate, async ()=>{
+    try{ await txCreate(); }catch(e){ console.error(e); alert("Create error: "+prettyErr(e)); }
+  }));
 
-    const amt=(el.inAmount.value||"").trim();
-    const payTo=(el.payTo.value||"").trim();
-    const mins=Number(el.payWindow.value||30);
-    const price=(el.pricePer.value||"").trim();
-    const total=calcTotalOffchain();
+  el.btnWithdraw.addEventListener("click", ()=>guard.run("withdraw", el.btnWithdraw, async ()=>{
+    try{ await txWithdraw(); }catch(e){ console.error(e); alert("Withdraw error: "+prettyErr(e)); }
+  }));
 
-    if(!amt || Number(amt)<=0) throw new Error("Invalid INRI amount");
-    if(!price || Number(price)<=0) throw new Error("Price per INRI required");
-    if(!total) throw new Error("Could not calculate off-chain total");
-    if(!payTo) throw new Error("Seller receive address required");
+  el.btnAccept.addEventListener("click", ()=>guard.run("accept:"+String(modalId||""), el.btnAccept, async ()=>{
+    try{ await txAccept(); }catch(e){ console.error(e); alert("Accept error: "+prettyErr(e)); }
+  }));
 
-    const payWindowSec=Math.max(60, Math.floor(mins*60));
-    const valueWei=ethers.parseEther(amt);
-    const payToPacked=packPayTo(payTo, price, total);
+  el.btnPaid.addEventListener("click", ()=>guard.run("paid:"+String(modalId||""), el.btnPaid, async ()=>{
+    try{ await txPaid(); }catch(e){ console.error(e); alert("Mark Paid error: "+prettyErr(e)); }
+  }));
 
-    toast("Creating offer…");
-    const tx = await sendTxSafe(contractWrite, "createOffer", [payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked], { value:valueWei });
-    const receipt = await tx.wait();
+  el.btnRelease.addEventListener("click", ()=>guard.run("release:"+String(modalId||""), el.btnRelease, async ()=>{
+    try{ await txRelease(); }catch(e){ console.error(e); alert("Release error: "+prettyErr(e)); }
+  }));
 
-    try{
-      for(const lg of receipt.logs){
-        if((lg.address||"").toLowerCase()!==CONTRACT.toLowerCase()) continue;
-        const parsed=iface.parseLog(lg);
-        if(parsed && parsed.name==="OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
-      }
-    }catch{}
+  el.btnDispute.addEventListener("click", ()=>guard.run("dispute:"+String(modalId||""), el.btnDispute, async ()=>{
+    try{ await txDispute(); }catch(e){ console.error(e); alert("Dispute error: "+prettyErr(e)); }
+  }));
 
-    el.inAmount.value=""; el.pricePer.value=""; el.payTo.value="";
-    renderPreview();
-    await refreshMarket();
-    toast("Offer created ✅");
-    if(window.innerWidth<=980) showTab("market");
-  })).catch(e=>{ console.error(e); alert("Create error: "+prettyErr(e)); });
+  el.btnReclaim.addEventListener("click", ()=>guard.run("reclaim:"+String(modalId||""), el.btnReclaim, async ()=>{
+    try{ await txReclaim(); }catch(e){ console.error(e); alert("Reclaim error: "+prettyErr(e)); }
+  }));
 
-  // Withdraw
-  el.btnWithdraw.addEventListener("click", ()=>withButtonLock(el.btnWithdraw, "withdraw", async ()=>{
-    await requireConnected();
-    toast("Withdrawing…");
-    const tx = await sendTxSafe(contractWrite, "withdraw", [], {});
-    await tx.wait();
-    await refreshWithdrawable();
-    toast("Withdraw complete ✅");
-  })).catch(e=>{ console.error(e); alert("Withdraw error: "+prettyErr(e)); });
+  el.btnCancel.addEventListener("click", ()=>guard.run("cancel:"+String(modalId||""), el.btnCancel, async ()=>{
+    try{ await txCancel(); }catch(e){ console.error(e); alert("Cancel error: "+prettyErr(e)); }
+  }));
 
-  // Modal actions
-  el.btnAccept.addEventListener("click", ()=>withButtonLock(el.btnAccept, "accept", async ()=>{
-    await requireConnected();
-    toast("Accepting…");
-    const tx = await sendTxSafe(contractWrite, "acceptOffer", [modalId], {});
-    await tx.wait();
-    await refreshMarket();
-    await showOffer(modalId.toString());
-    toast("Accepted ✅");
-  })).catch(e=>{ console.error(e); alert("Accept error: "+prettyErr(e)); });
-
-  el.btnPaid.addEventListener("click", ()=>withButtonLock(el.btnPaid, "paid", async ()=>{
-    await requireConnected();
-    const txid=(el.mTxid.value||"").trim();
-    if(txid.length<6) throw new Error("TxID too short");
-    toast("Marking PAID…");
-    const tx = await sendTxSafe(contractWrite, "markPaid", [modalId, txid], {});
-    await tx.wait();
-    bumpAlert(`💠 Offer #${modalId.toString()} marked as PAID`);
-    await refreshMarket();
-    el.filter.value="paid"; page=1; renderMarket();
-    await showOffer(modalId.toString());
-    toast("Marked PAID ✅");
-  })).catch(e=>{ console.error(e); alert("Mark Paid error: "+prettyErr(e)); });
-
-  el.btnRelease.addEventListener("click", ()=>withButtonLock(el.btnRelease, "release", async ()=>{
-    await requireConnected();
-    toast("Releasing…");
-    const tx = await sendTxSafe(contractWrite, "releaseToBuyer", [modalId], {});
-    await tx.wait();
-    await refreshMarket();
-    await showOffer(modalId.toString());
-    toast("Released ✅");
-  })).catch(e=>{ console.error(e); alert("Release error: "+prettyErr(e)); });
-
-  el.btnDispute.addEventListener("click", ()=>withButtonLock(el.btnDispute, "dispute", async ()=>{
-    await requireConnected();
-    toast("Opening dispute…");
-    const tx = await sendTxSafe(contractWrite, "openDispute", [modalId], {});
-    await tx.wait();
-    bumpAlert(`⚠ Dispute opened on offer #${modalId.toString()}`);
-    await refreshMarket();
-    el.filter.value="disputed"; page=1; renderMarket();
-    await showOffer(modalId.toString());
-    toast("Dispute opened ✅");
-  })).catch(e=>{ console.error(e); alert("Dispute error: "+prettyErr(e)); });
-
-  el.btnReclaim.addEventListener("click", ()=>withButtonLock(el.btnReclaim, "reclaim", async ()=>{
-    await requireConnected();
-    toast("Reclaiming…");
-    const tx = await sendTxSafe(contractWrite, "reclaimIfUnpaid", [modalId], {});
-    await tx.wait();
-    await refreshMarket();
-    closeModal();
-    toast("Reclaimed ✅");
-  })).catch(e=>{ console.error(e); alert("Reclaim error: "+prettyErr(e)); });
-
-  el.btnCancel.addEventListener("click", ()=>withButtonLock(el.btnCancel, "cancel", async ()=>{
-    await requireConnected();
-    if(!confirm("Cancel this offer? (Only while OPEN)")) return;
-    toast("Cancelling…");
-    const tx = await sendTxSafe(contractWrite, "cancelOffer", [modalId], {});
-    await tx.wait();
-    await refreshMarket();
-    closeModal();
-    toast("Cancelled ✅");
-  })).catch(e=>{ console.error(e); alert("Cancel error: "+prettyErr(e)); });
-
-  // Live tick for time left (cheap)
+  // =======================
+  // Live Time Left (NO heavy rerender)
+  // =======================
   setInterval(() => {
-    if (offersCache && offersCache.length) renderMarket();
-    if (modalOffer) setModalButtonsState();
+    // update visible time cells only
+    document.querySelectorAll(".timeLeftCell").forEach(node=>{
+      const st = Number(node.getAttribute("data-status")||0);
+      const ex = Number(node.getAttribute("data-expires")||0);
+      node.textContent = timeLeftForOffer(st, ex);
+    });
+    if(modalOffer) setModalButtonsState();
   }, 1000);
 
-  // =========================
-  // INIT
-  // =========================
+  // =======================
+  // Init
+  // =======================
   (async function init(){
+    discoverWallets();
+    setTimeout(maybeShowMobileButtons, 400);
+
     el.contractPill.textContent="Contract: "+CONTRACT.slice(0,6)+"…"+CONTRACT.slice(-4);
     renderPreview();
     showTab("create");
-    maybeShowMobileButtons();
 
-    // build RPC fallback (always for reads)
+    // network pill
     try{
-      await buildRpcProvider();
-      readProvider = rpcProvider;
-      contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
-      el.rpcMode.textContent = "Provider mode: Public RPC (read-only)";
-      el.netPill.textContent = hasProvider() ? "Network: connect wallet" : "Network: (no wallet)";
-      el.syncInfo.textContent = "RPC OK • Click Refresh";
-    }catch(e){
-      console.error(e);
-      el.rpcMode.textContent = "Provider mode: RPC DOWN";
-      el.syncInfo.textContent = "RPC failed. Add a working RPC in code (RPCS array).";
-      alert("RPC error: " + prettyErr(e));
-      return;
-    }
+      const prov = pickBestProvider();
+      if(prov){
+        const cid=await prov.request({method:"eth_chainId"});
+        el.netPill.textContent=(cid && cid.toLowerCase()===CHAIN_HEX.toLowerCase())
+          ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
+      } else {
+        el.netPill.textContent="Network: (no wallet)";
+      }
+    }catch{ el.netPill.textContent="Network: —"; }
 
-    // fee info + first refresh
-    try{
+    // build rpc first
+    await buildRpcProvider();
+
+    if(contractRead){
       await loadFeeInfo();
-      await refreshMarket();
-    }catch(e){
-      console.error(e);
-      el.syncInfo.textContent="Could not load offers. Try Connect Wallet and click Refresh.";
-      toast("Provider error: cannot load offers", 3200);
+      try{ await refreshMarket(); }
+      catch(e){
+        console.error(e);
+        el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh.";
+        toast("Provider error: cannot load offers");
+      }
+    } else {
+      el.syncInfo.textContent="RPC is down. Please connect a wallet and click Refresh.";
+      toast("RPC down — connect wallet", 3500);
     }
   })();
 })();
