@@ -574,12 +574,37 @@
     if(st==="DISPUTED") return `<span class="tag tag-disputed">⚠ DISPUTE</span>`;
     return `<span class="tag tag-done">• ${st}</span>`;
   }
+
   const nowSec=()=>Math.floor(Date.now()/1000);
-  function timeLeft(expiresAt){
-    const t=Number(expiresAt||0); if(!t) return "—";
-    const left=t-nowSec(); if(left<=0) return "Expired";
-    const m=Math.floor(left/60), s=left%60; return `${m}m ${s}s`;
+
+  // ✅ TIME LEFT FIX (always shows meaningful label + HH:MM:SS countdown for LOCKED)
+  function formatLeftSeconds(left){
+    if (left <= 0) return "Expired";
+    const h = Math.floor(left / 3600);
+    const m = Math.floor((left % 3600) / 60);
+    const s = left % 60;
+    if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`;
+    return `${m}m ${String(s).padStart(2,"0")}s`;
   }
+
+  function timeLeftLocked(expiresAt){
+    const t = Number(expiresAt || 0);
+    if (!t) return "—";
+    const left = t - nowSec();
+    return formatLeftSeconds(left);
+  }
+
+  function timeLeftForOffer(status, expiresAt){
+    const st = statusLabel(status);
+    if (st === "LOCKED") return timeLeftLocked(expiresAt);
+    if (st === "OPEN") return "Not started";
+    if (st === "PAID") return "Waiting release";
+    if (st === "DISPUTED") return "In dispute";
+    if (st === "RELEASED" || st === "CANCELLED") return "Finalized";
+    return "—";
+  }
+  // ✅ END TIME LEFT FIX
+
   function imgOrFallback(url, alt){
     if(!url) return `<span class="ico"></span>`;
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
@@ -906,7 +931,8 @@
 
         <div class="kvs">
           <div class="kv"><div class="k">Window</div><div class="v">${Math.round(o.payWindowSec/60)} min</div></div>
-          <div class="kv"><div class="k">Time Left</div><div class="v">${o.status===1 ? timeLeft(o.expiresAt) : "—"}</div></div>
+          <!-- ✅ TIME LEFT FIX: always show meaningful value -->
+          <div class="kv"><div class="k">Time Left</div><div class="v">${timeLeftForOffer(o.status, o.expiresAt)}</div></div>
         </div>
 
         <div class="actions">
@@ -987,12 +1013,13 @@
     el.btnCancel.disabled = !(st==="OPEN" && me && isSeller);
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
 
+    // ✅ TIME LEFT FIX: modal note always shows time-left state (updates each second below)
     const note=[];
     note.push(`Status: ${st}`);
     if(isSeller) note.push("You are the seller.");
     if(isBuyer) note.push("You are the buyer.");
     if(!me) note.push("Connect wallet to interact.");
-    if(st==="LOCKED") note.push(`Deadline: ${new Date(modalOffer.expiresAt*1000).toLocaleString()} (${timeLeft(modalOffer.expiresAt)})`);
+    note.push(`Time left: ${timeLeftForOffer(modalOffer.status, modalOffer.expiresAt)}`);
     if(st==="PAID") note.push("Seller must confirm payment and release.");
     if(st==="DISPUTED") note.push("Dispute opened. Owner/mods decide.");
     el.mNote.textContent=note.join(" ");
@@ -1042,6 +1069,7 @@
       <div><b>Seller</b>: <span class="mono">${modalOffer.seller}</span></div>
       <div><b>Buyer</b>: <span class="mono">${modalOffer.buyer && modalOffer.buyer!==ethers.ZeroAddress ? modalOffer.buyer : "—"}</span></div>
       <div><b>Window</b>: ${Math.round(modalOffer.payWindowSec/60)} min</div>
+      <div><b>Time left</b>: <span class="mono">${timeLeftForOffer(modalOffer.status, modalOffer.expiresAt)}</span></div>
       <div><b>TxID</b>: <span class="mono">${modalOffer.txid ? modalOffer.txid : "—"}</span></div>
     `;
 
@@ -1224,6 +1252,13 @@
       toast("Cancelled ✅");
     }catch(e){ console.error(e); alert("Cancel error: "+(e.shortMessage||e.message||e)); }
   });
+
+  // ✅ TIME LEFT FIX: live ticking update each second (list + modal note)
+  setInterval(() => {
+    // only re-render if market has data (cheap enough with PAGE_SIZE=8)
+    if (offersCache && offersCache.length) render();
+    if (modalOffer) setModalButtonsState();
+  }, 1000);
 
   // ===== Init =====
   (async function init(){
