@@ -33,7 +33,6 @@
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
     .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-
     .p2pHero{
       width:100%;display:flex;justify-content:center;align-items:center;
       padding:18px 12px 12px;background:rgba(10,14,30,.55);
@@ -86,7 +85,6 @@
     .btn-ghost{background:rgba(255,255,255,.06)}
     .btn-bad{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.35)}
-    .btn-warn{background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.35)}
 
     .btnLogo{
       width:18px;height:18px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);
@@ -116,10 +114,11 @@
 
     .field{display:flex;flex-direction:column;gap:6px;margin:8px 0}
     label{font-size:11.5px;color:var(--muted)}
-    input,select{
+    input,select,textarea{
       width:100%;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
       background:rgba(0,0,0,.35);color:var(--text);outline:none;font-size:13px
     }
+    textarea{min-height:110px;resize:vertical}
 
     .hint{
       border:1px solid rgba(59,130,246,.22);background:rgba(59,130,246,.07);
@@ -188,7 +187,8 @@
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
     .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
-    .mini{font-size:11px;color:var(--muted2);line-height:1.35}
+    .mini{font-size:12px;color:var(--muted);line-height:1.35}
+    .codebox{width:100%;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace;}
   </style>
 </head>
 
@@ -217,10 +217,7 @@
         <div class="pill mono" id="contractPill">Contract: —</div>
         <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
 
-        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open MetaMask</button>
-        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open Trust</button>
-
-        <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
+        <button class="btn btn-ghost" id="btnConnect">Connect Wallet</button>
       </div>
     </header>
 
@@ -289,7 +286,7 @@
         </div>
 
         <div class="field">
-          <label>Seller Receive Address (on selected network)</label>
+          <label>Seller Receive Address (off-chain destination)</label>
           <input id="payTo" placeholder="0x... / T... / any account id" />
         </div>
 
@@ -364,6 +361,7 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Offer Modal -->
   <div class="backdrop" id="backdrop">
     <div class="modal">
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
@@ -394,7 +392,7 @@
             <div class="muted2">Only the buyer can mark as paid.</div>
           </div>
 
-          <div class="row">
+          <div class="row" style="gap:8px;flex-wrap:wrap">
             <button class="btn btn-pri" id="btnAccept">Accept</button>
             <button class="btn btn-ok" id="btnPaid">I Paid</button>
             <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
@@ -403,37 +401,53 @@
 
           <div class="hr"></div>
 
-          <div class="row">
+          <div class="row" style="gap:8px;flex-wrap:wrap">
             <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
             <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
           </div>
 
           <div class="hr"></div>
 
-          <!-- ✅ DISPUTE TOOLS (OWNER + MODS) -->
-          <div class="card" style="background:rgba(0,0,0,.12)">
-            <div class="muted" style="margin-bottom:6px">Moderator / Owner dispute tools</div>
-            <div class="mini" id="mRoleLine">Role: —</div>
-            <div class="mini" id="mModsLine">Mods: — • Threshold: — • Votes: buyer — / seller — • You voted: —</div>
+          <div class="hint" style="margin-bottom:10px">
+            <b>Moderator / Owner dispute tools</b><br>
+            <span class="muted2" id="modInfo">—</span>
+          </div>
 
-            <div class="row" style="margin-top:10px">
-              <button class="btn btn-warn" id="btnVoteBuyer">Vote: Release to Buyer</button>
-              <button class="btn btn-warn" id="btnVoteSeller">Vote: Refund to Seller</button>
-            </div>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" id="btnVoteBuyer">Vote: Release to Buyer</button>
+            <button class="btn btn-ghost" id="btnVoteSeller">Vote: Refund to Seller</button>
+          </div>
 
-            <div class="row" style="margin-top:10px">
-              <button class="btn btn-ok" id="btnOwnerRelease">OWNER: Release</button>
-              <button class="btn btn-bad" id="btnOwnerRefund">OWNER: Refund</button>
-            </div>
-
-            <div class="mini" style="margin-top:8px">
-              Owner can resolve anytime. Mods can vote only if enabled. (Contract functions: <span class="mono">resolveDisputeOwner</span> / <span class="mono">voteDispute</span>)
-            </div>
+          <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button class="btn btn-ok" id="btnOwnerRelease">OWNER: Release</button>
+            <button class="btn btn-bad" id="btnOwnerRefund">OWNER: Refund</button>
           </div>
 
           <div class="hr"></div>
           <div class="muted2" id="mNote">—</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Wallet Popup -->
+  <div class="backdrop" id="walletBackdrop">
+    <div class="modal" style="max-width:520px">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <h3 style="margin:0;font-size:14px">Open with a wallet</h3>
+          <div class="sub" style="margin-top:4px">On mobile you must open this site inside a wallet browser.</div>
+        </div>
+        <button class="btn btn-ghost" id="walletClose">✕</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <button class="btn btn-pri" id="openMM" style="width:100%;margin-bottom:10px">Open in MetaMask</button>
+      <button class="btn btn-ghost" id="openTW" style="width:100%">Open in Trust Wallet</button>
+
+      <div class="mini" style="margin-top:10px">
+        If you already have a wallet installed, this will open the correct in-app browser.
       </div>
     </div>
   </div>
@@ -444,24 +458,22 @@
   // CONFIG
   // =======================
   const CHAIN_ID   = 3777;
-  const CHAIN_HEX  = "0x" + CHAIN_ID.toString(16);
+  const CHAIN_HEX  = "0x" + CHAIN_ID.toString(16); // 0xec1
   const CHAIN_NAME = "INRI CHAIN";
 
-  // ✅ Put your RPC(s) here (Singapore / global). First working one will be used for READ.
+  // Public RPCs (first = Singapore)
   const RPC_URLS = [
     "https://rpc-chain.inri.life/",
-    // "https://<your-singapore-rpc>/",
-    // "https://<backup-rpc>/",
   ];
 
-  // ✅ Your deployed contract address (INRIP2PEscrowSafe)
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
+  // IMPORTANT: put your REAL public URL here (custom domain or github pages)
   const DAPP_URL = "https://p2p.inri.life/";
   const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, "");
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v10_safe";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v10";
   const PAGE_SIZE = 8;
 
   // =======================
@@ -498,34 +510,13 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   // =======================
-  // ABI (MATCHES YOUR CONTRACT)
+  // ABI (your contract + optional functions)
   // =======================
   const ABI = [
-    // config / fee
+    // core
     "function owner() view returns (address)",
     "function feeBps() view returns (uint16)",
     "function feeRecipient() view returns (address)",
-    "function minPayWindowSec() view returns (uint32)",
-    "function maxPayWindowSec() view returns (uint32)",
-
-    // withdraw
-    "function withdraw()",
-    "function pendingWithdrawals(address) view returns (uint256)",
-
-    // moderation
-    "function moderatorsEnabled() view returns (bool)",
-    "function modThreshold() view returns (uint8)",
-    "function isModerator(address) view returns (bool)",
-    "function modVote(uint256,address) view returns (uint8)",
-    "function votesToBuyer(uint256) view returns (uint8)",
-    "function votesToSeller(uint256) view returns (uint8)",
-    "function voteDispute(uint256 offerId,uint8 vote)",
-
-    // offers
-    "function nextOfferId() view returns (uint256)",
-    "function offers(uint256) view returns (address seller,address buyer,uint256 amount,uint64 createdAt,uint64 expiresAt,uint32 payWindowSec,uint8 status,string payAsset,string payNetwork,string payTo,string txid)",
-
-    // core
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
     "function cancelOffer(uint256 offerId)",
     "function acceptOffer(uint256 offerId)",
@@ -533,6 +524,19 @@
     "function reclaimIfUnpaid(uint256 offerId)",
     "function releaseToBuyer(uint256 offerId)",
     "function openDispute(uint256 offerId)",
+    "function withdraw()",
+    "function pendingWithdrawals(address) view returns (uint256)",
+    "function offers(uint256) view returns (address seller,address buyer,uint256 amount,uint64 createdAt,uint64 expiresAt,uint32 payWindowSec,uint8 status,string payAsset,string payNetwork,string payTo,string txid)",
+
+    // moderation (optional)
+    "function moderatorsEnabled() view returns (bool)",
+    "function modThreshold() view returns (uint8)",
+    "function isModerator(address) view returns (bool)",
+    "function votesToBuyer(uint256) view returns (uint8)",
+    "function votesToSeller(uint256) view returns (uint8)",
+    "function voteDispute(uint256 offerId,uint8 vote)",
+
+    // owner resolve (IMPORTANT: your contract has resolveDisputeOwner)
     "function resolveDisputeOwner(uint256 offerId,bool releaseToBuyerFlag)",
 
     // events
@@ -540,9 +544,9 @@
     "event MarkedPaid(uint256 indexed offerId,address indexed buyer,string txid)",
     "event DisputeOpened(uint256 indexed offerId,address indexed buyer)",
     "event Released(uint256 indexed offerId,address indexed buyer,uint256 netToBuyer,uint256 feeAmount)",
-    "event DisputeResolved(uint256 indexed offerId,bool releasedToBuyer)"
+    "event DisputeResolved(uint256 indexed offerId,bool releasedToBuyer)",
+    "event ModeratorVoted(uint256 indexed offerId,address indexed mod,uint8 vote,uint8 votesBuyerNow,uint8 votesSellerNow)"
   ];
-
   const iface = new ethers.Interface(ABI);
 
   // =======================
@@ -551,7 +555,7 @@
   const $ = (id)=>document.getElementById(id);
   const el = {
     netPill:$("netPill"), contractPill:$("contractPill"),
-    btnConnect:$("btnConnect"), btnOpenMM:$("btnOpenMM"), btnOpenTW:$("btnOpenTW"),
+    btnConnect:$("btnConnect"),
     alertBadge:$("alertBadge"), activityPill:$("activityPill"),
     tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
     createPanel:$("createPanel"), marketPanel:$("marketPanel"),
@@ -572,17 +576,16 @@
 
     backdrop:$("backdrop"), mClose:$("mClose"), mTitle:$("mTitle"), mSub:$("mSub"),
     mDetails:$("mDetails"), mPayHint:$("mPayHint"), mLogos:$("mLogos"),
-    mTxid:$("mTxid"), mNote:$("mNote"),
+    mTxid:$("mTxid"), mNote:$("mNote"), modInfo:$("modInfo"),
+
     btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
     btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel"),
 
-    // dispute tools
-    mRoleLine:$("mRoleLine"),
-    mModsLine:$("mModsLine"),
-    btnVoteBuyer:$("btnVoteBuyer"),
-    btnVoteSeller:$("btnVoteSeller"),
-    btnOwnerRelease:$("btnOwnerRelease"),
-    btnOwnerRefund:$("btnOwnerRefund"),
+    btnVoteBuyer:$("btnVoteBuyer"), btnVoteSeller:$("btnVoteSeller"),
+    btnOwnerRelease:$("btnOwnerRelease"), btnOwnerRefund:$("btnOwnerRefund"),
+
+    walletBackdrop:$("walletBackdrop"), walletClose:$("walletClose"),
+    openMM:$("openMM"), openTW:$("openTW"),
   };
 
   for (const n of PAY_NETWORKS){
@@ -593,14 +596,12 @@
   el.payNetwork.value="TRON";
 
   // =======================
-  // Wallet Detection (ANY wallet)
-  // - window.ethereum (legacy)
-  // - EIP-6963 (best coverage)
+  // Wallet detection (ANY wallet)
   // =======================
   let discoveredProviders = []; // { info, provider }
+
   function discoverWallets(){
     discoveredProviders = [];
-
     window.addEventListener("eip6963:announceProvider", (event) => {
       try{
         const { info, provider } = event.detail || {};
@@ -609,7 +610,6 @@
         discoveredProviders.push({ info, provider });
       }catch{}
     });
-
     window.dispatchEvent(new Event("eip6963:requestProvider"));
   }
 
@@ -620,7 +620,6 @@
     const rabby = byName("rabby");
     const cb = byName("coinbase");
     const okx = byName("okx");
-
     const best = mm || tw || rabby || cb || okx || discoveredProviders[0];
     if(best?.provider) return best.provider;
     if(window.ethereum) return window.ethereum;
@@ -628,24 +627,33 @@
   }
 
   // =======================
+  // Mobile open (MetaMask / Trust)
+  // =======================
+  const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
+
+  const openMetaMaskDapp = ()=>{
+    const url = "https://metamask.app.link/dapp/" + encodeURIComponent(DAPP_HOSTPATH);
+    window.location.href = url;
+  };
+
+  const openTrustDapp = ()=>{
+    const url = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL);
+    window.location.href = url;
+  };
+
+  el.openMM.onclick = openMetaMaskDapp;
+  el.openTW.onclick = openTrustDapp;
+  el.walletClose.onclick = ()=> el.walletBackdrop.style.display="none";
+  el.walletBackdrop.addEventListener("click", (e)=>{ if(e.target===el.walletBackdrop) el.walletBackdrop.style.display="none"; });
+
+  // =======================
   // Providers
   // =======================
-  let rpcProvider = null;
-  let activeRpcUrl = null;
-
+  let rpcProvider=null, activeRpcUrl=null;
   let browserProvider=null, signer=null, me=null;
-  let readProvider=null;
-  let contractRead=null;
-  let contractWrite=null;
+  let contractRead=null, contractWrite=null;
 
   let supportsWithdraw=false;
-
-  // contract info
-  let feeBps = 20;
-  let feeRecipient = null;
-  let ownerAddr = null;
-  let modsEnabled = false;
-  let modThreshold = 2;
 
   // market state
   let offerIds=[], offersCache=[];
@@ -653,8 +661,18 @@
   let modalId=null, modalOffer=null;
   let alertCount=0, lastSeenBlock=0, pollTimer=null;
 
+  // fee + admin info
+  let feeBps = 20;
+  let feeRecipient = null;
+  let ownerAddr = null;
+
+  // moderation info
+  let modsEnabled = false;
+  let modThreshold = 2;
+  let isMod = false;
+
   // =======================
-  // Guard
+  // Guard (anti spam)
   // =======================
   const guard = {
     locks: new Set(),
@@ -675,20 +693,6 @@
   // =======================
   // Utils
   // =======================
-  const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
-  const openMetaMaskDapp = ()=>{ window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH; };
-  const openTrustDapp   = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
-
-  function maybeShowMobileButtons(){
-    if (isMobile() && !window.ethereum && discoveredProviders.length===0){
-      el.btnOpenMM.style.display="inline-flex";
-      el.btnOpenTW.style.display="inline-flex";
-    } else {
-      el.btnOpenMM.style.display="none";
-      el.btnOpenTW.style.display="none";
-    }
-  }
-
   function toast(msg, ms=2300){
     el.toast.textContent=msg;
     el.toast.style.display="block";
@@ -702,9 +706,8 @@
     toast(msg, 3200);
   }
   function prettyErr(e){
-    return (e?.shortMessage || e?.reason || e?.message || String(e||"Error")).slice(0,240);
+    return (e?.shortMessage || e?.message || String(e||"Error")).slice(0,220);
   }
-
   function loadSavedIds(){
     try{
       const raw=localStorage.getItem(LS_KEY);
@@ -816,30 +819,6 @@
       `${amtStr} INRI • price ${price||"—"} • off-chain pay ${totalOff||"—"} ${el.payAsset.value} (${el.payNetwork.value}) • buyer fee ${feeInri||"—"} INRI • buyer receives ~${netInri||"—"} INRI • ${mins} min`;
   }
 
-  function normalize(s){ return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim(); }
-  function addrVariants(a){
-    const x=normalize(a); if(!x) return [];
-    const no0x=x.startsWith("0x")?x.slice(2):x;
-    const sh=(x.length>=12)?(x.slice(0,6)+"..."+x.slice(-4)):x;
-    const sh2=(no0x.length>=10)?("0x"+no0x.slice(0,6)+"..."+no0x.slice(-4)):("0x"+no0x);
-    return [x,no0x,sh,sh2];
-  }
-  function makeHaystack(o){
-    const meta=unpackPayTo(o.payTo);
-    const parts=[
-      o.id?.toString?.()??"", o.payAsset, o.payNetwork, o.txid,
-      o.payTo, meta.address, meta.price, meta.total,
-      ...addrVariants(o.seller), ...addrVariants(o.buyer)
-    ];
-    return normalize(parts.join(" "));
-  }
-  function matchesQuery(o,q){
-    const query=normalize(q); if(!query) return true;
-    const tokens=query.split(" ").filter(Boolean);
-    const hay=makeHaystack(o);
-    return tokens.every(t=>hay.includes(t));
-  }
-
   function showTab(which){
     const createOn=(which==="create");
     el.tabCreate.classList.toggle("active", createOn);
@@ -854,7 +833,7 @@
   }
 
   // =======================
-  // RPC builder with fallback
+  // RPC fallback builder
   // =======================
   async function buildRpcProvider(){
     for(const url of RPC_URLS){
@@ -863,22 +842,18 @@
         await p.getBlockNumber();
         rpcProvider = p;
         activeRpcUrl = url;
-        readProvider = rpcProvider;
-        contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+        contractRead = new ethers.Contract(CONTRACT, ABI, rpcProvider);
         el.rpcMode.textContent = `Provider mode: Public RPC OK (${new URL(url).host})`;
         return;
-      }catch(e){}
+      }catch{}
     }
-    rpcProvider = null;
-    activeRpcUrl = null;
+    rpcProvider=null; activeRpcUrl=null; contractRead=null;
     el.rpcMode.textContent = "Provider mode: RPC DOWN (connect wallet)";
   }
 
   // =======================
-  // Wallet connect (ANY wallet)
+  // Network ensure (wallet)
   // =======================
-  let walletListenersAttached = false;
-
   async function ensureNetwork(prov){
     const cur=await prov.request({method:"eth_chainId"});
     if(cur && cur.toLowerCase()===CHAIN_HEX.toLowerCase()){
@@ -894,22 +869,24 @@
           params:[{
             chainId:CHAIN_HEX,
             chainName:CHAIN_NAME,
-            rpcUrls:[activeRpcUrl || RPC_URLS[0]],
-            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18},
-            blockExplorerUrls:[]
+            rpcUrls:[RPC_URLS[0]],
+            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18}
           }]
         });
         await prov.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
-      } else throw e;
+      } else {
+        throw e;
+      }
     }
     el.netPill.textContent=`Network: ${CHAIN_NAME}`;
   }
 
+  let walletListenersAttached=false;
   function attachWalletListeners(prov){
     if(walletListenersAttached) return;
-    walletListenersAttached = true;
+    walletListenersAttached=true;
 
-    prov.on?.("accountsChanged", (accs)=> {
+    prov.on?.("accountsChanged", async (accs)=>{
       try{
         if(!accs || !accs.length){
           me=null; signer=null; contractWrite=null;
@@ -920,17 +897,18 @@
           renderMarket();
           return;
         }
-        me = accs[0];
+        me=accs[0];
         el.btnConnect.textContent=short(me);
         el.meAddr.textContent=me;
-        refreshWithdrawable().catch(()=>{});
+        await refreshWithdrawable();
+        await loadAdminInfo();
         renderMarket();
       }catch{}
     });
 
     prov.on?.("chainChanged", (cid)=>{
       try{
-        if(String(cid).toLowerCase() !== CHAIN_HEX.toLowerCase()){
+        if(String(cid).toLowerCase()!==CHAIN_HEX.toLowerCase()){
           toast("Wrong network. Switch to INRI CHAIN.", 3500);
           el.netPill.textContent = "Network: switch to INRI CHAIN";
         } else {
@@ -951,20 +929,31 @@
     });
   }
 
-  async function loadContractInfo(){
-    try{ feeBps = Number(await contractRead.feeBps()); }catch{ feeBps = 20; }
-    try{ feeRecipient = await contractRead.feeRecipient(); }catch{ feeRecipient = null; }
-    try{ ownerAddr = await contractRead.owner(); }catch{ ownerAddr = null; }
-    try{ modsEnabled = await contractRead.moderatorsEnabled(); }catch{ modsEnabled = false; }
-    try{ modThreshold = Number(await contractRead.modThreshold()); }catch{ modThreshold = 2; }
+  async function loadFeeInfo(){
+    try{ feeBps = Number(await contractRead.feeBps()); }catch{ feeBps=20; }
+    try{ feeRecipient = await contractRead.feeRecipient(); }catch{ feeRecipient=null; }
     renderPreview();
+  }
+
+  async function loadAdminInfo(){
+    // owner, modsEnabled, threshold, isModerator(me)
+    try{ ownerAddr = await contractRead.owner(); }catch{ ownerAddr=null; }
+
+    try{ modsEnabled = await contractRead.moderatorsEnabled(); }catch{ modsEnabled=false; }
+    try{ modThreshold = Number(await contractRead.modThreshold()); }catch{ modThreshold=2; }
+
+    if(me){
+      try{ isMod = await contractRead.isModerator(me); }catch{ isMod=false; }
+    } else {
+      isMod=false;
+    }
   }
 
   async function detectWithdrawSupport(){
     supportsWithdraw=false;
     el.btnWithdraw.style.display="none";
     el.withdrawPill.textContent="—";
-    if(!me) { el.withdrawPill.textContent="—"; return; }
+    if(!me) return;
     try{
       await contractRead.pendingWithdrawals(me);
       supportsWithdraw=true;
@@ -985,16 +974,21 @@
     }catch{ el.withdrawPill.textContent="—"; }
   }
 
+  // =======================
+  // Connect wallet (mobile safe)
+  // =======================
   async function connectWallet(){
     const prov = pickBestProvider();
     if(!prov){
-      if(isMobile()){ openMetaMaskDapp(); return; }
-      alert("No wallet provider found. Install a wallet (MetaMask/Trust/Rabby/Coinbase/OKX) or open this site inside a wallet browser.");
+      if(isMobile()){
+        el.walletBackdrop.style.display="flex";
+        return;
+      }
+      alert("No wallet provider found. Install MetaMask/Trust/Rabby/Coinbase/OKX or open this site inside a wallet browser.");
       return;
     }
 
     if(!rpcProvider) await buildRpcProvider();
-
     await ensureNetwork(prov);
 
     browserProvider = new ethers.BrowserProvider(prov);
@@ -1002,7 +996,8 @@
     signer = await browserProvider.getSigner();
     me = await signer.getAddress();
 
-    readProvider = rpcProvider || browserProvider; // if RPC dead, fallback to wallet
+    // read = RPC (preferred) else wallet provider
+    const readProvider = rpcProvider || browserProvider;
     contractRead  = new ethers.Contract(CONTRACT, ABI, readProvider);
     contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
 
@@ -1015,9 +1010,10 @@
 
     attachWalletListeners(prov);
 
-    await loadContractInfo();
+    await loadFeeInfo();
     await detectWithdrawSupport();
     await refreshWithdrawable();
+    await loadAdminInfo();
 
     toast("Wallet connected ✅");
     startLiveActivity();
@@ -1079,6 +1075,13 @@
     el.doneCount.textContent=String(offersCache.filter(o=>o.status===4 || o.status===5).length);
   }
 
+  function normalize(s){ return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim(); }
+  function matchesQuery(o,q){
+    const query=normalize(q); if(!query) return true;
+    const hay=normalize([o.id,o.seller,o.buyer,o.payAsset,o.payNetwork,o.payTo,o.txid].join(" "));
+    return query.split(" ").filter(Boolean).every(t=>hay.includes(t));
+  }
+
   function applyFilters(list){
     const f=el.filter.value;
     const q=el.q.value||"";
@@ -1136,6 +1139,7 @@
       const assetLogo=TOKEN_LOGO[o.payAsset]||"";
 
       const meta=unpackPayTo(o.payTo);
+
       const amtInriStr = (()=>{ try{return ethers.formatEther(o.amount);}catch{return "0";} })();
       const feeInri = calcFeeInriFromInriAmount(amtInriStr);
       const netInri = calcNetInri(amtInriStr, feeInri);
@@ -1197,7 +1201,8 @@
       }
     }
 
-    await loadContractInfo();
+    await loadFeeInfo();
+    await loadAdminInfo();
     await loadOfferIds();
     await loadOffersDetails();
 
@@ -1255,80 +1260,17 @@
   el.mClose.addEventListener("click", closeModal);
   el.backdrop.addEventListener("click", (e)=>{ if(e.target===el.backdrop) closeModal(); });
 
-  async function updateDisputeToolingUI(){
-    // defaults hidden
-    el.btnOwnerRelease.style.display="none";
-    el.btnOwnerRefund.style.display="none";
-    el.btnVoteBuyer.style.display="none";
-    el.btnVoteSeller.style.display="none";
-
-    let role = "GUEST";
-    let youVoted = "—";
-    let votesB = "—", votesS = "—";
-    let mods = "—", thr = "—";
-
-    const st = modalOffer ? statusLabel(modalOffer.status) : "—";
-    if(!modalOffer || !contractRead){
-      el.mRoleLine.textContent = "Role: —";
-      el.mModsLine.textContent = "Mods: — • Threshold: — • Votes: buyer — / seller — • You voted: —";
-      return;
-    }
-
-    // load on demand
-    if(!ownerAddr || ownerAddr===ethers.ZeroAddress){
-      try{ ownerAddr = await contractRead.owner(); }catch{}
-    }
-    try{ modsEnabled = await contractRead.moderatorsEnabled(); }catch{}
-    try{ modThreshold = Number(await contractRead.modThreshold()); }catch{}
-
-    const isOwner = me && ownerAddr && me.toLowerCase()===ownerAddr.toLowerCase();
-    let isMod = false;
-    if(me){
-      try{ isMod = await contractRead.isModerator(me); }catch{ isMod=false; }
-    }
-
-    if(isOwner) role = "OWNER";
-    else if(isMod) role = "MODERATOR";
-    else if(me) role = "USER";
-
-    // votes (only meaningful in DISPUTED)
-    if(st==="DISPUTED"){
-      try{ votesB = String(await contractRead.votesToBuyer(modalId)); }catch{}
-      try{ votesS = String(await contractRead.votesToSeller(modalId)); }catch{}
-      try{
-        const v = me ? Number(await contractRead.modVote(modalId, me)) : 0;
-        youVoted = v===0 ? "no" : (v===1 ? "release" : "refund");
-      }catch{ youVoted="—"; }
-    }
-
-    mods = modsEnabled ? "ENABLED" : "DISABLED";
-    thr = String(modThreshold);
-
-    el.mRoleLine.textContent = `Role: ${role} • Owner: ${ownerAddr ? short(ownerAddr) : "—"}`;
-    el.mModsLine.textContent = `Mods: ${mods} • Threshold: ${thr} • Votes: buyer ${votesB} / seller ${votesS} • You voted: ${youVoted}`;
-
-    // show/hide buttons
-    if(st==="DISPUTED"){
-      if(isOwner){
-        el.btnOwnerRelease.style.display="inline-flex";
-        el.btnOwnerRefund.style.display="inline-flex";
-      }
-      if(modsEnabled && isMod){
-        el.btnVoteBuyer.style.display="inline-flex";
-        el.btnVoteSeller.style.display="inline-flex";
-      }
-    }
-  }
-
   function setModalButtonsState(){
     if(!modalOffer){
       el.btnAccept.disabled=el.btnPaid.disabled=el.btnRelease.disabled=el.btnDispute.disabled=el.btnCancel.disabled=el.btnReclaim.disabled=true;
-      el.btnOwnerRelease.disabled=el.btnOwnerRefund.disabled=el.btnVoteBuyer.disabled=el.btnVoteSeller.disabled=true;
+      el.btnVoteBuyer.disabled=el.btnVoteSeller.disabled=el.btnOwnerRelease.disabled=el.btnOwnerRefund.disabled=true;
       return;
     }
+
     const st=statusLabel(modalOffer.status);
     const isSeller=me && modalOffer.seller && modalOffer.seller.toLowerCase()===me.toLowerCase();
     const isBuyer=me && modalOffer.buyer && modalOffer.buyer.toLowerCase()===me.toLowerCase();
+    const isOwner = me && ownerAddr && me.toLowerCase()===ownerAddr.toLowerCase();
 
     el.btnAccept.disabled = !(st==="OPEN" && me && !isSeller);
     el.btnPaid.disabled = !(st==="LOCKED" && me && isBuyer);
@@ -1337,21 +1279,27 @@
     el.btnCancel.disabled = !(st==="OPEN" && me && isSeller);
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
 
-    // dispute buttons enablement is checked again on click (but keep sensible)
-    el.btnOwnerRelease.disabled = !(st==="DISPUTED" && me);
-    el.btnOwnerRefund.disabled  = !(st==="DISPUTED" && me);
-    el.btnVoteBuyer.disabled    = !(st==="DISPUTED" && me);
-    el.btnVoteSeller.disabled   = !(st==="DISPUTED" && me);
+    // mod tools
+    el.btnVoteBuyer.disabled = !(st==="DISPUTED" && me && isMod && modsEnabled);
+    el.btnVoteSeller.disabled = !(st==="DISPUTED" && me && isMod && modsEnabled);
+
+    // owner tools (your contract uses resolveDisputeOwner)
+    el.btnOwnerRelease.disabled = !(st==="DISPUTED" && me && isOwner);
+    el.btnOwnerRefund.disabled  = !(st==="DISPUTED" && me && isOwner);
 
     const note=[];
     note.push(`Status: ${st}`);
     if(isSeller) note.push("You are the seller.");
     if(isBuyer) note.push("You are the buyer.");
+    if(isOwner) note.push("You are the OWNER.");
+    if(isMod) note.push("You are a MODERATOR.");
     if(!me) note.push("Connect wallet to interact.");
     note.push(`Time left: ${timeLeftForOffer(modalOffer.status, modalOffer.expiresAt)}`);
     if(st==="PAID") note.push("Seller must confirm payment and release.");
     if(st==="DISPUTED") note.push("Dispute opened. Owner/mods decide.");
     el.mNote.textContent=note.join(" ");
+
+    el.modInfo.textContent = `Role: ${isOwner?"OWNER":(isMod?"MOD":"USER")} • Mods: ${modsEnabled?"ENABLED":"DISABLED"} • Threshold: ${modThreshold}`;
   }
 
   async function showOffer(idStr){
@@ -1418,7 +1366,6 @@
 
     setModalButtonsState();
     openModal();
-    await updateDisputeToolingUI();
   }
 
   async function requireConnected(){
@@ -1429,7 +1376,7 @@
   }
 
   // =======================
-  // Transactions
+  // TX actions
   // =======================
   async function txCreate(){
     await requireConnected();
@@ -1546,38 +1493,40 @@
     toast("Cancelled ✅");
   }
 
-  // ✅ owner resolve dispute
-  async function txOwnerResolve(releaseToBuyerFlag){
+  async function txVote(vote){
     await requireConnected();
-    toast(releaseToBuyerFlag ? "OWNER: releasing…" : "OWNER: refunding…");
-    const tx = await contractWrite.resolveDisputeOwner(modalId, !!releaseToBuyerFlag);
-    await tx.wait();
-    await refreshMarket();
-    await showOffer(modalId.toString());
-    toast("Dispute resolved ✅");
-  }
-
-  // ✅ moderator vote
-  async function txVote(vote){ // 1=buyer,2=seller
-    await requireConnected();
-    toast(vote===1 ? "Voting release to buyer…" : "Voting refund to seller…");
-    const tx = await contractWrite.voteDispute(modalId, vote);
+    toast("Voting…");
+    const tx=await contractWrite.voteDispute(modalId, vote);
     await tx.wait();
     await refreshMarket();
     await showOffer(modalId.toString());
     toast("Vote submitted ✅");
   }
 
+  async function txOwnerResolve(releaseFlag){
+    await requireConnected();
+    toast("Owner resolving…");
+    // your contract function name:
+    const tx=await contractWrite.resolveDisputeOwner(modalId, releaseFlag);
+    await tx.wait();
+    await refreshMarket();
+    await showOffer(modalId.toString());
+    toast("Resolved ✅");
+  }
+
   // =======================
   // Events
   // =======================
-  el.btnOpenMM.addEventListener("click", openMetaMaskDapp);
-  el.btnOpenTW.addEventListener("click", openTrustDapp);
+  el.btnConnect.addEventListener("click", ()=>guard.run("connect", el.btnConnect, async ()=>{
+    await connectWallet();
+  }));
 
-  el.btnConnect.addEventListener("click", ()=>guard.run("connect", el.btnConnect, async ()=>{ await connectWallet(); }));
-
-  el.btnRefresh.addEventListener("click", ()=>guard.run("refresh", el.btnRefresh, async ()=>{ await refreshMarket(); }));
-  el.btnRefreshTop.addEventListener("click", ()=>guard.run("refreshTop", el.btnRefreshTop, async ()=>{ await refreshMarket(); }));
+  el.btnRefresh.addEventListener("click", ()=>guard.run("refresh", el.btnRefresh, async ()=>{
+    await refreshMarket();
+  }));
+  el.btnRefreshTop.addEventListener("click", ()=>guard.run("refreshTop", el.btnRefreshTop, async ()=>{
+    await refreshMarket();
+  }));
 
   el.btnClearSaved.addEventListener("click", ()=>{
     if(!confirm("Clear saved offers from this device?")) return;
@@ -1606,7 +1555,6 @@
     catch(e){ console.error(e); alert("Open offer error: "+prettyErr(e)); }
   });
 
-  // guarded buttons
   el.btnCreate.addEventListener("click", ()=>guard.run("create", el.btnCreate, async ()=>{
     try{ await txCreate(); }catch(e){ console.error(e); alert("Create error: "+prettyErr(e)); }
   }));
@@ -1639,28 +1587,22 @@
     try{ await txCancel(); }catch(e){ console.error(e); alert("Cancel error: "+prettyErr(e)); }
   }));
 
-  // ✅ dispute tools
-  el.btnOwnerRelease.addEventListener("click", ()=>guard.run("ownerRel:"+String(modalId||""), el.btnOwnerRelease, async ()=>{
-    try{
-      if(!confirm("OWNER: Release to buyer?")) return;
-      await txOwnerResolve(true);
-    }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
-  }));
-  el.btnOwnerRefund.addEventListener("click", ()=>guard.run("ownerRef:"+String(modalId||""), el.btnOwnerRefund, async ()=>{
-    try{
-      if(!confirm("OWNER: Refund to seller?")) return;
-      await txOwnerResolve(false);
-    }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
-  }));
-  el.btnVoteBuyer.addEventListener("click", ()=>guard.run("voteB:"+String(modalId||""), el.btnVoteBuyer, async ()=>{
+  el.btnVoteBuyer.addEventListener("click", ()=>guard.run("voteBuyer:"+String(modalId||""), el.btnVoteBuyer, async ()=>{
     try{ await txVote(1); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
   }));
-  el.btnVoteSeller.addEventListener("click", ()=>guard.run("voteS:"+String(modalId||""), el.btnVoteSeller, async ()=>{
+  el.btnVoteSeller.addEventListener("click", ()=>guard.run("voteSeller:"+String(modalId||""), el.btnVoteSeller, async ()=>{
     try{ await txVote(2); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
   }));
 
+  el.btnOwnerRelease.addEventListener("click", ()=>guard.run("ownerRelease:"+String(modalId||""), el.btnOwnerRelease, async ()=>{
+    try{ await txOwnerResolve(true); }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
+  }));
+  el.btnOwnerRefund.addEventListener("click", ()=>guard.run("ownerRefund:"+String(modalId||""), el.btnOwnerRefund, async ()=>{
+    try{ await txOwnerResolve(false); }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
+  }));
+
   // =======================
-  // Live Time Left (lightweight)
+  // Live time-left update
   // =======================
   setInterval(() => {
     document.querySelectorAll(".timeLeftCell").forEach(node=>{
@@ -1676,7 +1618,6 @@
   // =======================
   (async function init(){
     discoverWallets();
-    setTimeout(maybeShowMobileButtons, 400);
 
     el.contractPill.textContent="Contract: "+CONTRACT.slice(0,6)+"…"+CONTRACT.slice(-4);
     renderPreview();
@@ -1696,7 +1637,8 @@
     await buildRpcProvider();
 
     if(contractRead){
-      await loadContractInfo();
+      await loadFeeInfo();
+      await loadAdminInfo();
       try{ await refreshMarket(); }
       catch(e){
         console.error(e);
