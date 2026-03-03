@@ -196,11 +196,12 @@
         </div>
         <div class="title">
           <h1>INRI P2P — Escrow Market</h1>
-          <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% • Alerts for PAID/DISPUTE</div>
+          <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% in INRI (charged on withdraw) • Alerts for PAID/DISPUTE</div>
         </div>
       </div>
 
       <div class="row" style="justify-content:flex-end">
+        <!-- abre na mesma página -->
         <a class="btn btn-ghost" href="https://www.inri.life/">
           <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
           Back to INRI.life
@@ -210,12 +211,8 @@
         <div class="pill mono" id="contractPill">Contract: —</div>
         <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
 
-        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">
-          Open MetaMask
-        </button>
-        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">
-          Open Trust
-        </button>
+        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open MetaMask</button>
+        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open Trust</button>
 
         <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
       </div>
@@ -240,7 +237,7 @@
         <h2>Create Offer</h2>
         <div class="hint">
           Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.<br>
-          Buyer fee: <b>0.2%</b> (added to the amount shown).
+          <b>Buyer fee: 0.2% in INRI</b> (charged when the buyer withdraws / receives INRI).
         </div>
 
         <div class="field">
@@ -266,22 +263,23 @@
           <div class="field" style="flex:1;min-width:200px">
             <label>Price per 1 INRI (USDT/USDC)</label>
             <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
-            <div class="muted2">Total = INRI × price</div>
+            <div class="muted2">Total (off-chain) = INRI × price</div>
           </div>
           <div class="field" style="flex:1;min-width:200px">
-            <label>Total to pay (auto)</label>
+            <label>Total to pay off-chain (auto)</label>
             <div class="pill mono" id="totalPill">—</div>
           </div>
         </div>
 
+        <!-- taxa em INRI (do comprador), cobrada no saque -->
         <div class="row">
           <div class="field" style="flex:1;min-width:200px">
-            <label>Buyer fee (0.2%)</label>
+            <label>Buyer fee (0.2%) in INRI (charged on withdraw)</label>
             <div class="pill mono" id="feePill">—</div>
           </div>
           <div class="field" style="flex:1;min-width:200px">
-            <label>Total + fee</label>
-            <div class="pill mono" id="grandPill">—</div>
+            <label>Buyer receives (estimated)</label>
+            <div class="pill mono" id="netPill2">—</div>
           </div>
         </div>
 
@@ -341,6 +339,7 @@
               <div class="mono" id="meAddr">—</div>
               <div class="muted" style="margin-top:6px">Withdrawable</div>
               <div class="pill mono" id="withdrawPill">—</div>
+              <div class="muted2" style="margin-top:6px">Buyer fee: 0.2% in INRI (charged on withdraw)</div>
             </div>
 
             <div class="walletRight">
@@ -421,9 +420,9 @@
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
   const DAPP_URL = "https://inrichain.github.io/inrichain-inri-p2p/";
-  const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, ""); // inrichain.github.io/inrichain-inri-p2p/
+  const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, "");
 
-  const BUYER_FEE_BPS = 20; // 0.2%
+  const BUYER_FEE_BPS = 20; // 0.2% in INRI (charged on withdraw)
   const DEFAULT_SCAN_BLOCKS = 300000;
   const LS_KEY = "inri_p2p_saved_offer_ids_v8_full";
   const PAGE_SIZE = 8;
@@ -487,7 +486,8 @@
     paidCount:$("paidCount"), disputeCount:$("disputeCount"), doneCount:$("doneCount"),
 
     inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
-    pricePer:$("pricePer"), totalPill:$("totalPill"), feePill:$("feePill"), grandPill:$("grandPill"),
+    pricePer:$("pricePer"), totalPill:$("totalPill"),
+    feePill:$("feePill"), netPill2:$("netPill2"),
     payTo:$("payTo"), payWindow:$("payWindow"), previewPill:$("previewPill"), btnCreate:$("btnCreate"),
 
     meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
@@ -527,13 +527,8 @@
   const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
   const hasProvider = ()=> !!window.ethereum;
 
-  const openMetaMaskDapp = ()=>{
-    // MetaMask deep link: dapp/<host+path>
-    window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH;
-  };
-  const openTrustDapp = ()=>{
-    window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL);
-  };
+  const openMetaMaskDapp = ()=>{ window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH; };
+  const openTrustDapp = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
 
   function maybeShowMobileButtons(){
     if (isMobile() && !hasProvider()){
@@ -585,13 +580,14 @@
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
   }
 
-  const packPayTo = (addr, priceStr, totalStr, feeStr, grandStr)=>
-    `${(addr||"").trim()} || price=${(priceStr||"").trim()} || total=${(totalStr||"").trim()} || fee=${(feeStr||"").trim()} || grand=${(grandStr||"").trim()}`;
+  // Pack only OFF-CHAIN payment info (USDT/USDC). Buyer fee is in INRI on withdraw.
+  const packPayTo = (addr, priceStr, totalStr)=>
+    `${(addr||"").trim()} || price=${(priceStr||"").trim()} || total=${(totalStr||"").trim()}`;
 
   function unpackPayTo(payToRaw){
     const raw=(payToRaw||"").trim();
     const parts=raw.split("||").map(x=>x.trim()).filter(Boolean);
-    const out={ address:raw, price:"", total:"", fee:"", grand:"" };
+    const out={ address:raw, price:"", total:"" };
     if(!parts.length) return out;
     out.address=parts[0]||raw;
     for(const part of parts.slice(1)){
@@ -599,43 +595,45 @@
       const val=part.split("=").slice(1).join("=").trim();
       if(low.startsWith("price=")) out.price=val;
       if(low.startsWith("total=")) out.total=val;
-      if(low.startsWith("fee=")) out.fee=val;
-      if(low.startsWith("grand=")) out.grand=val;
     }
     return out;
   }
 
-  function calcTotal(){
+  function calcTotalOffchain(){
     const amt=Number(el.inAmount.value||0);
     const price=Number(el.pricePer.value||0);
     if(!amt||!price||amt<=0||price<=0) return "";
     return (amt*price).toFixed(6);
   }
-  function calcFee(totalStr){
-    const total=Number(totalStr||0);
-    if(!total||total<=0) return "";
-    return (total*(BUYER_FEE_BPS/10000)).toFixed(6);
+  function calcBuyerFeeInri(inriAmtStr){
+    const amt=Number(inriAmtStr||0);
+    if(!amt||amt<=0) return "";
+    return (amt*(BUYER_FEE_BPS/10000)).toFixed(6);
   }
-  function calcGrand(totalStr, feeStr){
-    const t=Number(totalStr||0), f=Number(feeStr||0);
-    if(!t||t<=0) return "";
-    return (t+f).toFixed(6);
+  function calcBuyerNetInri(inriAmtStr, feeInriStr){
+    const a=Number(inriAmtStr||0), f=Number(feeInriStr||0);
+    if(!a||a<=0) return "";
+    const net=a - f;
+    return (net>0?net:0).toFixed(6);
   }
 
   function renderPreview(){
-    const amt=(el.inAmount.value||"").trim();
+    const amtStr=(el.inAmount.value||"").trim();
     const mins=Number(el.payWindow.value||30);
     const price=(el.pricePer.value||"").trim();
-    const total=calcTotal();
-    const fee=calcFee(total);
-    const grand=calcGrand(total, fee);
 
-    el.totalPill.textContent = total ? `${total} ${el.payAsset.value}` : "—";
-    el.feePill.textContent   = fee ? `${fee} ${el.payAsset.value}` : "—";
-    el.grandPill.textContent = grand ? `${grand} ${el.payAsset.value}` : "—";
+    const totalOff=calcTotalOffchain();
+    el.totalPill.textContent = totalOff ? `${totalOff} ${el.payAsset.value}` : "—";
 
-    if(!amt){ el.previewPill.textContent="—"; return; }
-    el.previewPill.textContent = `${amt} INRI • price ${price||"—"} • total ${total||"—"} • fee ${fee||"—"} • pay ${grand||"—"} ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
+    const feeInri = calcBuyerFeeInri(amtStr);
+    const netInri = calcBuyerNetInri(amtStr, feeInri);
+
+    el.feePill.textContent   = feeInri ? `${feeInri} INRI` : "—";
+    el.netPill2.textContent  = netInri ? `${netInri} INRI` : "—";
+
+    if(!amtStr){ el.previewPill.textContent="—"; return; }
+    el.previewPill.textContent =
+      `${amtStr} INRI • price ${price||"—"} • pay ${totalOff||"—"} ${el.payAsset.value} (${el.payNetwork.value}) • buyer fee ${feeInri||"—"} INRI (on withdraw) • buyer receives ~${netInri||"—"} INRI • ${mins} min`;
   }
 
   function normalize(s){ return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim(); }
@@ -650,7 +648,7 @@
     const meta=unpackPayTo(o.payTo);
     const parts=[
       o.id?.toString?.()??"", o.payAsset, o.payNetwork, o.txid,
-      o.payTo, meta.address, meta.price, meta.total, meta.fee, meta.grand,
+      o.payTo, meta.address, meta.price, meta.total,
       ...addrVariants(o.seller), ...addrVariants(o.buyer)
     ];
     return normalize(parts.join(" "));
@@ -724,7 +722,6 @@
 
   async function connect(){
     if(!hasProvider()){
-      // mobile sem provider: abrir metamask dapp
       if(isMobile()){ openMetaMaskDapp(); return; }
       alert("No wallet provider found. Install MetaMask (desktop extension) or open in MetaMask mobile browser.");
       return;
@@ -859,10 +856,14 @@
       const assetLogo=TOKEN_LOGO[o.payAsset]||"";
 
       const meta=unpackPayTo(o.payTo);
+
+      // Buyer fee in INRI (estimated from offer amount)
+      const amtInriStr = (()=>{ try{return ethers.formatEther(o.amount);}catch{return "0";} })();
+      const feeInri = calcBuyerFeeInri(amtInriStr);
+      const netInri = calcBuyerNetInri(amtInriStr, feeInri);
+
       const priceLine = meta.price ? `• price ${meta.price} ${o.payAsset}` : "";
-      const totalLine = meta.total ? `• total ${meta.total} ${o.payAsset}` : "";
-      const feeLine   = meta.fee ? `• fee ${meta.fee} ${o.payAsset}` : "";
-      const grandLine = meta.grand ? `• pay ${meta.grand} ${o.payAsset}` : "";
+      const totalLine = meta.total ? `• pay ${meta.total} ${o.payAsset}` : "";
 
       li.innerHTML=`
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
@@ -876,7 +877,7 @@
             <div style="margin-top:8px;font-weight:900;font-size:15px">${fmtInri(o.amount)} INRI</div>
             <div class="muted2">Offer <span class="mono">#${o.id.toString()}</span></div>
             <div class="muted2" style="margin-top:5px">${priceLine} ${totalLine}</div>
-            <div class="muted2" style="margin-top:3px">${feeLine} ${grandLine}</div>
+            <div class="muted2" style="margin-top:3px">• buyer fee (on withdraw): ${feeInri||"—"} INRI • buyer receives ~${netInri||"—"} INRI</div>
           </div>
 
           <div class="right" style="min-width:180px">
@@ -999,8 +1000,11 @@
     const payNet=PAY_NETWORKS.find(n=>n.key===modalOffer.payNetwork);
     const assetLogo=TOKEN_LOGO[modalOffer.payAsset]||"";
     const netLogo=payNet?.logo||"";
-
     const meta=unpackPayTo(modalOffer.payTo);
+
+    const amtInriStr = (()=>{ try{return ethers.formatEther(modalOffer.amount);}catch{return "0";} })();
+    const feeInri = calcBuyerFeeInri(amtInriStr);
+    const netInri = calcBuyerNetInri(amtInriStr, feeInri);
 
     el.mDetails.innerHTML=`
       <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -1009,10 +1013,11 @@
       </div>
       <div class="hr"></div>
       <div><b>Amount</b>: ${fmtInri(modalOffer.amount)} INRI</div>
-      <div><b>Price</b>: <span class="mono">${meta.price||"—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Total</b>: <span class="mono">${meta.total||"—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Fee (0.2%)</b>: <span class="mono">${meta.fee||"—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Total + Fee</b>: <span class="mono">${meta.grand||"—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Buyer fee</b>: <span class="mono">${feeInri||"—"}</span> INRI (charged on withdraw)</div>
+      <div><b>Buyer receives (est.)</b>: <span class="mono">${netInri||"—"}</span> INRI</div>
+      <div class="hr"></div>
+      <div><b>Off-chain price</b>: <span class="mono">${meta.price||"—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Off-chain total</b>: <span class="mono">${meta.total||"—"}</span> ${modalOffer.payAsset}</div>
       <div class="hr"></div>
       <div><b>Seller</b>: <span class="mono">${modalOffer.seller}</span></div>
       <div><b>Buyer</b>: <span class="mono">${modalOffer.buyer && modalOffer.buyer!==ethers.ZeroAddress ? modalOffer.buyer : "—"}</span></div>
@@ -1022,9 +1027,10 @@
 
     el.mPayHint.innerHTML=`
       <b>Payment instructions</b><br>
-      Pay exactly <b>${meta.grand||"—"} ${modalOffer.payAsset||"—"}</b> on <b>${modalOffer.payNetwork||"—"}</b> to:<br>
+      Pay exactly <b>${meta.total||"—"} ${modalOffer.payAsset||"—"}</b> on <b>${modalOffer.payNetwork||"—"}</b> to:<br>
       <span class="mono">${meta.address||"—"}</span><br>
-      Includes buyer fee <b>0.2%</b>. Then paste the <b>TxID</b> and click <b>I Paid</b>.
+      Then paste the <b>TxID</b> and click <b>I Paid</b>.<br><br>
+      <b>Fee rule:</b> Buyer pays <b>0.2% in INRI</b> when withdrawing/receiving INRI.
     `;
 
     el.mLogos.innerHTML=`
@@ -1078,20 +1084,18 @@
       const mins=Number(el.payWindow.value||30);
       const price=(el.pricePer.value||"").trim();
 
-      const total=calcTotal();
-      const fee=calcFee(total);
-      const grand=calcGrand(total, fee);
+      const total=calcTotalOffchain();
 
       if(!amt || Number(amt)<=0) throw new Error("Invalid INRI amount");
       if(!price || Number(price)<=0) throw new Error("Price per INRI required");
-      if(!total) throw new Error("Could not calculate total");
-      if(!fee) throw new Error("Could not calculate fee");
-      if(!grand) throw new Error("Could not calculate total+fee");
+      if(!total) throw new Error("Could not calculate off-chain total");
       if(!payTo) throw new Error("Seller receive address required");
 
       const payWindowSec=Math.max(60, Math.floor(mins*60));
       const valueWei=ethers.parseEther(amt);
-      const payToPacked=packPayTo(payTo, price, total, fee, grand);
+
+      // store only off-chain meta; INRI fee is charged later on withdraw
+      const payToPacked=packPayTo(payTo, price, total);
 
       toast("Creating offer…");
       const tx=await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, {value:valueWei});
@@ -1117,6 +1121,8 @@
     try{
       await requireConnected();
       toast("Withdrawing…");
+
+      // NOTE: Fee must be enforced in the CONTRACT withdraw() logic.
       const tx=await contractWrite.withdraw();
       await tx.wait();
       await refreshWithdrawable();
