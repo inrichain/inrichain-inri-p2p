@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>INRI P2P — Escrow</title>
 
-  <!-- Ubuntu font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
@@ -24,245 +23,130 @@
       --radius:14px;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;
-      color:var(--text);
-      background: rgb(0,0,0);
-      overflow:auto;
-    }
-    a{color:inherit; text-decoration:none}
+    body{margin:0;color:var(--text);background:rgb(0,0,0);overflow:auto}
+    a{color:inherit;text-decoration:none}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
     .muted{color:var(--muted);font-size:12px}
     .muted2{color:var(--muted2);font-size:12px}
-
-    /* remove shadows */
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
-    /* ✅ FIXED HEADER STACK */
-    .headerStack{
-      position:fixed;
-      top:0; left:0; right:0;
-      z-index:999;
-      background:transparent;
-      pointer-events:none; /* let inside items control */
-    }
-    .headerStack > *{pointer-events:auto}
+    .headerStack{position:fixed;top:0;left:0;right:0;z-index:999;background:transparent;pointer-events:none}
+    .headerStack>*{pointer-events:auto}
 
-    /* ✅ P2P BIG TITLE */
     .p2pHero{
-      width:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:18px 12px 12px;
-      background: rgba(10,14,30,.55);
+      width:100%;display:flex;justify-content:center;align-items:center;
+      padding:18px 12px 12px;background:rgba(10,14,30,.55);
       border-bottom:1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
     }
-    .p2pHero .p2pText{
-      font-family: "Ubuntu", system-ui, sans-serif;
-      font-weight:700;
-      font-size:40px;
-      letter-spacing:.8px;
-      line-height:1;
-      margin:0;
-    }
+    .p2pHero .p2pText{font-family:"Ubuntu",system-ui,sans-serif;font-weight:700;font-size:40px;letter-spacing:.8px;line-height:1;margin:0}
 
-    /* container */
-    .wrap{
-      max-width:1180px;
-      margin:0 auto;
-      padding:12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    /* ✅ reserve space for fixed header stack (hero + top + tabs) */
-    .spacer{
-      height: 190px; /* adjusted by JS too */
-    }
+    .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .spacer{height:190px}
 
     .top{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      padding:10px;
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      background: rgba(10,14,30,.55);
-      backdrop-filter: blur(10px);
-      margin:10px 12px 0;
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      padding:10px;border:1px solid var(--border);border-radius:var(--radius);
+      background:rgba(10,14,30,.55);backdrop-filter:blur(10px);margin:10px 12px 0;
     }
 
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .brand{display:flex; gap:10px; align-items:center; min-width:0}
+    .brand{display:flex;gap:10px;align-items:center;min-width:0}
     .logo{
-      width:38px;height:38px;border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden; flex:0 0 auto;
+      width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto
     }
     .logo img{width:28px;height:28px;object-fit:contain}
-
     .title{min-width:0}
-    .title h1{
-      margin:0;font-size:14px;letter-spacing:.2px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .title .sub{
-      margin-top:2px;font-size:11.5px;color:var(--muted);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      max-width:760px;
-    }
+    .title h1{margin:0;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .title .sub{margin-top:2px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:760px}
 
     .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 9px;border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:var(--muted);
-      font-size:11.5px;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;gap:8px;padding:6px 9px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:var(--muted);font-size:11.5px;white-space:nowrap
     }
     .pill b{color:#fff}
-
     .badge{
-      display:inline-flex;align-items:center;justify-content:center;
-      min-width:18px;height:18px;padding:0 6px;border-radius:999px;
-      font-size:11px;font-weight:900;
-      background:rgba(239,68,68,.20); border:1px solid rgba(239,68,68,.35); color:#fff;
+      display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;border-radius:999px;
+      font-size:11px;font-weight:900;background:rgba(239,68,68,.20);border:1px solid rgba(239,68,68,.35);color:#fff
     }
 
     .btn{
-      border:none; cursor:pointer; font-weight:900;
-      padding:9px 11px; border-radius:12px;
-      background:rgba(255,255,255,.08);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.12);
-      transition: transform .12s ease;
-      font-size:12.5px;
-      display:inline-flex; align-items:center; gap:8px;
+      border:none;cursor:pointer;font-weight:900;padding:9px 11px;border-radius:12px;
+      background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.12);
+      transition:transform .12s ease;font-size:12.5px;display:inline-flex;align-items:center;gap:8px
     }
     .btn:hover{transform:translateY(-1px)}
-    .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
-    .btn-pri{background:linear-gradient(90deg,var(--pri),var(--pri2)); border:1px solid rgba(255,255,255,.10)}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-pri{background:linear-gradient(90deg,var(--pri),var(--pri2));border:1px solid rgba(255,255,255,.10)}
     .btn-ghost{background:rgba(255,255,255,.06)}
-    .btn-bad{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.35)}
-    .btn-ok{background:rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.35)}
+    .btn-bad{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.35)}
+    .btn-ok{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.35)}
 
     .btnLogo{
-      width:18px;height:18px;border-radius:999px; overflow:hidden;
-      background:rgba(255,255,255,.12);
-      display:inline-flex;align-items:center;justify-content:center;
+      width:18px;height:18px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);
+      display:inline-flex;align-items:center;justify-content:center
     }
     .btnLogo img{width:18px;height:18px;object-fit:contain}
 
     .tabs{
-      display:flex; gap:8px; align-items:center; justify-content:space-between;
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      background: rgba(10,14,30,.55);
-      padding:8px;
-      backdrop-filter: blur(10px);
-      margin:10px 12px 0;
+      display:flex;gap:8px;align-items:center;justify-content:space-between;
+      border:1px solid var(--border);border-radius:var(--radius);
+      background:rgba(10,14,30,.55);padding:8px;backdrop-filter:blur(10px);margin:10px 12px 0;
     }
     .tabRow{display:flex;gap:8px;align-items:center}
     .tab{
       padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06); color:#fff; font-weight:900; font-size:12.5px;
-      cursor:pointer;
+      background:rgba(255,255,255,.06);color:#fff;font-weight:900;font-size:12.5px;cursor:pointer
     }
-    .tab.active{
-      background:linear-gradient(90deg,var(--pri),var(--pri2));
-      border-color:rgba(255,255,255,.10);
-    }
+    .tab.active{background:linear-gradient(90deg,var(--pri),var(--pri2));border-color:rgba(255,255,255,.10)}
 
-    .panelWrap{display:grid; grid-template-columns:360px 1fr; gap:10px;}
-    @media(max-width:980px){ .panelWrap{grid-template-columns:1fr} }
+    .panelWrap{display:grid;grid-template-columns:360px 1fr;gap:10px}
+    @media(max-width:980px){.panelWrap{grid-template-columns:1fr}}
 
-    .card{
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      background: rgba(10,14,30,.55);
-      padding:10px;
-      backdrop-filter: blur(10px);
-    }
-    .card h2{margin:0 0 8px 0; font-size:13px}
+    .card{border:1px solid var(--border);border-radius:var(--radius);background:rgba(10,14,30,.55);padding:10px;backdrop-filter:blur(10px)}
+    .card h2{margin:0 0 8px 0;font-size:13px}
     .hr{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
 
     .field{display:flex;flex-direction:column;gap:6px;margin:8px 0}
     label{font-size:11.5px;color:var(--muted)}
     input,select{
-      width:100%;
-      padding:9px 10px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.35);
-      color:var(--text);
-      outline:none;
-      font-size:13px;
+      width:100%;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.35);color:var(--text);outline:none;font-size:13px
     }
 
     .hint{
-      border:1px solid rgba(59,130,246,.22);
-      background:rgba(59,130,246,.07);
-      padding:8px;border-radius:12px;
-      font-size:11.5px;color:var(--muted);
-      line-height:1.32;
+      border:1px solid rgba(59,130,246,.22);background:rgba(59,130,246,.07);
+      padding:8px;border-radius:12px;font-size:11.5px;color:var(--muted);line-height:1.32
     }
 
-    .toolbar{
-      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
-    }
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .search{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .search input{width:280px}
-    @media(max-width:520px){ .search, .search input{width:100%} }
+    @media(max-width:520px){.search,.search input{width:100%}}
 
     .offers{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0,1fr));
-      gap:10px;
-      list-style:none;
-      padding:0; margin:0;
-      max-height: 62vh;
-      overflow:auto;
-      padding-right:6px;
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+      list-style:none;padding:0;margin:0;max-height:62vh;overflow:auto;padding-right:6px
     }
-    @media(max-width:720px){ .offers{grid-template-columns:1fr; max-height: 58vh;} }
+    @media(max-width:720px){.offers{grid-template-columns:1fr;max-height:58vh}}
 
-    .offer{
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.22);
-      border-radius:14px;
-      padding:10px;
-      position:relative;
-      overflow:hidden;
-    }
+    .offer{border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);border-radius:14px;padding:10px;position:relative;overflow:hidden}
 
     .tag{
-      display:inline-flex;align-items:center;gap:6px;
-      font-size:11.5px;font-weight:900;
-      padding:5px 9px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.06);
-      white-space:nowrap;
+      display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:900;
+      padding:5px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);white-space:nowrap
     }
-    .tag-open{border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.12)}
-    .tag-locked{border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10)}
-    .tag-paid{border-color:rgba(59,130,246,.40); background:rgba(59,130,246,.12)}
-    .tag-disputed{border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.10)}
+    .tag-open{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.12)}
+    .tag-locked{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
+    .tag-paid{border-color:rgba(59,130,246,.40);background:rgba(59,130,246,.12)}
+    .tag-disputed{border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.10)}
     .tag-done{opacity:.78}
 
     .kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-    .kv{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      border-radius:12px;
-      padding:8px;
-    }
+    .kv{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);border-radius:12px;padding:8px}
     .kv .k{font-size:11px;color:var(--muted2);margin-bottom:3px}
     .kv .v{font-weight:900;font-size:12.5px}
 
@@ -270,102 +154,63 @@
     .right{text-align:right}
 
     .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 9px;border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      font-size:11.5px; font-weight:900;
-      white-space:nowrap;
+      display:inline-flex;align-items:center;gap:8px;padding:6px 9px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      font-size:11.5px;font-weight:900;white-space:nowrap
     }
-    .ico{
-      width:18px;height:18px;border-radius:999px;
-      display:inline-flex;align-items:center;justify-content:center;
-      background:rgba(255,255,255,.12);
-      overflow:hidden;
-    }
+    .ico{width:18px;height:18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.12);overflow:hidden}
     .ico img{width:18px;height:18px;object-fit:contain}
 
     .marketFooter{
-      margin-top:10px;
-      border-top:1px solid rgba(255,255,255,.10);
-      padding-top:10px;
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:10px;
-      align-items:end;
+      margin-top:10px;border-top:1px solid rgba(255,255,255,.10);padding-top:10px;
+      display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end
     }
-    @media(max-width:720px){ .marketFooter{grid-template-columns:1fr} }
-
-    .walletBox{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-end;
-      justify-content:space-between;
-    }
+    @media(max-width:720px){.marketFooter{grid-template-columns:1fr}}
+    .walletBox{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
     .walletLeft,.walletRight{min-width:220px}
     .walletRight{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 
     .toast{
-      position:fixed; right:12px; bottom:12px;
-      background:rgba(10,14,30,.92);
-      border:1px solid rgba(255,255,255,.12);
-      padding:9px 10px; border-radius:12px;
-      display:none; max-width:min(520px, 92vw);
-      color:#fff; z-index:9999;
-      font-size:12.5px;
-      backdrop-filter: blur(10px);
+      position:fixed;right:12px;bottom:12px;background:rgba(10,14,30,.92);
+      border:1px solid rgba(255,255,255,.12);padding:9px 10px;border-radius:12px;display:none;
+      max-width:min(520px,92vw);color:#fff;z-index:9999;font-size:12.5px;backdrop-filter:blur(10px)
     }
 
-    /* Modal */
-    .backdrop{position:fixed; inset:0; display:none; background:rgba(0,0,0,.65); align-items:center; justify-content:center; z-index:9998; padding:12px;}
+    .backdrop{position:fixed;inset:0;display:none;background:rgba(0,0,0,.65);align-items:center;justify-content:center;z-index:9998;padding:12px}
     .modal{
-      width:min(980px, 100%);
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(10,14,30,.90);
-      padding:12px;
-      backdrop-filter: blur(12px);
-      max-height: 92vh;
-      overflow:auto;
+      width:min(980px,100%);border-radius:18px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,14,30,.90);padding:12px;backdrop-filter:blur(12px);max-height:92vh;overflow:auto
     }
     .modal h3{margin:0;font-size:13px}
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
-    .modalGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+    .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-
-<!-- ✅ FIXED STACK (P2P + header + tabs) -->
 <div class="headerStack" id="headerStack">
-  <div class="p2pHero" id="p2pHero">
-    <div class="p2pText">P2P</div>
-  </div>
+  <div class="p2pHero" id="p2pHero"><div class="p2pText">P2P</div></div>
 
   <header class="top" id="topBar">
     <div class="brand">
-      <div class="logo" title="INRI">
-        <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
-      </div>
+      <div class="logo" title="INRI"><img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/></div>
       <div class="title">
         <h1>INRI P2P — Escrow Market</h1>
-        <div class="sub">Escrow on-chain • Payment off-chain • Alerts for PAID/DISPUTE • Professional search + counters</div>
+        <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% • Alerts for PAID/DISPUTE</div>
       </div>
     </div>
 
     <div class="row" style="justify-content:flex-end">
-      <a class="btn btn-ghost" href="https://www.inri.life/" target="_blank" rel="noopener">
+      <!-- ✅ same page (no target _blank) -->
+      <a class="btn btn-ghost" href="https://www.inri.life/">
         <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
         Back to INRI.life
       </a>
 
       <div class="pill" id="netPill">Network: —</div>
       <div class="pill mono" id="contractPill">Contract: —</div>
-      <div class="pill" title="Live activity alerts">
-        Alerts <span class="badge" id="alertBadge" style="display:none">0</span>
-      </div>
+      <div class="pill" title="Live activity alerts">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
       <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
     </div>
   </header>
@@ -385,17 +230,16 @@
   </div>
 </div>
 
-<!-- ✅ spacer so content starts below fixed stack -->
 <div class="spacer" id="spacer"></div>
 
 <div class="wrap">
   <div class="panelWrap">
-    <!-- CREATE -->
     <aside class="card" id="createPanel">
       <h2>Create Offer</h2>
 
       <div class="hint">
-        Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.
+        Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.<br>
+        Buyer fee: <b>0.2%</b> (added to the amount shown).
       </div>
 
       <div class="field">
@@ -429,6 +273,18 @@
         </div>
       </div>
 
+      <!-- ✅ fee line -->
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Buyer fee (0.2%)</label>
+          <div class="pill mono" id="feePill">—</div>
+        </div>
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Total + fee</label>
+          <div class="pill mono" id="grandPill">—</div>
+        </div>
+      </div>
+
       <div class="field">
         <label>Seller Receive Address (on selected network)</label>
         <input id="payTo" placeholder="0x... / T... / any account id" />
@@ -448,7 +304,6 @@
       <button class="btn btn-pri" id="btnCreate" style="width:100%">Create Offer (deposit INRI)</button>
     </aside>
 
-    <!-- MARKET -->
     <main class="card" id="marketPanel">
       <div class="toolbar">
         <div class="row">
@@ -564,6 +419,9 @@
   const RPC_URL = "https://rpc-chain.inri.life/";
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
+  // ✅ buyer fee 0.2% (20 bps)
+  const BUYER_FEE_BPS = 20; // 0.20%
+
   const LOGOS = {
     NET: {
       TRON:     "https://raw.githubusercontent.com/inrichain/logotron/main/TRON.png",
@@ -595,7 +453,8 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v5";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v6_fee";
+  const PAGE_SIZE = 8;
 
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
@@ -621,7 +480,7 @@
 
   const $ = (id)=>document.getElementById(id);
   const el = {
-    headerStack:$("headerStack"), p2pHero:$("p2pHero"), topBar:$("topBar"), tabsBar:$("tabsBar"), spacer:$("spacer"),
+    p2pHero:$("p2pHero"), topBar:$("topBar"), tabsBar:$("tabsBar"), spacer:$("spacer"),
     netPill:$("netPill"), contractPill:$("contractPill"),
     btnConnect:$("btnConnect"), alertBadge:$("alertBadge"), activityPill:$("activityPill"),
     tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
@@ -629,7 +488,9 @@
     btnRefreshTop:$("btnRefreshTop"),
     paidCount:$("paidCount"), disputeCount:$("disputeCount"), doneCount:$("doneCount"),
     inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
-    pricePer:$("pricePer"), totalPill:$("totalPill"), payTo:$("payTo"), payWindow:$("payWindow"),
+    pricePer:$("pricePer"), totalPill:$("totalPill"),
+    feePill:$("feePill"), grandPill:$("grandPill"),
+    payTo:$("payTo"), payWindow:$("payWindow"),
     previewPill:$("previewPill"), btnCreate:$("btnCreate"),
     meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
     rpcMode:$("rpcMode"), btnClearSaved:$("btnClearSaved"),
@@ -643,7 +504,6 @@
     btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel")
   };
 
-  // ✅ dynamic spacer height for fixed stack (no overlap)
   function updateSpacer(){
     const h = el.p2pHero.offsetHeight + el.topBar.offsetHeight + el.tabsBar.offsetHeight + 24;
     el.spacer.style.height = h + "px";
@@ -665,28 +525,14 @@
 
   let offerIds = [];
   let offersCache = [];
-  let page = 1;
-  let totalPages = 1;
-  let lastBlock = 0;
+  let page = 1, totalPages = 1, lastBlock = 0;
 
-  let modalId = null;
-  let modalOffer = null;
+  let modalId = null, modalOffer = null;
 
-  let alertCount = 0;
-  let lastSeenBlock = 0;
-  let pollTimer = null;
+  let alertCount = 0, lastSeenBlock = 0, pollTimer = null;
 
-  const PAGE_SIZE = 8;
-
-  function loadSavedIds(){
-    try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(x=>String(x)) : []; }
-    catch{ return []; }
-  }
-  function saveId(idStr){
-    const cur = new Set(loadSavedIds());
-    cur.add(String(idStr));
-    localStorage.setItem(LS_KEY, JSON.stringify([...cur]));
-  }
+  function loadSavedIds(){ try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(x=>String(x)) : []; }catch{ return []; } }
+  function saveId(idStr){ const cur = new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
   function clearSaved(){ localStorage.removeItem(LS_KEY); }
 
   function toast(msg, ms=2300){
@@ -727,17 +573,23 @@
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
   }
 
-  const packPayTo = (addr, priceStr, totalStr)=> `${(addr||"").trim()} || price=${(priceStr||"").trim()} || total=${(totalStr||"").trim()}`;
+  // ✅ store fee + grand total inside payTo packed field too (so buyer sees it)
+  const packPayTo = (addr, priceStr, totalStr, feeStr, grandStr)=>
+    `${(addr||"").trim()} || price=${(priceStr||"").trim()} || total=${(totalStr||"").trim()} || fee=${(feeStr||"").trim()} || grand=${(grandStr||"").trim()}`;
+
   function unpackPayTo(payToRaw){
     const raw = (payToRaw||"").trim();
     const parts = raw.split("||").map(x=>x.trim()).filter(Boolean);
-    const out = { address: raw, price: "", total: "" };
+    const out = { address: raw, price: "", total: "", fee:"", grand:"" };
     if (!parts.length) return out;
     out.address = parts[0] || raw;
     for (const part of parts.slice(1)){
       const low = part.toLowerCase();
-      if (low.startsWith("price=")) out.price = part.split("=").slice(1).join("=").trim();
-      if (low.startsWith("total=")) out.total = part.split("=").slice(1).join("=").trim();
+      const val = part.split("=").slice(1).join("=").trim();
+      if (low.startsWith("price=")) out.price = val;
+      if (low.startsWith("total=")) out.total = val;
+      if (low.startsWith("fee=")) out.fee = val;
+      if (low.startsWith("grand=")) out.grand = val;
     }
     return out;
   }
@@ -748,16 +600,38 @@
     if (!amt || !price || amt <= 0 || price <= 0) return "";
     return (amt * price).toFixed(6);
   }
+  function calcFee(totalStr){
+    const total = Number(totalStr || 0);
+    if (!total || total <= 0) return "";
+    const fee = total * (BUYER_FEE_BPS / 10000);
+    return fee.toFixed(6);
+  }
+  function calcGrand(totalStr, feeStr){
+    const t = Number(totalStr || 0), f = Number(feeStr || 0);
+    if (!t || t <= 0) return "";
+    return (t + f).toFixed(6);
+  }
+
   function renderPreview(){
     const amt = (el.inAmount.value||"").trim();
     const mins = Number(el.payWindow.value||30);
     const price = (el.pricePer.value||"").trim();
+
     const total = calcTotal();
+    const fee = calcFee(total);
+    const grand = calcGrand(total, fee);
+
     el.totalPill.textContent = total ? `${total} ${el.payAsset.value}` : "—";
+    el.feePill.textContent = fee ? `${fee} ${el.payAsset.value}` : "—";
+    el.grandPill.textContent = grand ? `${grand} ${el.payAsset.value}` : "—";
+
     if (!amt){ el.previewPill.textContent = "—"; return; }
+
     const pr = price ? ` • price ${price}` : "";
-    const tt = total ? ` • total ${total} ${el.payAsset.value}` : "";
-    el.previewPill.textContent = `${amt} INRI${pr}${tt} • ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
+    const tt = total ? ` • total ${total}` : "";
+    const ff = fee ? ` • fee ${fee}` : "";
+    const gg = grand ? ` • pay ${grand} ${el.payAsset.value}` : "";
+    el.previewPill.textContent = `${amt} INRI${pr}${tt}${ff}${gg} • ${el.payNetwork.value} • ${mins} min`;
   }
 
   function normalize(s){
@@ -777,7 +651,7 @@
       o.id?.toString?.() ?? "",
       o.payAsset, o.payNetwork,
       o.txid,
-      o.payTo, meta.address, meta.price, meta.total,
+      o.payTo, meta.address, meta.price, meta.total, meta.fee, meta.grand,
       ...addrVariants(o.seller),
       ...addrVariants(o.buyer)
     ];
@@ -795,7 +669,6 @@
     const createOn = which==="create";
     el.tabCreate.classList.toggle("active", createOn);
     el.tabMarket.classList.toggle("active", !createOn);
-
     if (window.innerWidth <= 980){
       el.createPanel.style.display = createOn ? "block" : "none";
       el.marketPanel.style.display = createOn ? "none" : "block";
@@ -820,11 +693,8 @@
         await window.ethereum.request({
           method:"wallet_addEthereumChain",
           params:[{
-            chainId: CHAIN_HEX,
-            chainName: CHAIN_NAME,
-            rpcUrls:[RPC_URL],
-            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18},
-            blockExplorerUrls:[]
+            chainId: CHAIN_HEX, chainName: CHAIN_NAME, rpcUrls:[RPC_URL],
+            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18}, blockExplorerUrls:[]
           }]
         });
         await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId: CHAIN_HEX}]});
@@ -850,7 +720,6 @@
 
     await detectWithdrawSupport();
     await refreshWithdrawable();
-
     toast("Wallet connected ✅");
     startLiveActivity();
   }
@@ -901,9 +770,7 @@
         const id = parsed.args.offerId.toString();
         if (!seen.has(id)){ seen.add(id); fromLogs.push(id); }
       }
-    }catch(e){
-      console.warn("getLogs failed. Showing saved offers only.", e);
-    }
+    }catch(e){ console.warn("getLogs failed. Showing saved offers only.", e); }
     offerIds = mergeIds(saved, fromLogs).map(x=>BigInt(x));
   }
 
@@ -994,6 +861,8 @@
       const meta = unpackPayTo(o.payTo);
       const priceLine = meta.price ? `• price ${meta.price} ${o.payAsset}` : "";
       const totalLine = meta.total ? `• total ${meta.total} ${o.payAsset}` : "";
+      const feeLine = meta.fee ? `• fee ${meta.fee} ${o.payAsset}` : "";
+      const grandLine = meta.grand ? `• pay ${meta.grand} ${o.payAsset}` : "";
 
       li.innerHTML = `
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
@@ -1007,6 +876,7 @@
             <div style="margin-top:8px;font-weight:900;font-size:15px">${fmtInri(o.amount)} INRI</div>
             <div class="muted2">Offer <span class="mono">#${o.id.toString()}</span></div>
             <div class="muted2" style="margin-top:5px">${priceLine} ${totalLine}</div>
+            <div class="muted2" style="margin-top:3px">${feeLine} ${grandLine}</div>
           </div>
 
           <div class="right" style="min-width:180px">
@@ -1088,15 +958,9 @@
       if (touched) await refresh();
     }catch(e){}
   }
-  function startLiveActivity(){
-    if (pollTimer) return;
-    pollTimer = setInterval(pollActivity, 9000);
-  }
+  function startLiveActivity(){ if (pollTimer) return; pollTimer = setInterval(pollActivity, 9000); }
 
-  async function requireConnected(){
-    if (!me) await connect();
-    if (!contractWrite) throw new Error("Not connected.");
-  }
+  async function requireConnected(){ if (!me) await connect(); if (!contractWrite) throw new Error("Not connected."); }
 
   el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage || e.message || e)); } });
 
@@ -1108,16 +972,23 @@
       const payTo = (el.payTo.value||"").trim();
       const mins = Number(el.payWindow.value||30);
       const price = (el.pricePer.value||"").trim();
+
       const total = calcTotal();
+      const fee = calcFee(total);
+      const grand = calcGrand(total, fee);
 
       if (!amt || Number(amt) <= 0) throw new Error("Invalid INRI amount");
       if (!price || Number(price) <= 0) throw new Error("Price per INRI is required");
       if (!total) throw new Error("Could not calculate total");
+      if (!fee) throw new Error("Could not calculate fee");
+      if (!grand) throw new Error("Could not calculate total+fee");
       if (!payTo) throw new Error("Seller receive address is required");
 
       const payWindowSec = Math.max(60, Math.floor(mins*60));
       const valueWei = ethers.parseEther(amt);
-      const payToPacked = packPayTo(payTo, price, total);
+
+      // ✅ store price/total/fee/grand in payTo string
+      const payToPacked = packPayTo(payTo, price, total, fee, grand);
 
       toast("Creating offer…");
       const tx = await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, { value: valueWei });
@@ -1127,10 +998,7 @@
         for (const lg of receipt.logs){
           if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
           const parsed = iface.parseLog(lg);
-          if (parsed && parsed.name === "OfferCreated"){
-            saveId(parsed.args.offerId.toString());
-            break;
-          }
+          if (parsed && parsed.name === "OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
         }
       }catch(e){}
 
@@ -1154,10 +1022,7 @@
       await tx.wait();
       await refreshWithdrawable();
       toast("Withdraw complete ✅");
-    }catch(e){
-      console.error(e);
-      alert("Withdraw error: " + (e.shortMessage || e.message || e));
-    }
+    }catch(e){ console.error(e); alert("Withdraw error: " + (e.shortMessage || e.message || e)); }
   });
 
   el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
@@ -1243,6 +1108,8 @@
       <div><b>Amount</b>: ${fmtInri(modalOffer.amount)} INRI</div>
       <div><b>Price</b>: <span class="mono">${meta.price || "—"}</span> ${modalOffer.payAsset}</div>
       <div><b>Total</b>: <span class="mono">${meta.total || "—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Fee (0.2%)</b>: <span class="mono">${meta.fee || "—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Total + Fee</b>: <span class="mono">${meta.grand || "—"}</span> ${modalOffer.payAsset}</div>
       <div class="hr"></div>
       <div><b>Seller</b>: <span class="mono">${modalOffer.seller}</span></div>
       <div><b>Buyer</b>: <span class="mono">${modalOffer.buyer && modalOffer.buyer!==ethers.ZeroAddress ? modalOffer.buyer : "—"}</span></div>
@@ -1252,9 +1119,9 @@
 
     el.mPayHint.innerHTML = `
       <b>Payment instructions</b><br>
-      Pay exactly <b>${meta.total || "—"} ${modalOffer.payAsset || "—"}</b> on <b>${modalOffer.payNetwork || "—"}</b> to:<br>
+      Pay exactly <b>${meta.grand || "—"} ${modalOffer.payAsset || "—"}</b> on <b>${modalOffer.payNetwork || "—"}</b> to:<br>
       <span class="mono">${meta.address || "—"}</span><br>
-      Then paste the <b>TxID</b> and click <b>I Paid</b>.
+      Includes buyer fee <b>0.2%</b>. Then paste the <b>TxID</b> and click <b>I Paid</b>.
     `;
 
     el.mLogos.innerHTML = `
@@ -1357,10 +1224,7 @@
     }catch(e){ console.error(e); alert("Cancel error: " + (e.shortMessage || e.message || e)); }
   });
 
-  function startLiveActivity(){
-    if (pollTimer) return;
-    pollTimer = setInterval(pollActivity, 9000);
-  }
+  function startLiveActivity(){ if (pollTimer) return; pollTimer = setInterval(pollActivity, 9000); }
 
   el.tabCreate.addEventListener("click", ()=>showTab("create"));
   el.tabMarket.addEventListener("click", ()=>showTab("market"));
@@ -1369,7 +1233,6 @@
     el.contractPill.textContent = "Contract: " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4);
     renderPreview();
     showTab("create");
-
     updateSpacer();
 
     try{
@@ -1395,28 +1258,6 @@
     try{ await refresh(); }
     catch(e){ console.error(e); el.syncInfo.textContent = "Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
   })();
-
-  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-
-  el.btnClearSaved.addEventListener("click", ()=>{
-    if (!confirm("Clear saved offers from this device?")) return;
-    clearSaved(); toast("Saved offers cleared ✅");
-    refresh().catch(()=>{});
-  });
-
-  el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
-  el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
-
-  el.filter.addEventListener("change", ()=>{ page=1; render(); });
-  el.q.addEventListener("input", ()=>{ page=1; render(); });
-
-  el.inAmount.addEventListener("input", renderPreview);
-  el.payAsset.addEventListener("change", renderPreview);
-  el.payNetwork.addEventListener("change", renderPreview);
-  el.payWindow.addEventListener("input", renderPreview);
-  el.pricePer.addEventListener("input", renderPreview);
-
 })();
 </script>
 </body>
