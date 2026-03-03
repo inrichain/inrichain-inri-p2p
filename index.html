@@ -4,6 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>INRI P2P — Escrow</title>
+
+  <!-- Ubuntu font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/inrichain/logofavicon/main/Favicon.png" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 
@@ -24,8 +30,8 @@
     body{
       margin:0;
       color:var(--text);
-      background: rgb(0,0,0); /* ✅ pure black */
-      overflow:auto; /* ✅ scroll enabled */
+      background: rgb(0,0,0);
+      overflow:auto;
     }
     a{color:inherit; text-decoration:none}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
@@ -35,16 +41,59 @@
     /* remove shadows */
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
-    .wrap{max-width:1180px;margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px;}
+    /* ✅ FIXED HEADER STACK */
+    .headerStack{
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:999;
+      background:transparent;
+      pointer-events:none; /* let inside items control */
+    }
+    .headerStack > *{pointer-events:auto}
+
+    /* ✅ P2P BIG TITLE */
+    .p2pHero{
+      width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:18px 12px 12px;
+      background: rgba(10,14,30,.55);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+    .p2pHero .p2pText{
+      font-family: "Ubuntu", system-ui, sans-serif;
+      font-weight:700;
+      font-size:40px;
+      letter-spacing:.8px;
+      line-height:1;
+      margin:0;
+    }
+
+    /* container */
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    /* ✅ reserve space for fixed header stack (hero + top + tabs) */
+    .spacer{
+      height: 190px; /* adjusted by JS too */
+    }
 
     .top{
-      position:sticky; top:0; z-index:20;
       display:flex; gap:10px; align-items:center; justify-content:space-between;
       padding:10px;
       border:1px solid var(--border);
       border-radius:var(--radius);
       background: rgba(10,14,30,.55);
       backdrop-filter: blur(10px);
+      margin:10px 12px 0;
     }
 
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -118,6 +167,7 @@
       background: rgba(10,14,30,.55);
       padding:8px;
       backdrop-filter: blur(10px);
+      margin:10px 12px 0;
     }
     .tabRow{display:flex;gap:8px;align-items:center}
     .tab{
@@ -171,15 +221,14 @@
     .search input{width:280px}
     @media(max-width:520px){ .search, .search input{width:100%} }
 
-    /* ✅ offers scroll (needed) */
     .offers{
       display:grid;
       grid-template-columns:repeat(2, minmax(0,1fr));
       gap:10px;
       list-style:none;
       padding:0; margin:0;
-      max-height: 62vh; /* ✅ scroll area */
-      overflow:auto;     /* ✅ */
+      max-height: 62vh;
+      overflow:auto;
       padding-right:6px;
     }
     @media(max-width:720px){ .offers{grid-template-columns:1fr; max-height: 58vh;} }
@@ -278,7 +327,7 @@
       padding:12px;
       backdrop-filter: blur(12px);
       max-height: 92vh;
-      overflow:auto; /* modal can scroll */
+      overflow:auto;
     }
     .modal h3{margin:0;font-size:13px}
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
@@ -288,8 +337,14 @@
 </head>
 
 <body>
-<div class="wrap">
-  <header class="top">
+
+<!-- ✅ FIXED STACK (P2P + header + tabs) -->
+<div class="headerStack" id="headerStack">
+  <div class="p2pHero" id="p2pHero">
+    <div class="p2pText">P2P</div>
+  </div>
+
+  <header class="top" id="topBar">
     <div class="brand">
       <div class="logo" title="INRI">
         <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
@@ -301,7 +356,6 @@
     </div>
 
     <div class="row" style="justify-content:flex-end">
-      <!-- ✅ Back button with INRI logo -->
       <a class="btn btn-ghost" href="https://www.inri.life/" target="_blank" rel="noopener">
         <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
         Back to INRI.life
@@ -316,13 +370,12 @@
     </div>
   </header>
 
-  <div class="tabs">
+  <div class="tabs" id="tabsBar">
     <div class="tabRow">
       <button class="tab active" id="tabCreate">Create</button>
       <button class="tab" id="tabMarket">Market</button>
     </div>
 
-    <!-- ✅ counters (fix: includes finalized) -->
     <div class="row" style="justify-content:flex-end">
       <span class="pill"><b id="paidCount">0</b> paid</span>
       <span class="pill"><b id="disputeCount">0</b> disputes</span>
@@ -330,7 +383,12 @@
       <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
     </div>
   </div>
+</div>
 
+<!-- ✅ spacer so content starts below fixed stack -->
+<div class="spacer" id="spacer"></div>
+
+<div class="wrap">
   <div class="panelWrap">
     <!-- CREATE -->
     <aside class="card" id="createPanel">
@@ -338,8 +396,6 @@
 
       <div class="hint">
         Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.
-        <br><br>
-        Safety tip: buyer should pay only when status is <b>LOCKED / in progress</b>. :contentReference[oaicite:2]{index=2}
       </div>
 
       <div class="field">
@@ -502,9 +558,6 @@
 
 <script>
 (() => {
-  // =============================
-  // CONFIG
-  // =============================
   const CHAIN_ID = 3777;
   const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
@@ -542,7 +595,7 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v4";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v5";
 
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
@@ -566,37 +619,36 @@
   ];
   const iface = new ethers.Interface(ABI);
 
-  // =============================
-  // DOM
-  // =============================
   const $ = (id)=>document.getElementById(id);
   const el = {
+    headerStack:$("headerStack"), p2pHero:$("p2pHero"), topBar:$("topBar"), tabsBar:$("tabsBar"), spacer:$("spacer"),
     netPill:$("netPill"), contractPill:$("contractPill"),
     btnConnect:$("btnConnect"), alertBadge:$("alertBadge"), activityPill:$("activityPill"),
     tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
     createPanel:$("createPanel"), marketPanel:$("marketPanel"),
     btnRefreshTop:$("btnRefreshTop"),
-
     paidCount:$("paidCount"), disputeCount:$("disputeCount"), doneCount:$("doneCount"),
-
     inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
     pricePer:$("pricePer"), totalPill:$("totalPill"), payTo:$("payTo"), payWindow:$("payWindow"),
     previewPill:$("previewPill"), btnCreate:$("btnCreate"),
-
     meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
     rpcMode:$("rpcMode"), btnClearSaved:$("btnClearSaved"),
-
     filter:$("filter"), q:$("q"), btnRefresh:$("btnRefresh"),
     offers:$("offers"), count:$("count"), syncInfo:$("syncInfo"),
-
     prev:$("prev"), next:$("next"), pageInfo:$("pageInfo"),
-
     toast:$("toast"),
     backdrop:$("backdrop"), mClose:$("mClose"), mTitle:$("mTitle"), mSub:$("mSub"),
     mDetails:$("mDetails"), mPayHint:$("mPayHint"), mLogos:$("mLogos"), mTxid:$("mTxid"), mNote:$("mNote"),
     btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
     btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel")
   };
+
+  // ✅ dynamic spacer height for fixed stack (no overlap)
+  function updateSpacer(){
+    const h = el.p2pHero.offsetHeight + el.topBar.offsetHeight + el.tabsBar.offsetHeight + 24;
+    el.spacer.style.height = h + "px";
+  }
+  window.addEventListener("resize", updateSpacer);
 
   for (const n of PAY_NETWORKS){
     const opt = document.createElement("option");
@@ -605,9 +657,6 @@
   }
   el.payNetwork.value = "TRON";
 
-  // =============================
-  // Providers / State
-  // =============================
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
   let readProvider = rpcProvider, browserProvider=null, signer=null, me=null;
   let contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
@@ -623,17 +672,12 @@
   let modalId = null;
   let modalOffer = null;
 
-  // alerts/poll
   let alertCount = 0;
   let lastSeenBlock = 0;
   let pollTimer = null;
 
-  // paging
   const PAGE_SIZE = 8;
 
-  // =============================
-  // Local storage
-  // =============================
   function loadSavedIds(){
     try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(x=>String(x)) : []; }
     catch{ return []; }
@@ -645,9 +689,6 @@
   }
   function clearSaved(){ localStorage.removeItem(LS_KEY); }
 
-  // =============================
-  // Helpers
-  // =============================
   function toast(msg, ms=2300){
     el.toast.textContent = msg;
     el.toast.style.display = "block";
@@ -663,10 +704,7 @@
 
   const short = (a)=> a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
   const fmtInri = (wei)=> { try{ return ethers.formatEther(wei); }catch{ return String(wei); } };
-
-  function statusLabel(s){
-    return ["OPEN","LOCKED","PAID","DISPUTED","RELEASED","CANCELLED"][Number(s)] || "UNKNOWN";
-  }
+  function statusLabel(s){ return ["OPEN","LOCKED","PAID","DISPUTED","RELEASED","CANCELLED"][Number(s)] || "UNKNOWN"; }
   function statusTag(s){
     const st = statusLabel(s);
     if (st==="OPEN") return `<span class="tag tag-open">✅ OPEN</span>`;
@@ -677,7 +715,6 @@
     if (st==="CANCELLED") return `<span class="tag tag-done">✖ CANCELLED</span>`;
     return `<span class="tag tag-done">• ${st}</span>`;
   }
-
   const nowSec = ()=> Math.floor(Date.now()/1000);
   function timeLeft(expiresAt){
     const t = Number(expiresAt||0); if (!t) return "—";
@@ -685,7 +722,6 @@
     const m = Math.floor(left/60), s = left % 60;
     return `${m}m ${s}s`;
   }
-
   function imgOrFallback(url, alt){
     if (!url) return `<span class="ico"></span>`;
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
@@ -724,18 +760,8 @@
     el.previewPill.textContent = `${amt} INRI${pr}${tt} • ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
   }
 
-  // =============================
-  // Better search (like pro P2P):
-  // - supports searching "0x78a9...dd55" / "78a9" / "dd55" / tokens
-  // - multi-term: "usdt tron 78a9" => all must match
-  // =============================
   function normalize(s){
-    return String(s||"")
-      .toLowerCase()
-      .replace(/\u2026/g,'...')   // ellipsis
-      .replace(/[^a-z0-9x.\-_\s]/g,' ') // keep 0x
-      .replace(/\s+/g,' ')
-      .trim();
+    return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim();
   }
   function addrVariants(a){
     const x = normalize(a);
@@ -765,9 +791,6 @@
     return tokens.every(t => hay.includes(t));
   }
 
-  // =============================
-  // Tabs
-  // =============================
   function showTab(which){
     const createOn = which==="create";
     el.tabCreate.classList.toggle("active", createOn);
@@ -780,11 +803,9 @@
       el.createPanel.style.display = "block";
       el.marketPanel.style.display = "block";
     }
+    updateSpacer();
   }
 
-  // =============================
-  // Connect / Network
-  // =============================
   async function ensureNetwork(){
     if (!window.ethereum) throw new Error("No wallet found (MetaMask/Rabby).");
     const cur = await window.ethereum.request({method:"eth_chainId"});
@@ -857,9 +878,6 @@
     }catch{ el.withdrawPill.textContent = "—"; }
   }
 
-  // =============================
-  // Market loading
-  // =============================
   function mergeIds(aStr, bStr){
     const set = new Set([...aStr.map(String), ...bStr.map(String)]);
     return [...set].sort((x,y)=> { try{ return BigInt(y) > BigInt(x) ? 1 : -1; } catch { return 0; } });
@@ -925,9 +943,7 @@
       }
     }
 
-    if (q){
-      x = x.filter(o => matchesQuery(o, q));
-    }
+    if (q) x = x.filter(o => matchesQuery(o, q));
     return x;
   }
 
@@ -941,7 +957,7 @@
   function updateCounters(){
     const paid = offersCache.filter(o=>o.status===2).length;
     const disp = offersCache.filter(o=>o.status===3).length;
-    const done = offersCache.filter(o=>o.status===4 || o.status===5).length; // ✅ finalized (concretizados)
+    const done = offersCache.filter(o=>o.status===4 || o.status===5).length;
     el.paidCount.textContent = String(paid);
     el.disputeCount.textContent = String(disp);
     el.doneCount.textContent = String(done);
@@ -1044,9 +1060,6 @@
     toast("Updated ✅", 1200);
   }
 
-  // =============================
-  // Live activity (PAID / DISPUTE)
-  // =============================
   async function pollActivity(){
     try{
       const provider = contractRead.runner.provider;
@@ -1066,32 +1079,108 @@
       for (const lg of logs){
         const parsed = iface.parseLog(lg);
         if (!parsed) continue;
-        if (parsed.name === "MarkedPaid"){
-          touched = true;
-          bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`);
-        }
-        if (parsed.name === "DisputeOpened"){
-          touched = true;
-          bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`);
-        }
+        if (parsed.name === "MarkedPaid"){ touched = true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
+        if (parsed.name === "DisputeOpened"){ touched = true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
       }
 
       lastSeenBlock = latest;
       el.activityPill.textContent = "block " + latest;
       if (touched) await refresh();
-    }catch(e){
-      console.warn("pollActivity failed:", e);
-    }
+    }catch(e){}
   }
-
   function startLiveActivity(){
     if (pollTimer) return;
     pollTimer = setInterval(pollActivity, 9000);
   }
 
-  // =============================
-  // Modal
-  // =============================
+  async function requireConnected(){
+    if (!me) await connect();
+    if (!contractWrite) throw new Error("Not connected.");
+  }
+
+  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage || e.message || e)); } });
+
+  el.btnCreate.addEventListener("click", async ()=>{
+    try{
+      await requireConnected();
+
+      const amt = (el.inAmount.value||"").trim();
+      const payTo = (el.payTo.value||"").trim();
+      const mins = Number(el.payWindow.value||30);
+      const price = (el.pricePer.value||"").trim();
+      const total = calcTotal();
+
+      if (!amt || Number(amt) <= 0) throw new Error("Invalid INRI amount");
+      if (!price || Number(price) <= 0) throw new Error("Price per INRI is required");
+      if (!total) throw new Error("Could not calculate total");
+      if (!payTo) throw new Error("Seller receive address is required");
+
+      const payWindowSec = Math.max(60, Math.floor(mins*60));
+      const valueWei = ethers.parseEther(amt);
+      const payToPacked = packPayTo(payTo, price, total);
+
+      toast("Creating offer…");
+      const tx = await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, { value: valueWei });
+      const receipt = await tx.wait();
+
+      try{
+        for (const lg of receipt.logs){
+          if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
+          const parsed = iface.parseLog(lg);
+          if (parsed && parsed.name === "OfferCreated"){
+            saveId(parsed.args.offerId.toString());
+            break;
+          }
+        }
+      }catch(e){}
+
+      el.inAmount.value = ""; el.pricePer.value = ""; el.payTo.value = "";
+      renderPreview();
+
+      await refresh();
+      toast("Offer created ✅");
+      if (window.innerWidth <= 980) showTab("market");
+    }catch(e){
+      console.error(e);
+      alert("Create error: " + (e.shortMessage || e.message || e));
+    }
+  });
+
+  el.btnWithdraw.addEventListener("click", async ()=>{
+    try{
+      await requireConnected();
+      toast("Withdrawing…");
+      const tx = await contractWrite.withdraw();
+      await tx.wait();
+      await refreshWithdrawable();
+      toast("Withdraw complete ✅");
+    }catch(e){
+      console.error(e);
+      alert("Withdraw error: " + (e.shortMessage || e.message || e));
+    }
+  });
+
+  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
+  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
+
+  el.btnClearSaved.addEventListener("click", ()=>{
+    if (!confirm("Clear saved offers from this device?")) return;
+    clearSaved(); toast("Saved offers cleared ✅");
+    refresh().catch(()=>{});
+  });
+
+  el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
+  el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
+
+  el.filter.addEventListener("change", ()=>{ page=1; render(); });
+  el.q.addEventListener("input", ()=>{ page=1; render(); });
+
+  el.inAmount.addEventListener("input", renderPreview);
+  el.payAsset.addEventListener("change", renderPreview);
+  el.payNetwork.addEventListener("change", renderPreview);
+  el.payWindow.addEventListener("input", renderPreview);
+  el.pricePer.addEventListener("input", renderPreview);
+
   function openModal(){ el.backdrop.style.display="flex"; }
   function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
 
@@ -1178,98 +1267,6 @@
     openModal();
   }
 
-  // =============================
-  // Actions
-  // =============================
-  async function requireConnected(){
-    if (!me) await connect();
-    if (!contractWrite) throw new Error("Not connected.");
-  }
-
-  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage || e.message || e)); } });
-
-  el.btnCreate.addEventListener("click", async ()=>{
-    try{
-      await requireConnected();
-
-      const amt = (el.inAmount.value||"").trim();
-      const payTo = (el.payTo.value||"").trim();
-      const mins = Number(el.payWindow.value||30);
-      const price = (el.pricePer.value||"").trim();
-      const total = calcTotal();
-
-      if (!amt || Number(amt) <= 0) throw new Error("Invalid INRI amount");
-      if (!price || Number(price) <= 0) throw new Error("Price per INRI is required");
-      if (!total) throw new Error("Could not calculate total");
-      if (!payTo) throw new Error("Seller receive address is required");
-
-      const payWindowSec = Math.max(60, Math.floor(mins*60));
-      const valueWei = ethers.parseEther(amt);
-      const payToPacked = packPayTo(payTo, price, total);
-
-      toast("Creating offer…");
-      const tx = await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, { value: valueWei });
-      const receipt = await tx.wait();
-
-      try{
-        for (const lg of receipt.logs){
-          if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
-          const parsed = iface.parseLog(lg);
-          if (parsed && parsed.name === "OfferCreated"){
-            saveId(parsed.args.offerId.toString());
-            break;
-          }
-        }
-      }catch(e){ console.warn("Could not parse OfferCreated.", e); }
-
-      el.inAmount.value = ""; el.pricePer.value = ""; el.payTo.value = "";
-      renderPreview();
-
-      await refresh();
-      toast("Offer created ✅");
-      if (window.innerWidth <= 980) showTab("market");
-    }catch(e){
-      console.error(e);
-      alert("Create error: " + (e.shortMessage || e.message || e));
-    }
-  });
-
-  el.btnWithdraw.addEventListener("click", async ()=>{
-    try{
-      await requireConnected();
-      toast("Withdrawing…");
-      const tx = await contractWrite.withdraw();
-      await tx.wait();
-      await refreshWithdrawable();
-      toast("Withdraw complete ✅");
-    }catch(e){
-      console.error(e);
-      alert("Withdraw error: " + (e.shortMessage || e.message || e));
-    }
-  });
-
-  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-
-  el.btnClearSaved.addEventListener("click", ()=>{
-    if (!confirm("Clear saved offers from this device?")) return;
-    clearSaved();
-    toast("Saved offers cleared ✅");
-    refresh().catch(()=>{});
-  });
-
-  el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
-  el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
-
-  el.filter.addEventListener("change", ()=>{ page=1; render(); });
-  el.q.addEventListener("input", ()=>{ page=1; render(); });
-
-  el.inAmount.addEventListener("input", renderPreview);
-  el.payAsset.addEventListener("change", renderPreview);
-  el.payNetwork.addEventListener("change", renderPreview);
-  el.payWindow.addEventListener("input", renderPreview);
-  el.pricePer.addEventListener("input", renderPreview);
-
   document.addEventListener("click", async (ev)=>{
     const btn = ev.target.closest("button[data-act]");
     if (!btn) return;
@@ -1278,8 +1275,8 @@
     catch(e){ console.error(e); alert("Open offer error: " + (e.shortMessage || e.message || e)); }
   });
 
-  el.mClose.addEventListener("click", ()=>{ el.backdrop.style.display="none"; });
-  el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) el.backdrop.style.display="none"; });
+  el.mClose.addEventListener("click", closeModal);
+  el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) closeModal(); });
 
   el.btnAccept.addEventListener("click", async ()=>{
     try{
@@ -1342,7 +1339,7 @@
       const tx = await contractWrite.reclaimIfUnpaid(modalId);
       await tx.wait();
       await refresh();
-      el.backdrop.style.display="none";
+      closeModal();
       toast("Reclaimed ✅");
     }catch(e){ console.error(e); alert("Reclaim error: " + (e.shortMessage || e.message || e)); }
   });
@@ -1355,22 +1352,25 @@
       const tx = await contractWrite.cancelOffer(modalId);
       await tx.wait();
       await refresh();
-      el.backdrop.style.display="none";
+      closeModal();
       toast("Cancelled ✅");
     }catch(e){ console.error(e); alert("Cancel error: " + (e.shortMessage || e.message || e)); }
   });
 
-  // Tabs
+  function startLiveActivity(){
+    if (pollTimer) return;
+    pollTimer = setInterval(pollActivity, 9000);
+  }
+
   el.tabCreate.addEventListener("click", ()=>showTab("create"));
   el.tabMarket.addEventListener("click", ()=>showTab("market"));
 
-  // =============================
-  // Init
-  // =============================
   (async function init(){
     el.contractPill.textContent = "Contract: " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4);
     renderPreview();
     showTab("create");
+
+    updateSpacer();
 
     try{
       if (window.ethereum){
@@ -1392,48 +1392,30 @@
       el.rpcMode.textContent = "Provider mode: Public RPC blocked (use Connect Wallet)";
     }
 
-    try{
-      await refresh();
-    }catch(e){
-      console.error(e);
-      el.syncInfo.textContent = "Could not load offers. Connect wallet and click Refresh.";
-      toast("Provider error: cannot load offers");
-    }
+    try{ await refresh(); }
+    catch(e){ console.error(e); el.syncInfo.textContent = "Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
   })();
 
-  // Live activity polling (PAID/DISPUTE), similar to “appeal/dispute status” patterns on big P2P platforms. :contentReference[oaicite:3]{index=3}
-  async function pollActivity(){
-    try{
-      const provider = contractRead.runner.provider;
-      const latest = await provider.getBlockNumber();
-      if (!lastSeenBlock) lastSeenBlock = latest;
-      if (latest <= lastSeenBlock) return;
+  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
+  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
 
-      const from = lastSeenBlock + 1;
-      const to = latest;
+  el.btnClearSaved.addEventListener("click", ()=>{
+    if (!confirm("Clear saved offers from this device?")) return;
+    clearSaved(); toast("Saved offers cleared ✅");
+    refresh().catch(()=>{});
+  });
 
-      const tPaid = iface.getEvent("MarkedPaid").topicHash;
-      const tDisp = iface.getEvent("DisputeOpened").topicHash;
+  el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
+  el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
 
-      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: to, topics: [[tPaid, tDisp]] });
+  el.filter.addEventListener("change", ()=>{ page=1; render(); });
+  el.q.addEventListener("input", ()=>{ page=1; render(); });
 
-      let touched = false;
-      for (const lg of logs){
-        const parsed = iface.parseLog(lg);
-        if (!parsed) continue;
-        if (parsed.name === "MarkedPaid"){ touched = true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
-        if (parsed.name === "DisputeOpened"){ touched = true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
-      }
-
-      lastSeenBlock = latest;
-      el.activityPill.textContent = "block " + latest;
-      if (touched) await refresh();
-    }catch(e){ /* ignore */ }
-  }
-  function startLiveActivity(){
-    if (pollTimer) return;
-    pollTimer = setInterval(pollActivity, 9000);
-  }
+  el.inAmount.addEventListener("input", renderPreview);
+  el.payAsset.addEventListener("change", renderPreview);
+  el.payNetwork.addEventListener("change", renderPreview);
+  el.payWindow.addEventListener("input", renderPreview);
+  el.pricePer.addEventListener("input", renderPreview);
 
 })();
 </script>
