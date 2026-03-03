@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap" rel="stylesheet">
-
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/inrichain/logofavicon/main/Favicon.png" />
+
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 
   <style>
@@ -25,33 +25,30 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;color:var(--text);background:rgb(0,0,0);overflow:auto}
+    body{margin:0;color:var(--text);background:#000;overflow:auto}
     a{color:inherit;text-decoration:none}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
     .muted{color:var(--muted);font-size:12px}
     .muted2{color:var(--muted2);font-size:12px}
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
-    .headerStack{position:fixed;top:0;left:0;right:0;z-index:999;background:transparent;pointer-events:none}
-    .headerStack>*{pointer-events:auto}
+    /* ✅ agora é "normal" (não fixo) */
+    .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
 
     .p2pHero{
       width:100%;display:flex;justify-content:center;align-items:center;
       padding:18px 12px 12px;background:rgba(10,14,30,.55);
       border-bottom:1px solid rgba(255,255,255,.08);
       backdrop-filter:blur(10px);
+      border-radius:14px;
     }
     .p2pHero .p2pText{font-family:"Ubuntu",system-ui,sans-serif;font-weight:700;font-size:40px;letter-spacing:.8px;line-height:1;margin:0}
-
-    .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-    .spacer{height:190px}
 
     .top{
       display:flex;gap:10px;align-items:center;justify-content:space-between;
       padding:10px;border:1px solid var(--border);border-radius:var(--radius);
-      background:rgba(10,14,30,.55);backdrop-filter:blur(10px);margin:10px 12px 0;
+      background:rgba(10,14,30,.55);backdrop-filter:blur(10px);
     }
-
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .brand{display:flex;gap:10px;align-items:center;min-width:0}
     .logo{
@@ -94,7 +91,7 @@
     .tabs{
       display:flex;gap:8px;align-items:center;justify-content:space-between;
       border:1px solid var(--border);border-radius:var(--radius);
-      background:rgba(10,14,30,.55);padding:8px;backdrop-filter:blur(10px);margin:10px 12px 0;
+      background:rgba(10,14,30,.55);padding:8px;backdrop-filter:blur(10px);
     }
     .tabRow{display:flex;gap:8px;align-items:center}
     .tab{
@@ -185,231 +182,267 @@
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
     .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
+
+    /* ✅ popup mobile wallet */
+    .walletModal{
+      display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);
+      align-items:center;justify-content:center;padding:14px
+    }
+    .walletBox2{
+      width:min(520px,100%);border:1px solid rgba(255,255,255,.14);border-radius:16px;
+      background:rgba(10,14,30,.92);backdrop-filter:blur(12px);padding:12px
+    }
+    .walletBox2 h3{margin:0 0 6px 0;font-size:14px}
+    .walletGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    @media(max-width:520px){.walletGrid{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-<div class="headerStack" id="headerStack">
-  <div class="p2pHero" id="p2pHero"><div class="p2pText">P2P</div></div>
-
-  <header class="top" id="topBar">
-    <div class="brand">
-      <div class="logo" title="INRI"><img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/></div>
-      <div class="title">
-        <h1>INRI P2P — Escrow Market</h1>
-        <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% • Alerts for PAID/DISPUTE</div>
+  <div class="walletModal" id="walletModal">
+    <div class="walletBox2">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <h3>Open Wallet</h3>
+          <div class="muted2">On mobile, open this page inside a wallet browser.</div>
+        </div>
+        <button class="btn btn-ghost" id="walletClose">✕</button>
       </div>
-    </div>
 
-    <div class="row" style="justify-content:flex-end">
-      <!-- ✅ same page (no target _blank) -->
-      <a class="btn btn-ghost" href="https://www.inri.life/">
-        <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
-        Back to INRI.life
-      </a>
+      <div class="walletGrid">
+        <button class="btn btn-pri" id="openMetaMask">
+          <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logoeth/main/ETH.png" alt=""></span>
+          Open in MetaMask
+        </button>
+        <button class="btn btn-ghost" id="openTrust">
+          <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logobsc/main/BSC.png" alt=""></span>
+          Open in Trust Wallet
+        </button>
+      </div>
 
-      <div class="pill" id="netPill">Network: —</div>
-      <div class="pill mono" id="contractPill">Contract: —</div>
-      <div class="pill" title="Live activity alerts">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
-      <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
-    </div>
-  </header>
-
-  <div class="tabs" id="tabsBar">
-    <div class="tabRow">
-      <button class="tab active" id="tabCreate">Create</button>
-      <button class="tab" id="tabMarket">Market</button>
-    </div>
-
-    <div class="row" style="justify-content:flex-end">
-      <span class="pill"><b id="paidCount">0</b> paid</span>
-      <span class="pill"><b id="disputeCount">0</b> disputes</span>
-      <span class="pill"><b id="doneCount">0</b> finalized</span>
-      <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
+      <div class="hr"></div>
+      <div class="muted2">
+        Tip: If you already use MetaMask mobile, open the <b>browser inside MetaMask</b> and paste your P2P URL.
+      </div>
     </div>
   </div>
-</div>
 
-<div class="spacer" id="spacer"></div>
+  <div class="wrap">
+    <div class="p2pHero"><div class="p2pText">P2P</div></div>
 
-<div class="wrap">
-  <div class="panelWrap">
-    <aside class="card" id="createPanel">
-      <h2>Create Offer</h2>
-
-      <div class="hint">
-        Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.<br>
-        Buyer fee: <b>0.2%</b> (added to the amount shown).
-      </div>
-
-      <div class="field">
-        <label>INRI Amount (native)</label>
-        <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
-      </div>
-
-      <div class="row">
-        <div class="field" style="flex:1;min-width:160px">
-          <label>Pay Asset</label>
-          <select id="payAsset">
-            <option value="USDT">USDT</option>
-            <option value="USDC">USDC</option>
-          </select>
+    <header class="top">
+      <div class="brand">
+        <div class="logo" title="INRI">
+          <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
         </div>
-        <div class="field" style="flex:1;min-width:180px">
-          <label>Pay Network</label>
-          <select id="payNetwork"></select>
+        <div class="title">
+          <h1>INRI P2P — Escrow Market</h1>
+          <div class="sub">Escrow on-chain • Payment off-chain • Buyer fee 0.2% • Alerts for PAID/DISPUTE</div>
         </div>
       </div>
 
-      <div class="row">
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Price per 1 INRI (USDT/USDC)</label>
-          <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
-          <div class="muted2">Total = INRI × price</div>
-        </div>
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Total to pay (auto)</label>
-          <div class="pill mono" id="totalPill">—</div>
-        </div>
+      <div class="row" style="justify-content:flex-end">
+        <a class="btn btn-ghost" href="https://www.inri.life/">
+          <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
+          Back to INRI.life
+        </a>
+
+        <div class="pill" id="netPill">Network: —</div>
+        <div class="pill mono" id="contractPill">Contract: —</div>
+        <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
+        <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <div class="tabRow">
+        <button class="tab active" id="tabCreate">Create</button>
+        <button class="tab" id="tabMarket">Market</button>
       </div>
 
-      <!-- ✅ fee line -->
-      <div class="row">
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Buyer fee (0.2%)</label>
-          <div class="pill mono" id="feePill">—</div>
-        </div>
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Total + fee</label>
-          <div class="pill mono" id="grandPill">—</div>
-        </div>
+      <div class="row" style="justify-content:flex-end">
+        <span class="pill"><b id="paidCount">0</b> paid</span>
+        <span class="pill"><b id="disputeCount">0</b> disputes</span>
+        <span class="pill"><b id="doneCount">0</b> finalized</span>
+        <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
       </div>
+    </div>
 
-      <div class="field">
-        <label>Seller Receive Address (on selected network)</label>
-        <input id="payTo" placeholder="0x... / T... / any account id" />
-      </div>
-
-      <div class="row">
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Payment Window (minutes)</label>
-          <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
+    <div class="panelWrap">
+      <aside class="card" id="createPanel">
+        <h2>Create Offer</h2>
+        <div class="hint">
+          Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.<br>
+          Buyer fee: <b>0.2%</b> (added to the amount shown).
         </div>
-        <div class="field" style="flex:1;min-width:200px">
-          <label>Preview</label>
-          <div class="pill" id="previewPill">—</div>
+
+        <div class="field">
+          <label>INRI Amount (native)</label>
+          <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
         </div>
-      </div>
 
-      <button class="btn btn-pri" id="btnCreate" style="width:100%">Create Offer (deposit INRI)</button>
-    </aside>
-
-    <main class="card" id="marketPanel">
-      <div class="toolbar">
         <div class="row">
-          <span class="pill"><b id="count">0</b> offers</span>
-          <span class="pill mono">chainId 3777</span>
-          <span class="pill"><span class="muted2">Activity</span> <span class="mono" id="activityPill">—</span></span>
+          <div class="field" style="flex:1;min-width:160px">
+            <label>Pay Asset</label>
+            <select id="payAsset">
+              <option value="USDT">USDT</option>
+              <option value="USDC">USDC</option>
+            </select>
+          </div>
+          <div class="field" style="flex:1;min-width:180px">
+            <label>Pay Network</label>
+            <select id="payNetwork"></select>
+          </div>
         </div>
 
-        <div class="search">
-          <select id="filter">
-            <option value="all">All</option>
-            <option value="open">Open</option>
-            <option value="locked">Locked</option>
-            <option value="paid">Paid</option>
-            <option value="disputed">Disputed</option>
-            <option value="finalized">Finalized</option>
-            <option value="mine">Mine</option>
-          </select>
-          <input id="q" placeholder="Search: id / seller / buyer / txid / network / asset / payTo" />
-          <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
-        </div>
-      </div>
-
-      <ul class="offers" id="offers"></ul>
-
-      <div class="marketFooter">
-        <div>
-          <div class="muted2" id="syncInfo">Tip: Connect wallet for best sync.</div>
-          <div class="muted2" id="rpcMode">Provider mode: —</div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Price per 1 INRI (USDT/USDC)</label>
+            <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
+            <div class="muted2">Total = INRI × price</div>
+          </div>
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Total to pay (auto)</label>
+            <div class="pill mono" id="totalPill">—</div>
+          </div>
         </div>
 
-        <div class="walletBox">
-          <div class="walletLeft">
-            <div class="muted">Wallet</div>
-            <div class="mono" id="meAddr">—</div>
-            <div class="muted" style="margin-top:6px">Withdrawable</div>
-            <div class="pill mono" id="withdrawPill">—</div>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Buyer fee (0.2%)</label>
+            <div class="pill mono" id="feePill">—</div>
+          </div>
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Total + fee</label>
+            <div class="pill mono" id="grandPill">—</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Seller Receive Address (on selected network)</label>
+          <input id="payTo" placeholder="0x... / T... / any account id" />
+        </div>
+
+        <div class="row">
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Payment Window (minutes)</label>
+            <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
+          </div>
+          <div class="field" style="flex:1;min-width:200px">
+            <label>Preview</label>
+            <div class="pill" id="previewPill">—</div>
+          </div>
+        </div>
+
+        <button class="btn btn-pri" id="btnCreate" style="width:100%">Create Offer (deposit INRI)</button>
+      </aside>
+
+      <main class="card" id="marketPanel">
+        <div class="toolbar">
+          <div class="row">
+            <span class="pill"><b id="count">0</b> offers</span>
+            <span class="pill mono">chainId 3777</span>
+            <span class="pill"><span class="muted2">Activity</span> <span class="mono" id="activityPill">—</span></span>
           </div>
 
-          <div class="walletRight">
-            <button class="btn btn-ok" id="btnWithdraw" style="display:none">Withdraw</button>
-            <button class="btn btn-ghost" id="btnClearSaved">Clear saved offers (this device)</button>
-            <div class="row">
-              <button class="btn btn-ghost" id="prev">◀</button>
-              <div class="pill" id="pageInfo">1 / 1</div>
-              <button class="btn btn-ghost" id="next">▶</button>
+          <div class="search">
+            <select id="filter">
+              <option value="all">All</option>
+              <option value="open">Open</option>
+              <option value="locked">Locked</option>
+              <option value="paid">Paid</option>
+              <option value="disputed">Disputed</option>
+              <option value="finalized">Finalized</option>
+              <option value="mine">Mine</option>
+            </select>
+            <input id="q" placeholder="Search: id / seller / buyer / txid / network / asset / payTo" />
+            <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
+          </div>
+        </div>
+
+        <ul class="offers" id="offers"></ul>
+
+        <div class="marketFooter">
+          <div>
+            <div class="muted2" id="syncInfo">Tip: Connect wallet for best sync.</div>
+            <div class="muted2" id="rpcMode">Provider mode: —</div>
+          </div>
+
+          <div class="walletBox">
+            <div class="walletLeft">
+              <div class="muted">Wallet</div>
+              <div class="mono" id="meAddr">—</div>
+              <div class="muted" style="margin-top:6px">Withdrawable</div>
+              <div class="pill mono" id="withdrawPill">—</div>
+            </div>
+
+            <div class="walletRight">
+              <button class="btn btn-ok" id="btnWithdraw" style="display:none">Withdraw</button>
+              <button class="btn btn-ghost" id="btnClearSaved">Clear saved offers (this device)</button>
+              <div class="row">
+                <button class="btn btn-ghost" id="prev">◀</button>
+                <div class="pill" id="pageInfo">1 / 1</div>
+                <button class="btn btn-ghost" id="next">▶</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="backdrop" id="backdrop">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
-      <div>
-        <h3 id="mTitle">Offer</h3>
-        <div class="sub" id="mSub">—</div>
-      </div>
-      <div class="row" style="gap:8px">
-        <button class="btn btn-ghost" id="mClose">✕</button>
-      </div>
-    </div>
-
-    <div class="modalGrid" style="margin-top:10px">
-      <div class="card" style="background:rgba(0,0,0,.18)">
-        <h2 style="margin:0 0 8px 0">Details</h2>
-        <div id="mDetails" class="muted"></div>
-        <div class="hr"></div>
-        <div class="hint" id="mPayHint">—</div>
-        <div class="row" id="mLogos" style="flex-wrap:wrap;gap:8px;margin-top:8px"></div>
-      </div>
-
-      <div class="card" style="background:rgba(0,0,0,.18)">
-        <h2 style="margin:0 0 8px 0">Actions</h2>
-
-        <div class="field">
-          <label>TxID (required to mark as paid)</label>
-          <input id="mTxid" placeholder="Paste transaction hash / txid here" />
-          <div class="muted2">Only the buyer can mark as paid.</div>
-        </div>
-
-        <div class="row">
-          <button class="btn btn-pri" id="btnAccept">Accept</button>
-          <button class="btn btn-ok" id="btnPaid">I Paid</button>
-          <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
-          <button class="btn btn-bad" id="btnDispute">Open Dispute</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row">
-          <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
-          <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
-        </div>
-
-        <div class="hr"></div>
-        <div class="muted2" id="mNote">—</div>
-      </div>
+      </main>
     </div>
   </div>
-</div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="backdrop" id="backdrop">
+    <div class="modal">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
+        <div>
+          <h3 id="mTitle">Offer</h3>
+          <div class="sub" id="mSub">—</div>
+        </div>
+        <div class="row" style="gap:8px">
+          <button class="btn btn-ghost" id="mClose">✕</button>
+        </div>
+      </div>
+
+      <div class="modalGrid" style="margin-top:10px">
+        <div class="card" style="background:rgba(0,0,0,.18)">
+          <h2 style="margin:0 0 8px 0">Details</h2>
+          <div id="mDetails" class="muted"></div>
+          <div class="hr"></div>
+          <div class="hint" id="mPayHint">—</div>
+          <div class="row" id="mLogos" style="flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+        </div>
+
+        <div class="card" style="background:rgba(0,0,0,.18)">
+          <h2 style="margin:0 0 8px 0">Actions</h2>
+
+          <div class="field">
+            <label>TxID (required to mark as paid)</label>
+            <input id="mTxid" placeholder="Paste transaction hash / txid here" />
+            <div class="muted2">Only the buyer can mark as paid.</div>
+          </div>
+
+          <div class="row">
+            <button class="btn btn-pri" id="btnAccept">Accept</button>
+            <button class="btn btn-ok" id="btnPaid">I Paid</button>
+            <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
+            <button class="btn btn-bad" id="btnDispute">Open Dispute</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
+            <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
+          </div>
+
+          <div class="hr"></div>
+          <div class="muted2" id="mNote">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
 (() => {
@@ -418,9 +451,10 @@
   const CHAIN_NAME = "INRI CHAIN";
   const RPC_URL = "https://rpc-chain.inri.life/";
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
-
-  // ✅ buyer fee 0.2% (20 bps)
-  const BUYER_FEE_BPS = 20; // 0.20%
+  const BUYER_FEE_BPS = 20; // 0.2%
+  const DEFAULT_SCAN_BLOCKS = 300000;
+  const LS_KEY = "inri_p2p_saved_offer_ids_v7_mobilefix";
+  const PAGE_SIZE = 8;
 
   const LOGOS = {
     NET: {
@@ -452,10 +486,6 @@
   ];
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
-  const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v6_fee";
-  const PAGE_SIZE = 8;
-
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
     "function cancelOffer(uint256 offerId)",
@@ -469,18 +499,13 @@
     "function pendingWithdrawals(address) view returns (uint256)",
     "function offers(uint256) view returns (address seller,address buyer,uint256 amount,uint64 createdAt,uint64 expiresAt,uint32 payWindowSec,uint8 status,string payAsset,string payNetwork,string payTo,string txid)",
     "event OfferCreated(uint256 indexed offerId,address indexed seller,uint256 amount,uint32 payWindowSec,string payAsset,string payNetwork,string payTo)",
-    "event OfferCancelled(uint256 indexed offerId)",
-    "event OfferAccepted(uint256 indexed offerId,address indexed buyer,uint64 expiresAt)",
     "event MarkedPaid(uint256 indexed offerId,address indexed buyer,string txid)",
-    "event DisputeOpened(uint256 indexed offerId,address indexed buyer)",
-    "event Released(uint256 indexed offerId,address indexed buyer,uint256 netToBuyer,uint256 feeAmount)",
-    "event DisputeResolved(uint256 indexed offerId,bool releasedToBuyer)"
+    "event DisputeOpened(uint256 indexed offerId,address indexed buyer)"
   ];
   const iface = new ethers.Interface(ABI);
 
   const $ = (id)=>document.getElementById(id);
   const el = {
-    p2pHero:$("p2pHero"), topBar:$("topBar"), tabsBar:$("tabsBar"), spacer:$("spacer"),
     netPill:$("netPill"), contractPill:$("contractPill"),
     btnConnect:$("btnConnect"), alertBadge:$("alertBadge"), activityPill:$("activityPill"),
     tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
@@ -488,10 +513,8 @@
     btnRefreshTop:$("btnRefreshTop"),
     paidCount:$("paidCount"), disputeCount:$("disputeCount"), doneCount:$("doneCount"),
     inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
-    pricePer:$("pricePer"), totalPill:$("totalPill"),
-    feePill:$("feePill"), grandPill:$("grandPill"),
-    payTo:$("payTo"), payWindow:$("payWindow"),
-    previewPill:$("previewPill"), btnCreate:$("btnCreate"),
+    pricePer:$("pricePer"), totalPill:$("totalPill"), feePill:$("feePill"), grandPill:$("grandPill"),
+    payTo:$("payTo"), payWindow:$("payWindow"), previewPill:$("previewPill"), btnCreate:$("btnCreate"),
     meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
     rpcMode:$("rpcMode"), btnClearSaved:$("btnClearSaved"),
     filter:$("filter"), q:$("q"), btnRefresh:$("btnRefresh"),
@@ -501,14 +524,10 @@
     backdrop:$("backdrop"), mClose:$("mClose"), mTitle:$("mTitle"), mSub:$("mSub"),
     mDetails:$("mDetails"), mPayHint:$("mPayHint"), mLogos:$("mLogos"), mTxid:$("mTxid"), mNote:$("mNote"),
     btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
-    btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel")
+    btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel"),
+    walletModal:$("walletModal"), walletClose:$("walletClose"),
+    openMetaMask:$("openMetaMask"), openTrust:$("openTrust"),
   };
-
-  function updateSpacer(){
-    const h = el.p2pHero.offsetHeight + el.topBar.offsetHeight + el.tabsBar.offsetHeight + 24;
-    el.spacer.style.height = h + "px";
-  }
-  window.addEventListener("resize", updateSpacer);
 
   for (const n of PAY_NETWORKS){
     const opt = document.createElement("option");
@@ -523,17 +542,10 @@
   let contractWrite = null;
   let supportsWithdraw = false;
 
-  let offerIds = [];
-  let offersCache = [];
+  let offerIds = [], offersCache = [];
   let page = 1, totalPages = 1, lastBlock = 0;
-
-  let modalId = null, modalOffer = null;
-
-  let alertCount = 0, lastSeenBlock = 0, pollTimer = null;
-
-  function loadSavedIds(){ try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(x=>String(x)) : []; }catch{ return []; } }
-  function saveId(idStr){ const cur = new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
-  function clearSaved(){ localStorage.removeItem(LS_KEY); }
+  let modalId=null, modalOffer=null;
+  let alertCount=0, lastSeenBlock=0, pollTimer=null;
 
   function toast(msg, ms=2300){
     el.toast.textContent = msg;
@@ -548,125 +560,108 @@
     toast(msg, 3200);
   }
 
+  function loadSavedIds(){ try{ const raw=localStorage.getItem(LS_KEY); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.map(x=>String(x)):[]; }catch{ return []; } }
+  function saveId(idStr){ const cur=new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
+  function clearSaved(){ localStorage.removeItem(LS_KEY); }
+
   const short = (a)=> a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
   const fmtInri = (wei)=> { try{ return ethers.formatEther(wei); }catch{ return String(wei); } };
   function statusLabel(s){ return ["OPEN","LOCKED","PAID","DISPUTED","RELEASED","CANCELLED"][Number(s)] || "UNKNOWN"; }
   function statusTag(s){
-    const st = statusLabel(s);
+    const st=statusLabel(s);
     if (st==="OPEN") return `<span class="tag tag-open">✅ OPEN</span>`;
     if (st==="LOCKED") return `<span class="tag tag-locked">⏳ LOCKED</span>`;
     if (st==="PAID") return `<span class="tag tag-paid">💠 PAID</span>`;
     if (st==="DISPUTED") return `<span class="tag tag-disputed">⚠ DISPUTE</span>`;
-    if (st==="RELEASED") return `<span class="tag tag-done">✅ RELEASED</span>`;
-    if (st==="CANCELLED") return `<span class="tag tag-done">✖ CANCELLED</span>`;
     return `<span class="tag tag-done">• ${st}</span>`;
   }
   const nowSec = ()=> Math.floor(Date.now()/1000);
   function timeLeft(expiresAt){
-    const t = Number(expiresAt||0); if (!t) return "—";
-    const left = t - nowSec(); if (left <= 0) return "Expired";
-    const m = Math.floor(left/60), s = left % 60;
-    return `${m}m ${s}s`;
+    const t=Number(expiresAt||0); if(!t) return "—";
+    const left=t-nowSec(); if(left<=0) return "Expired";
+    const m=Math.floor(left/60), s=left%60; return `${m}m ${s}s`;
   }
   function imgOrFallback(url, alt){
-    if (!url) return `<span class="ico"></span>`;
+    if(!url) return `<span class="ico"></span>`;
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
   }
 
-  // ✅ store fee + grand total inside payTo packed field too (so buyer sees it)
   const packPayTo = (addr, priceStr, totalStr, feeStr, grandStr)=>
     `${(addr||"").trim()} || price=${(priceStr||"").trim()} || total=${(totalStr||"").trim()} || fee=${(feeStr||"").trim()} || grand=${(grandStr||"").trim()}`;
 
   function unpackPayTo(payToRaw){
-    const raw = (payToRaw||"").trim();
-    const parts = raw.split("||").map(x=>x.trim()).filter(Boolean);
-    const out = { address: raw, price: "", total: "", fee:"", grand:"" };
-    if (!parts.length) return out;
-    out.address = parts[0] || raw;
-    for (const part of parts.slice(1)){
-      const low = part.toLowerCase();
-      const val = part.split("=").slice(1).join("=").trim();
-      if (low.startsWith("price=")) out.price = val;
-      if (low.startsWith("total=")) out.total = val;
-      if (low.startsWith("fee=")) out.fee = val;
-      if (low.startsWith("grand=")) out.grand = val;
+    const raw=(payToRaw||"").trim();
+    const parts=raw.split("||").map(x=>x.trim()).filter(Boolean);
+    const out={ address:raw, price:"", total:"", fee:"", grand:"" };
+    if(!parts.length) return out;
+    out.address=parts[0]||raw;
+    for(const part of parts.slice(1)){
+      const low=part.toLowerCase();
+      const val=part.split("=").slice(1).join("=").trim();
+      if(low.startsWith("price=")) out.price=val;
+      if(low.startsWith("total=")) out.total=val;
+      if(low.startsWith("fee=")) out.fee=val;
+      if(low.startsWith("grand=")) out.grand=val;
     }
     return out;
   }
 
   function calcTotal(){
-    const amt = Number(el.inAmount.value || 0);
-    const price = Number(el.pricePer.value || 0);
-    if (!amt || !price || amt <= 0 || price <= 0) return "";
-    return (amt * price).toFixed(6);
+    const amt=Number(el.inAmount.value||0);
+    const price=Number(el.pricePer.value||0);
+    if(!amt||!price||amt<=0||price<=0) return "";
+    return (amt*price).toFixed(6);
   }
   function calcFee(totalStr){
-    const total = Number(totalStr || 0);
-    if (!total || total <= 0) return "";
-    const fee = total * (BUYER_FEE_BPS / 10000);
-    return fee.toFixed(6);
+    const total=Number(totalStr||0);
+    if(!total||total<=0) return "";
+    return (total*(BUYER_FEE_BPS/10000)).toFixed(6);
   }
   function calcGrand(totalStr, feeStr){
-    const t = Number(totalStr || 0), f = Number(feeStr || 0);
-    if (!t || t <= 0) return "";
-    return (t + f).toFixed(6);
+    const t=Number(totalStr||0), f=Number(feeStr||0);
+    if(!t||t<=0) return "";
+    return (t+f).toFixed(6);
   }
 
   function renderPreview(){
-    const amt = (el.inAmount.value||"").trim();
-    const mins = Number(el.payWindow.value||30);
-    const price = (el.pricePer.value||"").trim();
+    const amt=(el.inAmount.value||"").trim();
+    const mins=Number(el.payWindow.value||30);
+    const price=(el.pricePer.value||"").trim();
 
-    const total = calcTotal();
-    const fee = calcFee(total);
-    const grand = calcGrand(total, fee);
+    const total=calcTotal();
+    const fee=calcFee(total);
+    const grand=calcGrand(total, fee);
 
     el.totalPill.textContent = total ? `${total} ${el.payAsset.value}` : "—";
-    el.feePill.textContent = fee ? `${fee} ${el.payAsset.value}` : "—";
+    el.feePill.textContent   = fee ? `${fee} ${el.payAsset.value}` : "—";
     el.grandPill.textContent = grand ? `${grand} ${el.payAsset.value}` : "—";
 
-    if (!amt){ el.previewPill.textContent = "—"; return; }
-
-    const pr = price ? ` • price ${price}` : "";
-    const tt = total ? ` • total ${total}` : "";
-    const ff = fee ? ` • fee ${fee}` : "";
-    const gg = grand ? ` • pay ${grand} ${el.payAsset.value}` : "";
-    el.previewPill.textContent = `${amt} INRI${pr}${tt}${ff}${gg} • ${el.payNetwork.value} • ${mins} min`;
+    if(!amt){ el.previewPill.textContent="—"; return; }
+    el.previewPill.textContent = `${amt} INRI • price ${price||"—"} • total ${total||"—"} • fee ${fee||"—"} • pay ${grand||"—"} ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
   }
 
-  function normalize(s){
-    return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim();
-  }
+  function normalize(s){ return String(s||"").toLowerCase().replace(/\u2026/g,'...').replace(/[^a-z0-9x.\-_\s]/g,' ').replace(/\s+/g,' ').trim(); }
   function addrVariants(a){
-    const x = normalize(a);
-    if (!x) return [];
-    const no0x = x.startsWith("0x") ? x.slice(2) : x;
-    const sh = (x.length >= 12) ? (x.slice(0,6) + "..." + x.slice(-4)) : x;
-    const sh2 = (no0x.length >= 10) ? ("0x"+no0x.slice(0,6)+"..."+no0x.slice(-4)) : ("0x"+no0x);
+    const x=normalize(a); if(!x) return [];
+    const no0x=x.startsWith("0x")?x.slice(2):x;
+    const sh=(x.length>=12)?(x.slice(0,6)+"..."+x.slice(-4)):x;
+    const sh2=(no0x.length>=10)?("0x"+no0x.slice(0,6)+"..."+no0x.slice(-4)):("0x"+no0x);
     return [x,no0x,sh,sh2];
   }
   function makeHaystack(o){
-    const meta = unpackPayTo(o.payTo);
-    const parts = [
-      o.id?.toString?.() ?? "",
-      o.payAsset, o.payNetwork,
-      o.txid,
-      o.payTo, meta.address, meta.price, meta.total, meta.fee, meta.grand,
-      ...addrVariants(o.seller),
-      ...addrVariants(o.buyer)
-    ];
+    const meta=unpackPayTo(o.payTo);
+    const parts=[o.id?.toString?.()??"", o.payAsset, o.payNetwork, o.txid, o.payTo, meta.address, meta.price, meta.total, meta.fee, meta.grand, ...addrVariants(o.seller), ...addrVariants(o.buyer)];
     return normalize(parts.join(" "));
   }
-  function matchesQuery(o, q){
-    const query = normalize(q);
-    if (!query) return true;
-    const tokens = query.split(" ").filter(Boolean);
-    const hay = makeHaystack(o);
-    return tokens.every(t => hay.includes(t));
+  function matchesQuery(o,q){
+    const query=normalize(q); if(!query) return true;
+    const tokens=query.split(" ").filter(Boolean);
+    const hay=makeHaystack(o);
+    return tokens.every(t=>hay.includes(t));
   }
 
   function showTab(which){
-    const createOn = which==="create";
+    const createOn=(which==="create");
     el.tabCreate.classList.toggle("active", createOn);
     el.tabMarket.classList.toggle("active", !createOn);
     if (window.innerWidth <= 980){
@@ -676,47 +671,93 @@
       el.createPanel.style.display = "block";
       el.marketPanel.style.display = "block";
     }
-    updateSpacer();
+  }
+
+  // ✅ MOBILE: deep link para abrir DAPP dentro da wallet
+  function showWalletChooser(){
+    el.walletModal.style.display="flex";
+  }
+  function hideWalletChooser(){
+    el.walletModal.style.display="none";
+  }
+  function currentUrl(){
+    // tenta manter https
+    return encodeURIComponent(window.location.href);
+  }
+  function openInMetaMask(){
+    // MetaMask deep link DAPP browser
+    const u = window.location.href.replace(/^https?:\/\//,'');
+    window.location.href = `https://metamask.app.link/dapp/${u}`;
+  }
+  function openInTrust(){
+    // Trust Wallet deep link
+    window.location.href = `https://link.trustwallet.com/open_url?url=${currentUrl()}`;
   }
 
   async function ensureNetwork(){
-    if (!window.ethereum) throw new Error("No wallet found (MetaMask/Rabby).");
-    const cur = await window.ethereum.request({method:"eth_chainId"});
-    if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()){
-      el.netPill.textContent = `Network: ${CHAIN_NAME}`;
-      return;
-    }
+    if (!window.ethereum) throw new Error("No wallet found.");
+    const cur=await window.ethereum.request({method:"eth_chainId"});
+    if (cur && cur.toLowerCase()===CHAIN_HEX.toLowerCase()){ el.netPill.textContent=`Network: ${CHAIN_NAME}`; return; }
     try{
-      await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId: CHAIN_HEX}]});
+      await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
     }catch(e){
-      if (e && e.code === 4902){
+      if (e && e.code===4902){
         await window.ethereum.request({
           method:"wallet_addEthereumChain",
           params:[{
-            chainId: CHAIN_HEX, chainName: CHAIN_NAME, rpcUrls:[RPC_URL],
+            chainId:CHAIN_HEX, chainName:CHAIN_NAME, rpcUrls:[RPC_URL],
             nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18}, blockExplorerUrls:[]
           }]
         });
-        await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId: CHAIN_HEX}]});
+        await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
       } else { throw e; }
     }
-    el.netPill.textContent = `Network: ${CHAIN_NAME}`;
+    el.netPill.textContent=`Network: ${CHAIN_NAME}`;
+  }
+
+  async function detectWithdrawSupport(){
+    supportsWithdraw=false;
+    el.btnWithdraw.style.display="none";
+    el.withdrawPill.textContent="—";
+    try{
+      await contractRead.pendingWithdrawals(me || ethers.ZeroAddress);
+      supportsWithdraw=true;
+      el.btnWithdraw.style.display="inline-flex";
+      el.withdrawPill.textContent="0";
+    }catch{
+      supportsWithdraw=false;
+      el.btnWithdraw.style.display="none";
+      el.withdrawPill.textContent="N/A";
+    }
+  }
+  async function refreshWithdrawable(){
+    if(!supportsWithdraw || !me) return;
+    try{
+      const amt=await contractRead.pendingWithdrawals(me);
+      el.withdrawPill.textContent = `${fmtInri(amt)} INRI`;
+    }catch{ el.withdrawPill.textContent="—"; }
   }
 
   async function connect(){
+    // ✅ se não existe provider (celular normal), abre chooser
+    if (!window.ethereum){
+      showWalletChooser();
+      return;
+    }
+
     await ensureNetwork();
-    browserProvider = new ethers.BrowserProvider(window.ethereum);
+    browserProvider=new ethers.BrowserProvider(window.ethereum);
     await browserProvider.send("eth_requestAccounts", []);
-    signer = await browserProvider.getSigner();
-    me = await signer.getAddress();
+    signer=await browserProvider.getSigner();
+    me=await signer.getAddress();
 
-    readProvider = browserProvider;
-    contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
-    contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
+    readProvider=browserProvider;
+    contractRead=new ethers.Contract(CONTRACT, ABI, readProvider);
+    contractWrite=new ethers.Contract(CONTRACT, ABI, signer);
 
-    el.btnConnect.textContent = short(me);
-    el.meAddr.textContent = me;
-    el.rpcMode.textContent = "Provider mode: Wallet Provider (no CORS)";
+    el.btnConnect.textContent=short(me);
+    el.meAddr.textContent=me;
+    el.rpcMode.textContent="Provider mode: Wallet Provider (no CORS)";
 
     await detectWithdrawSupport();
     await refreshWithdrawable();
@@ -724,153 +765,126 @@
     startLiveActivity();
   }
 
-  async function detectWithdrawSupport(){
-    supportsWithdraw = false;
-    el.btnWithdraw.style.display = "none";
-    el.withdrawPill.textContent = "—";
-    try{
-      await contractRead.pendingWithdrawals(me || ethers.ZeroAddress);
-      supportsWithdraw = true;
-      el.btnWithdraw.style.display = "inline-flex";
-      el.withdrawPill.textContent = "0";
-    }catch{
-      supportsWithdraw = false;
-      el.btnWithdraw.style.display = "none";
-      el.withdrawPill.textContent = "N/A";
-    }
-  }
-  async function refreshWithdrawable(){
-    if (!supportsWithdraw || !me) return;
-    try{
-      const amt = await contractRead.pendingWithdrawals(me);
-      el.withdrawPill.textContent = `${fmtInri(amt)} INRI`;
-    }catch{ el.withdrawPill.textContent = "—"; }
+  function mergeIds(aStr,bStr){
+    const set=new Set([...aStr.map(String),...bStr.map(String)]);
+    return [...set].sort((x,y)=>{ try{ return BigInt(y)>BigInt(x)?1:-1; }catch{ return 0; }});
   }
 
-  function mergeIds(aStr, bStr){
-    const set = new Set([...aStr.map(String), ...bStr.map(String)]);
-    return [...set].sort((x,y)=> { try{ return BigInt(y) > BigInt(x) ? 1 : -1; } catch { return 0; } });
-  }
-
+  let lastSeenBlock=0, pollTimer=null;
   async function loadOfferIds(){
-    const saved = loadSavedIds();
-    let fromLogs = [];
+    const saved=loadSavedIds();
+    let fromLogs=[];
     try{
-      const provider = contractRead.runner.provider;
-      const latest = await provider.getBlockNumber();
-      lastBlock = latest;
-      const from = Math.max(0, latest - DEFAULT_SCAN_BLOCKS);
+      const provider=contractRead.runner.provider;
+      const latest=await provider.getBlockNumber();
+      lastBlock=latest;
+      const from=Math.max(0, latest-DEFAULT_SCAN_BLOCKS);
 
-      const topic0 = iface.getEvent("OfferCreated").topicHash;
-      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: latest, topics:[topic0] });
+      const topic0=iface.getEvent("OfferCreated").topicHash;
+      const logs=await provider.getLogs({address:CONTRACT,fromBlock:from,toBlock:latest,topics:[topic0]});
 
-      const seen = new Set();
-      for (const lg of logs){
-        const parsed = iface.parseLog(lg);
-        const id = parsed.args.offerId.toString();
-        if (!seen.has(id)){ seen.add(id); fromLogs.push(id); }
+      const seen=new Set();
+      for(const lg of logs){
+        const parsed=iface.parseLog(lg);
+        const id=parsed.args.offerId.toString();
+        if(!seen.has(id)){ seen.add(id); fromLogs.push(id); }
       }
-    }catch(e){ console.warn("getLogs failed. Showing saved offers only.", e); }
+    }catch(e){ console.warn("getLogs failed. Showing saved only.", e); }
+
     offerIds = mergeIds(saved, fromLogs).map(x=>BigInt(x));
   }
 
   async function loadOffersDetails(){
-    const out = [];
-    for (const id of offerIds){
+    const out=[];
+    for(const id of offerIds){
       try{
-        const o = await contractRead.offers(id);
+        const o=await contractRead.offers(id);
         out.push({
-          id,
-          seller:o.seller, buyer:o.buyer, amount:o.amount,
+          id, seller:o.seller, buyer:o.buyer, amount:o.amount,
           createdAt:Number(o.createdAt), expiresAt:Number(o.expiresAt),
           payWindowSec:Number(o.payWindowSec), status:Number(o.status),
           payAsset:o.payAsset, payNetwork:o.payNetwork, payTo:o.payTo, txid:o.txid
         });
       }catch{}
     }
-    offersCache = out;
+    offersCache=out;
+  }
+
+  function updateCounters(){
+    el.paidCount.textContent = String(offersCache.filter(o=>o.status===2).length);
+    el.disputeCount.textContent = String(offersCache.filter(o=>o.status===3).length);
+    el.doneCount.textContent = String(offersCache.filter(o=>o.status===4 || o.status===5).length);
   }
 
   function applyFilters(list){
-    const f = el.filter.value;
-    const q = el.q.value || "";
+    const f=el.filter.value;
+    const q=el.q.value||"";
+    let x=list.slice();
 
-    let x = list.slice();
-    if (f==="open") x = x.filter(o=>o.status===0);
-    if (f==="locked") x = x.filter(o=>o.status===1);
-    if (f==="paid") x = x.filter(o=>o.status===2);
-    if (f==="disputed") x = x.filter(o=>o.status===3);
-    if (f==="finalized") x = x.filter(o=>o.status===4 || o.status===5);
+    if (f==="open") x=x.filter(o=>o.status===0);
+    if (f==="locked") x=x.filter(o=>o.status===1);
+    if (f==="paid") x=x.filter(o=>o.status===2);
+    if (f==="disputed") x=x.filter(o=>o.status===3);
+    if (f==="finalized") x=x.filter(o=>o.status===4 || o.status===5);
 
     if (f==="mine"){
-      if (!me) x = [];
+      if(!me) x=[];
       else{
-        const m = me.toLowerCase();
-        x = x.filter(o => (o.seller||"").toLowerCase()===m || (o.buyer||"").toLowerCase()===m);
+        const m=me.toLowerCase();
+        x=x.filter(o => (o.seller||"").toLowerCase()===m || (o.buyer||"").toLowerCase()===m);
       }
     }
-
-    if (q) x = x.filter(o => matchesQuery(o, q));
+    if(q) x=x.filter(o=>matchesQuery(o,q));
     return x;
   }
 
   function paginate(list){
-    totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-    page = Math.min(Math.max(1, page), totalPages);
-    const start = (page-1)*PAGE_SIZE;
-    return list.slice(start, start + PAGE_SIZE);
-  }
-
-  function updateCounters(){
-    const paid = offersCache.filter(o=>o.status===2).length;
-    const disp = offersCache.filter(o=>o.status===3).length;
-    const done = offersCache.filter(o=>o.status===4 || o.status===5).length;
-    el.paidCount.textContent = String(paid);
-    el.disputeCount.textContent = String(disp);
-    el.doneCount.textContent = String(done);
+    totalPages=Math.max(1, Math.ceil(list.length/PAGE_SIZE));
+    page=Math.min(Math.max(1,page), totalPages);
+    const start=(page-1)*PAGE_SIZE;
+    return list.slice(start, start+PAGE_SIZE);
   }
 
   function render(){
     updateCounters();
+    const filtered=applyFilters(offersCache);
+    el.count.textContent=String(filtered.length);
 
-    const filtered = applyFilters(offersCache);
-    el.count.textContent = String(filtered.length);
+    const items=paginate(filtered);
+    el.pageInfo.textContent=`${page} / ${totalPages}`;
+    el.prev.disabled=(page<=1);
+    el.next.disabled=(page>=totalPages);
 
-    const items = paginate(filtered);
-    el.pageInfo.textContent = `${page} / ${totalPages}`;
-    el.prev.disabled = (page<=1);
-    el.next.disabled = (page>=totalPages);
-
-    el.offers.innerHTML = "";
-    if (!items.length){
-      const div = document.createElement("div");
-      div.className = "muted";
-      div.textContent = (el.filter.value==="mine" && !me) ? "Connect wallet to view your offers." : "No offers found. Click Refresh.";
+    el.offers.innerHTML="";
+    if(!items.length){
+      const div=document.createElement("div");
+      div.className="muted";
+      div.textContent=(el.filter.value==="mine" && !me) ? "Connect wallet to view your offers." : "No offers found. Click Refresh.";
       el.offers.appendChild(div);
       return;
     }
 
-    for (const o of items){
-      const li = document.createElement("li");
-      li.className = "offer";
+    for(const o of items){
+      const li=document.createElement("li");
+      li.className="offer";
 
-      const net = PAY_NETWORKS.find(n=>n.key===o.payNetwork);
-      const netLogo = net?.logo || "";
-      const assetLogo = TOKEN_LOGO[o.payAsset] || "";
+      const net=PAY_NETWORKS.find(n=>n.key===o.payNetwork);
+      const netLogo=net?.logo||"";
+      const assetLogo=TOKEN_LOGO[o.payAsset]||"";
 
-      const meta = unpackPayTo(o.payTo);
+      const meta=unpackPayTo(o.payTo);
       const priceLine = meta.price ? `• price ${meta.price} ${o.payAsset}` : "";
       const totalLine = meta.total ? `• total ${meta.total} ${o.payAsset}` : "";
-      const feeLine = meta.fee ? `• fee ${meta.fee} ${o.payAsset}` : "";
+      const feeLine   = meta.fee ? `• fee ${meta.fee} ${o.payAsset}` : "";
       const grandLine = meta.grand ? `• pay ${meta.grand} ${o.payAsset}` : "";
 
-      li.innerHTML = `
+      li.innerHTML=`
         <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
           <div style="min-width:200px">
             <div class="row" style="gap:8px">
               ${statusTag(o.status)}
-              <span class="tag">${imgOrFallback(assetLogo, o.payAsset)} ${o.payAsset || "—"}</span>
-              <span class="tag">${imgOrFallback(netLogo, o.payNetwork)} ${o.payNetwork || "—"}</span>
+              <span class="tag">${imgOrFallback(assetLogo,o.payAsset)} ${o.payAsset||"—"}</span>
+              <span class="tag">${imgOrFallback(netLogo,o.payNetwork)} ${o.payNetwork||"—"}</span>
             </div>
 
             <div style="margin-top:8px;font-weight:900;font-size:15px">${fmtInri(o.amount)} INRI</div>
@@ -883,30 +897,18 @@
             <div class="muted2">Seller</div>
             <div class="mono">${short(o.seller)}</div>
             <div class="muted2" style="margin-top:6px">Buyer</div>
-            <div class="mono">${o.buyer && o.buyer !== ethers.ZeroAddress ? short(o.buyer) : "—"}</div>
+            <div class="mono">${o.buyer && o.buyer!==ethers.ZeroAddress ? short(o.buyer) : "—"}</div>
           </div>
         </div>
 
         <div class="kvs">
-          <div class="kv">
-            <div class="k">Window</div>
-            <div class="v">${Math.round(o.payWindowSec/60)} min</div>
-          </div>
-          <div class="kv">
-            <div class="k">Time Left</div>
-            <div class="v">${o.status===1 ? timeLeft(o.expiresAt) : "—"}</div>
-          </div>
+          <div class="kv"><div class="k">Window</div><div class="v">${Math.round(o.payWindowSec/60)} min</div></div>
+          <div class="kv"><div class="k">Time Left</div><div class="v">${o.status===1 ? timeLeft(o.expiresAt) : "—"}</div></div>
         </div>
 
         <div class="actions">
           <button class="btn btn-ghost" data-act="view" data-id="${o.id.toString()}">View</button>
           <button class="btn btn-pri" data-act="quick" data-id="${o.id.toString()}">${(statusLabel(o.status)==="OPEN" ? "Accept" : "Open")}</button>
-        </div>
-
-        <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap">
-          <span class="chip">${imgOrFallback(TOKEN_LOGO.INRI,"INRI")} INRI</span>
-          <span class="chip">${imgOrFallback(assetLogo,o.payAsset)} ${o.payAsset || "—"}</span>
-          <span class="chip">${imgOrFallback(netLogo,o.payNetwork)} ${net?.label || o.payNetwork || "—"}</span>
         </div>
       `;
       el.offers.appendChild(li);
@@ -932,111 +934,42 @@
 
   async function pollActivity(){
     try{
-      const provider = contractRead.runner.provider;
-      const latest = await provider.getBlockNumber();
-      if (!lastSeenBlock) lastSeenBlock = latest;
-      if (latest <= lastSeenBlock) return;
+      const provider=contractRead.runner.provider;
+      const latest=await provider.getBlockNumber();
+      if(!lastSeenBlock) lastSeenBlock=latest;
+      if(latest<=lastSeenBlock) return;
 
-      const from = lastSeenBlock + 1;
-      const to = latest;
+      const from=lastSeenBlock+1, to=latest;
+      const tPaid=iface.getEvent("MarkedPaid").topicHash;
+      const tDisp=iface.getEvent("DisputeOpened").topicHash;
 
-      const tPaid = iface.getEvent("MarkedPaid").topicHash;
-      const tDisp = iface.getEvent("DisputeOpened").topicHash;
+      const logs=await provider.getLogs({address:CONTRACT,fromBlock:from,toBlock:to,topics:[[tPaid,tDisp]]});
 
-      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: to, topics: [[tPaid, tDisp]] });
-
-      let touched = false;
-      for (const lg of logs){
-        const parsed = iface.parseLog(lg);
-        if (!parsed) continue;
-        if (parsed.name === "MarkedPaid"){ touched = true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
-        if (parsed.name === "DisputeOpened"){ touched = true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
+      let touched=false;
+      for(const lg of logs){
+        const parsed=iface.parseLog(lg);
+        if(!parsed) continue;
+        if(parsed.name==="MarkedPaid"){ touched=true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
+        if(parsed.name==="DisputeOpened"){ touched=true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
       }
-
-      lastSeenBlock = latest;
-      el.activityPill.textContent = "block " + latest;
-      if (touched) await refresh();
+      lastSeenBlock=latest;
+      el.activityPill.textContent="block "+latest;
+      if(touched) await refresh();
     }catch(e){}
   }
-  function startLiveActivity(){ if (pollTimer) return; pollTimer = setInterval(pollActivity, 9000); }
+  function startLiveActivity(){ if(pollTimer) return; pollTimer=setInterval(pollActivity, 9000); }
 
-  async function requireConnected(){ if (!me) await connect(); if (!contractWrite) throw new Error("Not connected."); }
+  async function requireConnected(){ if(!me) await connect(); if(!contractWrite) throw new Error("Not connected."); }
 
-  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage || e.message || e)); } });
+  // events
+  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: " + (e.shortMessage||e.message||e)); } });
+  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage||e.message||e)); } });
+  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage||e.message||e)); } });
 
-  el.btnCreate.addEventListener("click", async ()=>{
-    try{
-      await requireConnected();
+  el.btnClearSaved.addEventListener("click", ()=>{ if(!confirm("Clear saved offers from this device?")) return; clearSaved(); toast("Saved cleared ✅"); refresh().catch(()=>{}); });
 
-      const amt = (el.inAmount.value||"").trim();
-      const payTo = (el.payTo.value||"").trim();
-      const mins = Number(el.payWindow.value||30);
-      const price = (el.pricePer.value||"").trim();
-
-      const total = calcTotal();
-      const fee = calcFee(total);
-      const grand = calcGrand(total, fee);
-
-      if (!amt || Number(amt) <= 0) throw new Error("Invalid INRI amount");
-      if (!price || Number(price) <= 0) throw new Error("Price per INRI is required");
-      if (!total) throw new Error("Could not calculate total");
-      if (!fee) throw new Error("Could not calculate fee");
-      if (!grand) throw new Error("Could not calculate total+fee");
-      if (!payTo) throw new Error("Seller receive address is required");
-
-      const payWindowSec = Math.max(60, Math.floor(mins*60));
-      const valueWei = ethers.parseEther(amt);
-
-      // ✅ store price/total/fee/grand in payTo string
-      const payToPacked = packPayTo(payTo, price, total, fee, grand);
-
-      toast("Creating offer…");
-      const tx = await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, { value: valueWei });
-      const receipt = await tx.wait();
-
-      try{
-        for (const lg of receipt.logs){
-          if ((lg.address || "").toLowerCase() !== CONTRACT.toLowerCase()) continue;
-          const parsed = iface.parseLog(lg);
-          if (parsed && parsed.name === "OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
-        }
-      }catch(e){}
-
-      el.inAmount.value = ""; el.pricePer.value = ""; el.payTo.value = "";
-      renderPreview();
-
-      await refresh();
-      toast("Offer created ✅");
-      if (window.innerWidth <= 980) showTab("market");
-    }catch(e){
-      console.error(e);
-      alert("Create error: " + (e.shortMessage || e.message || e));
-    }
-  });
-
-  el.btnWithdraw.addEventListener("click", async ()=>{
-    try{
-      await requireConnected();
-      toast("Withdrawing…");
-      const tx = await contractWrite.withdraw();
-      await tx.wait();
-      await refreshWithdrawable();
-      toast("Withdraw complete ✅");
-    }catch(e){ console.error(e); alert("Withdraw error: " + (e.shortMessage || e.message || e)); }
-  });
-
-  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: " + (e.shortMessage || e.message || e)); } });
-
-  el.btnClearSaved.addEventListener("click", ()=>{
-    if (!confirm("Clear saved offers from this device?")) return;
-    clearSaved(); toast("Saved offers cleared ✅");
-    refresh().catch(()=>{});
-  });
-
-  el.prev.addEventListener("click", ()=>{ page = Math.max(1, page-1); render(); });
-  el.next.addEventListener("click", ()=>{ page = Math.min(totalPages, page+1); render(); });
-
+  el.prev.addEventListener("click", ()=>{ page=Math.max(1,page-1); render(); });
+  el.next.addEventListener("click", ()=>{ page=Math.min(totalPages,page+1); render(); });
   el.filter.addEventListener("change", ()=>{ page=1; render(); });
   el.q.addEventListener("input", ()=>{ page=1; render(); });
 
@@ -1046,70 +979,127 @@
   el.payWindow.addEventListener("input", renderPreview);
   el.pricePer.addEventListener("input", renderPreview);
 
+  // mobile wallet modal
+  el.walletClose.addEventListener("click", hideWalletChooser);
+  el.walletModal.addEventListener("click", (e)=>{ if(e.target===el.walletModal) hideWalletChooser(); });
+  el.openMetaMask.addEventListener("click", openInMetaMask);
+  el.openTrust.addEventListener("click", openInTrust);
+
+  // tabs
+  el.tabCreate.addEventListener("click", ()=>showTab("create"));
+  el.tabMarket.addEventListener("click", ()=>showTab("market"));
+
+  // create
+  el.btnCreate.addEventListener("click", async ()=>{
+    try{
+      await requireConnected();
+
+      const amt=(el.inAmount.value||"").trim();
+      const payTo=(el.payTo.value||"").trim();
+      const mins=Number(el.payWindow.value||30);
+      const price=(el.pricePer.value||"").trim();
+
+      const total=calcTotal();
+      const fee=calcFee(total);
+      const grand=calcGrand(total, fee);
+
+      if(!amt || Number(amt)<=0) throw new Error("Invalid INRI amount");
+      if(!price || Number(price)<=0) throw new Error("Price per INRI required");
+      if(!total) throw new Error("Could not calculate total");
+      if(!fee) throw new Error("Could not calculate fee");
+      if(!grand) throw new Error("Could not calculate total+fee");
+      if(!payTo) throw new Error("Seller receive address required");
+
+      const payWindowSec=Math.max(60, Math.floor(mins*60));
+      const valueWei=ethers.parseEther(amt);
+      const payToPacked=packPayTo(payTo, price, total, fee, grand);
+
+      toast("Creating offer…");
+      const tx=await contractWrite.createOffer(payWindowSec, el.payAsset.value, el.payNetwork.value, payToPacked, {value:valueWei});
+      const receipt=await tx.wait();
+
+      try{
+        for(const lg of receipt.logs){
+          if((lg.address||"").toLowerCase()!==CONTRACT.toLowerCase()) continue;
+          const parsed=iface.parseLog(lg);
+          if(parsed && parsed.name==="OfferCreated"){ saveId(parsed.args.offerId.toString()); break; }
+        }
+      }catch(e){}
+
+      el.inAmount.value=""; el.pricePer.value=""; el.payTo.value="";
+      renderPreview();
+      await refresh();
+      toast("Offer created ✅");
+      if(window.innerWidth<=980) showTab("market");
+    }catch(e){ console.error(e); alert("Create error: " + (e.shortMessage||e.message||e)); }
+  });
+
+  // modal open
   function openModal(){ el.backdrop.style.display="flex"; }
   function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
+  el.mClose.addEventListener("click", closeModal);
+  el.backdrop.addEventListener("click", (e)=>{ if(e.target===el.backdrop) closeModal(); });
 
   function setModalButtonsState(){
-    if (!modalOffer){
-      el.btnAccept.disabled = el.btnPaid.disabled = el.btnRelease.disabled = el.btnDispute.disabled = el.btnCancel.disabled = el.btnReclaim.disabled = true;
+    if(!modalOffer){
+      el.btnAccept.disabled=el.btnPaid.disabled=el.btnRelease.disabled=el.btnDispute.disabled=el.btnCancel.disabled=el.btnReclaim.disabled=true;
       return;
     }
-    const st = statusLabel(modalOffer.status);
-    const isSeller = me && modalOffer.seller && modalOffer.seller.toLowerCase()===me.toLowerCase();
-    const isBuyer  = me && modalOffer.buyer  && modalOffer.buyer.toLowerCase()===me.toLowerCase();
+    const st=statusLabel(modalOffer.status);
+    const isSeller=me && modalOffer.seller && modalOffer.seller.toLowerCase()===me.toLowerCase();
+    const isBuyer=me && modalOffer.buyer && modalOffer.buyer.toLowerCase()===me.toLowerCase();
 
-    el.btnAccept.disabled  = !(st==="OPEN" && me && !isSeller);
-    el.btnPaid.disabled    = !(st==="LOCKED" && me && isBuyer);
+    el.btnAccept.disabled = !(st==="OPEN" && me && !isSeller);
+    el.btnPaid.disabled = !(st==="LOCKED" && me && isBuyer);
     el.btnRelease.disabled = !((st==="PAID" || st==="DISPUTED") && me && isSeller);
     el.btnDispute.disabled = !(st==="PAID" && me && isBuyer);
-    el.btnCancel.disabled  = !(st==="OPEN" && me && isSeller);
+    el.btnCancel.disabled = !(st==="OPEN" && me && isSeller);
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
 
-    const note = [];
+    const note=[];
     note.push(`Status: ${st}`);
-    if (isSeller) note.push("You are the seller.");
-    if (isBuyer)  note.push("You are the buyer.");
-    if (!me)      note.push("Connect wallet to interact.");
-    if (st==="LOCKED") note.push(`Deadline: ${new Date(modalOffer.expiresAt*1000).toLocaleString()} (${timeLeft(modalOffer.expiresAt)})`);
-    if (st==="PAID") note.push("Seller must confirm payment and release.");
-    if (st==="DISPUTED") note.push("Dispute opened. Admin/mods decide.");
-    el.mNote.textContent = note.join(" ");
+    if(isSeller) note.push("You are the seller.");
+    if(isBuyer) note.push("You are the buyer.");
+    if(!me) note.push("Connect wallet to interact.");
+    if(st==="LOCKED") note.push(`Deadline: ${new Date(modalOffer.expiresAt*1000).toLocaleString()} (${timeLeft(modalOffer.expiresAt)})`);
+    if(st==="PAID") note.push("Seller must confirm payment and release.");
+    if(st==="DISPUTED") note.push("Dispute opened. Admin/mods decide.");
+    el.mNote.textContent=note.join(" ");
   }
 
   async function showOffer(idStr){
-    const id = BigInt(idStr);
-    const o = await contractRead.offers(id);
+    const id=BigInt(idStr);
+    const o=await contractRead.offers(id);
 
-    modalId = id;
-    modalOffer = {
-      id,
-      seller:o.seller, buyer:o.buyer, amount:o.amount,
+    modalId=id;
+    modalOffer={
+      id, seller:o.seller, buyer:o.buyer, amount:o.amount,
       createdAt:Number(o.createdAt), expiresAt:Number(o.expiresAt),
       payWindowSec:Number(o.payWindowSec), status:Number(o.status),
       payAsset:o.payAsset, payNetwork:o.payNetwork, payTo:o.payTo, txid:o.txid
     };
 
-    const st = statusLabel(modalOffer.status);
-    el.mTitle.textContent = `Offer #${idStr} — ${st}`;
-    el.mSub.textContent = `Seller ${short(modalOffer.seller)} • Amount ${fmtInri(modalOffer.amount)} INRI`;
+    const st=statusLabel(modalOffer.status);
+    el.mTitle.textContent=`Offer #${idStr} — ${st}`;
+    el.mSub.textContent=`Seller ${short(modalOffer.seller)} • Amount ${fmtInri(modalOffer.amount)} INRI`;
 
-    const payNet = PAY_NETWORKS.find(n=>n.key===modalOffer.payNetwork);
-    const assetLogo = TOKEN_LOGO[modalOffer.payAsset] || "";
-    const netLogo = payNet?.logo || "";
+    const payNet=PAY_NETWORKS.find(n=>n.key===modalOffer.payNetwork);
+    const assetLogo=TOKEN_LOGO[modalOffer.payAsset]||"";
+    const netLogo=payNet?.logo||"";
 
-    const meta = unpackPayTo(modalOffer.payTo);
+    const meta=unpackPayTo(modalOffer.payTo);
 
-    el.mDetails.innerHTML = `
+    el.mDetails.innerHTML=`
       <div class="row" style="justify-content:space-between;gap:10px;flex-wrap:wrap">
         <span class="pill">${statusTag(modalOffer.status)}</span>
         <span class="pill mono">#${idStr}</span>
       </div>
       <div class="hr"></div>
       <div><b>Amount</b>: ${fmtInri(modalOffer.amount)} INRI</div>
-      <div><b>Price</b>: <span class="mono">${meta.price || "—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Total</b>: <span class="mono">${meta.total || "—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Fee (0.2%)</b>: <span class="mono">${meta.fee || "—"}</span> ${modalOffer.payAsset}</div>
-      <div><b>Total + Fee</b>: <span class="mono">${meta.grand || "—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Price</b>: <span class="mono">${meta.price||"—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Total</b>: <span class="mono">${meta.total||"—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Fee (0.2%)</b>: <span class="mono">${meta.fee||"—"}</span> ${modalOffer.payAsset}</div>
+      <div><b>Total + Fee</b>: <span class="mono">${meta.grand||"—"}</span> ${modalOffer.payAsset}</div>
       <div class="hr"></div>
       <div><b>Seller</b>: <span class="mono">${modalOffer.seller}</span></div>
       <div><b>Buyer</b>: <span class="mono">${modalOffer.buyer && modalOffer.buyer!==ethers.ZeroAddress ? modalOffer.buyer : "—"}</span></div>
@@ -1117,17 +1107,17 @@
       <div><b>TxID</b>: <span class="mono">${modalOffer.txid ? modalOffer.txid : "—"}</span></div>
     `;
 
-    el.mPayHint.innerHTML = `
+    el.mPayHint.innerHTML=`
       <b>Payment instructions</b><br>
-      Pay exactly <b>${meta.grand || "—"} ${modalOffer.payAsset || "—"}</b> on <b>${modalOffer.payNetwork || "—"}</b> to:<br>
-      <span class="mono">${meta.address || "—"}</span><br>
+      Pay exactly <b>${meta.grand||"—"} ${modalOffer.payAsset||"—"}</b> on <b>${modalOffer.payNetwork||"—"}</b> to:<br>
+      <span class="mono">${meta.address||"—"}</span><br>
       Includes buyer fee <b>0.2%</b>. Then paste the <b>TxID</b> and click <b>I Paid</b>.
     `;
 
-    el.mLogos.innerHTML = `
-      <span class="chip">${imgOrFallback(TOKEN_LOGO.INRI, "INRI")} INRI</span>
-      <span class="chip">${imgOrFallback(assetLogo, modalOffer.payAsset)} ${modalOffer.payAsset || "—"}</span>
-      <span class="chip">${imgOrFallback(netLogo, modalOffer.payNetwork)} ${payNet?.label || modalOffer.payNetwork || "—"}</span>
+    el.mLogos.innerHTML=`
+      <span class="chip">${imgOrFallback(TOKEN_LOGO.INRI,"INRI")} INRI</span>
+      <span class="chip">${imgOrFallback(assetLogo,modalOffer.payAsset)} ${modalOffer.payAsset||"—"}</span>
+      <span class="chip">${imgOrFallback(netLogo,modalOffer.payNetwork)} ${payNet?.label||modalOffer.payNetwork||"—"}</span>
     `;
 
     setModalButtonsState();
@@ -1135,105 +1125,96 @@
   }
 
   document.addEventListener("click", async (ev)=>{
-    const btn = ev.target.closest("button[data-act]");
-    if (!btn) return;
-    const id = btn.getAttribute("data-id");
-    try{ await showOffer(id); }
-    catch(e){ console.error(e); alert("Open offer error: " + (e.shortMessage || e.message || e)); }
+    const btn=ev.target.closest("button[data-act]");
+    if(!btn) return;
+    const id=btn.getAttribute("data-id");
+    try{ await showOffer(id); }catch(e){ console.error(e); alert("Open offer error: "+(e.shortMessage||e.message||e)); }
   });
-
-  el.mClose.addEventListener("click", closeModal);
-  el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) closeModal(); });
 
   el.btnAccept.addEventListener("click", async ()=>{
     try{
       await requireConnected();
       toast("Accepting…");
-      const tx = await contractWrite.acceptOffer(modalId);
+      const tx=await contractWrite.acceptOffer(modalId);
       await tx.wait();
       await refresh();
       await showOffer(modalId.toString());
       toast("Accepted ✅");
-    }catch(e){ console.error(e); alert("Accept error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Accept error: "+(e.shortMessage||e.message||e)); }
   });
 
   el.btnPaid.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      const txid = (el.mTxid.value||"").trim();
-      if (txid.length < 6) throw new Error("TxID too short");
+      const txid=(el.mTxid.value||"").trim();
+      if(txid.length<6) throw new Error("TxID too short");
       toast("Marking PAID…");
-      const tx = await contractWrite.markPaid(modalId, txid);
+      const tx=await contractWrite.markPaid(modalId, txid);
       await tx.wait();
       bumpAlert(`💠 Offer #${modalId.toString()} marked as PAID`);
       await refresh();
-      el.filter.value = "paid"; page=1; render();
+      el.filter.value="paid"; page=1; render();
       await showOffer(modalId.toString());
       toast("Marked PAID ✅");
-    }catch(e){ console.error(e); alert("Mark Paid error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Mark Paid error: "+(e.shortMessage||e.message||e)); }
   });
 
   el.btnRelease.addEventListener("click", async ()=>{
     try{
       await requireConnected();
       toast("Releasing…");
-      const tx = await contractWrite.releaseToBuyer(modalId);
+      const tx=await contractWrite.releaseToBuyer(modalId);
       await tx.wait();
       await refresh();
       await showOffer(modalId.toString());
       toast("Released ✅");
-    }catch(e){ console.error(e); alert("Release error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Release error: "+(e.shortMessage||e.message||e)); }
   });
 
   el.btnDispute.addEventListener("click", async ()=>{
     try{
       await requireConnected();
       toast("Opening dispute…");
-      const tx = await contractWrite.openDispute(modalId);
+      const tx=await contractWrite.openDispute(modalId);
       await tx.wait();
       bumpAlert(`⚠ Dispute opened on offer #${modalId.toString()}`);
       await refresh();
-      el.filter.value = "disputed"; page=1; render();
+      el.filter.value="disputed"; page=1; render();
       await showOffer(modalId.toString());
       toast("Dispute opened ✅");
-    }catch(e){ console.error(e); alert("Dispute error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Dispute error: "+(e.shortMessage||e.message||e)); }
   });
 
   el.btnReclaim.addEventListener("click", async ()=>{
     try{
       await requireConnected();
       toast("Reclaiming…");
-      const tx = await contractWrite.reclaimIfUnpaid(modalId);
+      const tx=await contractWrite.reclaimIfUnpaid(modalId);
       await tx.wait();
       await refresh();
       closeModal();
       toast("Reclaimed ✅");
-    }catch(e){ console.error(e); alert("Reclaim error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Reclaim error: "+(e.shortMessage||e.message||e)); }
   });
 
   el.btnCancel.addEventListener("click", async ()=>{
     try{
       await requireConnected();
-      if (!confirm("Cancel this offer? (Only while OPEN)")) return;
+      if(!confirm("Cancel this offer? (Only while OPEN)")) return;
       toast("Cancelling…");
-      const tx = await contractWrite.cancelOffer(modalId);
+      const tx=await contractWrite.cancelOffer(modalId);
       await tx.wait();
       await refresh();
       closeModal();
       toast("Cancelled ✅");
-    }catch(e){ console.error(e); alert("Cancel error: " + (e.shortMessage || e.message || e)); }
+    }catch(e){ console.error(e); alert("Cancel error: "+(e.shortMessage||e.message||e)); }
   });
 
-  function startLiveActivity(){ if (pollTimer) return; pollTimer = setInterval(pollActivity, 9000); }
-
-  el.tabCreate.addEventListener("click", ()=>showTab("create"));
-  el.tabMarket.addEventListener("click", ()=>showTab("market"));
-
+  // init
   (async function init(){
     el.contractPill.textContent = "Contract: " + CONTRACT.slice(0,6) + "…" + CONTRACT.slice(-4);
     renderPreview();
     showTab("create");
-    updateSpacer();
 
     try{
       if (window.ethereum){
@@ -1256,7 +1237,7 @@
     }
 
     try{ await refresh(); }
-    catch(e){ console.error(e); el.syncInfo.textContent = "Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
+    catch(e){ console.error(e); el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
   })();
 })();
 </script>
