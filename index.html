@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>INRI P2P — Escrow</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/inrichain/logofavicon/main/Favicon.png" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 
   <style>
@@ -19,22 +20,25 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%; background:transparent!important; overflow:hidden!important;}
-    body{margin:0;color:var(--text);}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      background: rgb(0,0,0); /* ✅ pure black */
+      overflow:auto; /* ✅ scroll enabled */
+    }
+    a{color:inherit; text-decoration:none}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
+    .muted{color:var(--muted);font-size:12px}
+    .muted2{color:var(--muted2);font-size:12px}
 
-    /* ✅ NO SHADOWS */
+    /* remove shadows */
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
-    .app{height:100vh; display:grid; grid-template-rows:auto 1fr; gap:10px; padding:10px;}
-    .wrap{max-width:1180px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;height:100%}
-
-    a{color:inherit}
-    .row{display:flex;gap:8px;align-items:center}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,"Liberation Mono","Courier New", monospace}
-    .muted{color:var(--muted);font-size:11.5px}
-    .muted2{color:var(--muted2);font-size:11.5px}
+    .wrap{max-width:1180px;margin:0 auto; padding:12px; display:flex; flex-direction:column; gap:10px;}
 
     .top{
+      position:sticky; top:0; z-index:20;
       display:flex; gap:10px; align-items:center; justify-content:space-between;
       padding:10px;
       border:1px solid var(--border);
@@ -42,6 +46,8 @@
       background: rgba(10,14,30,.55);
       backdrop-filter: blur(10px);
     }
+
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .brand{display:flex; gap:10px; align-items:center; min-width:0}
     .logo{
       width:38px;height:38px;border-radius:999px;
@@ -51,6 +57,7 @@
       overflow:hidden; flex:0 0 auto;
     }
     .logo img{width:28px;height:28px;object-fit:contain}
+
     .title{min-width:0}
     .title h1{
       margin:0;font-size:14px;letter-spacing:.2px;
@@ -88,6 +95,7 @@
       border:1px solid rgba(255,255,255,.12);
       transition: transform .12s ease;
       font-size:12.5px;
+      display:inline-flex; align-items:center; gap:8px;
     }
     .btn:hover{transform:translateY(-1px)}
     .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
@@ -96,7 +104,12 @@
     .btn-bad{background:rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.35)}
 
-    .main{height:100%; display:grid; grid-template-rows:auto 1fr; gap:10px; min-height:0;}
+    .btnLogo{
+      width:18px;height:18px;border-radius:999px; overflow:hidden;
+      background:rgba(255,255,255,.12);
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+    .btnLogo img{width:18px;height:18px;object-fit:contain}
 
     .tabs{
       display:flex; gap:8px; align-items:center; justify-content:space-between;
@@ -117,7 +130,7 @@
       border-color:rgba(255,255,255,.10);
     }
 
-    .panelWrap{height:100%; min-height:0; display:grid; grid-template-columns:360px 1fr; gap:10px;}
+    .panelWrap{display:grid; grid-template-columns:360px 1fr; gap:10px;}
     @media(max-width:980px){ .panelWrap{grid-template-columns:1fr} }
 
     .card{
@@ -126,8 +139,6 @@
       background: rgba(10,14,30,.55);
       padding:10px;
       backdrop-filter: blur(10px);
-      min-height:0;
-      overflow:hidden; /* ✅ never scroll */
     }
     .card h2{margin:0 0 8px 0; font-size:13px}
     .hr{height:1px;background:rgba(255,255,255,.10);margin:10px 0}
@@ -139,7 +150,7 @@
       padding:9px 10px;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.25);
+      background:rgba(0,0,0,.35);
       color:var(--text);
       outline:none;
       font-size:13px;
@@ -153,47 +164,29 @@
       line-height:1.32;
     }
 
-    /* MARKET LAYOUT: toolbar / list / footer (wallet area under orders) */
-    .marketLayout{
-      height:100%;
-      min-height:0;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      gap:8px;
-      overflow:hidden;
-    }
-
     .toolbar{
       display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
     }
     .search{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .search input{width:240px}
+    .search input{width:280px}
+    @media(max-width:520px){ .search, .search input{width:100%} }
 
-    @media(max-width:520px){
-      .app{padding:8px}
-      .top{flex-direction:column; align-items:stretch}
-      .btn{width:100%}
-      .pill{width:100%; justify-content:center}
-      .search{width:100%}
-      .search input{width:100%}
-    }
-
-    /* ✅ NO SCROLL list */
+    /* ✅ offers scroll (needed) */
     .offers{
-      min-height:0;
       display:grid;
       grid-template-columns:repeat(2, minmax(0,1fr));
       gap:10px;
       list-style:none;
       padding:0; margin:0;
-      overflow:hidden; /* ✅ */
-      align-content:start;
+      max-height: 62vh; /* ✅ scroll area */
+      overflow:auto;     /* ✅ */
+      padding-right:6px;
     }
-    @media(max-width:720px){ .offers{grid-template-columns:1fr} }
+    @media(max-width:720px){ .offers{grid-template-columns:1fr; max-height: 58vh;} }
 
     .offer{
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.20);
+      background:rgba(0,0,0,.22);
       border-radius:14px;
       padding:10px;
       position:relative;
@@ -212,7 +205,7 @@
     .tag-locked{border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10)}
     .tag-paid{border-color:rgba(59,130,246,.40); background:rgba(59,130,246,.12)}
     .tag-disputed{border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.10)}
-    .tag-done{opacity:.70}
+    .tag-done{opacity:.78}
 
     .kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
     .kv{
@@ -227,14 +220,6 @@
     .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
     .right{text-align:right}
 
-    /* ✅ Logos row under each order (never cut) */
-    .logosUnder{
-      margin-top:8px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
     .chip{
       display:inline-flex; align-items:center; gap:8px;
       padding:6px 9px;border-radius:999px;
@@ -251,19 +236,16 @@
     }
     .ico img{width:18px;height:18px;object-fit:contain}
 
-    /* Footer under orders: pagination + wallet area (photo section) */
     .marketFooter{
+      margin-top:10px;
       border-top:1px solid rgba(255,255,255,.10);
-      padding-top:8px;
+      padding-top:10px;
       display:grid;
       grid-template-columns:1fr auto;
       gap:10px;
       align-items:end;
-      overflow:hidden;
     }
-    @media(max-width:720px){
-      .marketFooter{grid-template-columns:1fr}
-    }
+    @media(max-width:720px){ .marketFooter{grid-template-columns:1fr} }
 
     .walletBox{
       display:flex;
@@ -271,7 +253,6 @@
       flex-wrap:wrap;
       align-items:flex-end;
       justify-content:space-between;
-      overflow:hidden;
     }
     .walletLeft,.walletRight{min-width:220px}
     .walletRight{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -287,191 +268,182 @@
       backdrop-filter: blur(10px);
     }
 
-    /* Modal (keep no scroll; content is concise) */
-    .backdrop{position:fixed; inset:0; display:none; background:rgba(0,0,0,.55); align-items:center; justify-content:center; z-index:9998; padding:12px;}
+    /* Modal */
+    .backdrop{position:fixed; inset:0; display:none; background:rgba(0,0,0,.65); align-items:center; justify-content:center; z-index:9998; padding:12px;}
     .modal{
       width:min(980px, 100%);
       border-radius:18px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(10,14,30,.82);
+      background: rgba(10,14,30,.90);
       padding:12px;
       backdrop-filter: blur(12px);
-      height:min(92vh, 720px);
-      overflow:hidden;
-      display:grid;
-      grid-template-rows:auto 1fr;
-      gap:10px;
+      max-height: 92vh;
+      overflow:auto; /* modal can scroll */
     }
     .modal h3{margin:0;font-size:13px}
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
-    .modalGrid{min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:10px; overflow:hidden;}
+    .modalGrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
-
-    .embedHide{display:none!important}
   </style>
 </head>
 
 <body>
-<div class="app">
-  <div class="wrap">
-    <header class="top" id="topHeader">
-      <div class="brand">
-        <div class="logo" title="INRI">
-          <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
-        </div>
-        <div class="title">
-          <h1>INRI P2P — Escrow Market</h1>
-          <div class="sub">On-chain escrow • Off-chain payment (USDT/USDC) • Live alerts for PAID/DISPUTE</div>
-        </div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" title="INRI">
+        <img loading="lazy" src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" onerror="this.style.display='none'"/>
       </div>
-
-      <div class="row" style="justify-content:flex-end;flex-wrap:wrap">
-        <div class="pill" id="netPill">Network: —</div>
-        <div class="pill mono" id="contractPill">Contract: —</div>
-        <div class="pill" title="Live activity alerts">
-          Alerts <span class="badge" id="alertBadge" style="display:none">0</span>
-        </div>
-        <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
-      </div>
-    </header>
-
-    <div class="main">
-      <div class="tabs">
-        <div class="tabRow">
-          <button class="tab active" id="tabCreate">Create</button>
-          <button class="tab" id="tabMarket">Market</button>
-        </div>
-
-        <div class="row" style="flex-wrap:wrap;justify-content:flex-end">
-          <span class="pill"><b id="paidCount">0</b> paid</span>
-          <span class="pill"><b id="disputeCount">0</b> disputes</span>
-          <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
-        </div>
-      </div>
-
-      <div class="panelWrap">
-        <!-- CREATE PANEL (compact) -->
-        <aside class="card" id="createPanel">
-          <h2>Create Offer</h2>
-          <div class="hint">
-            Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.
-            Your offerId is saved on this device so it won’t “disappear”.
-          </div>
-
-          <div class="field">
-            <label>INRI Amount (native)</label>
-            <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
-          </div>
-
-          <div class="row" style="flex-wrap:wrap">
-            <div class="field" style="flex:1;min-width:160px;margin:8px 0">
-              <label>Pay Asset</label>
-              <select id="payAsset">
-                <option value="USDT">USDT</option>
-                <option value="USDC">USDC</option>
-              </select>
-            </div>
-            <div class="field" style="flex:1;min-width:180px;margin:8px 0">
-              <label>Pay Network</label>
-              <select id="payNetwork"></select>
-            </div>
-          </div>
-
-          <div class="row" style="flex-wrap:wrap">
-            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-              <label>Price per 1 INRI (USDT/USDC)</label>
-              <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
-              <div class="muted2">Total = INRI × price</div>
-            </div>
-            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-              <label>Total to pay (auto)</label>
-              <div class="pill mono" id="totalPill">—</div>
-            </div>
-          </div>
-
-          <div class="field">
-            <label>Seller Receive Address (on selected network)</label>
-            <input id="payTo" placeholder="0x... / T... / any account id" />
-          </div>
-
-          <div class="row" style="flex-wrap:wrap">
-            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-              <label>Payment Window (minutes)</label>
-              <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
-            </div>
-            <div class="field" style="flex:1;min-width:200px;margin:8px 0">
-              <label>Preview</label>
-              <div class="pill" id="previewPill">—</div>
-            </div>
-          </div>
-
-          <div class="row" style="flex-wrap:wrap">
-            <button class="btn btn-pri" id="btnCreate" style="flex:1">Create Offer (deposit INRI)</button>
-          </div>
-
-          <div class="hr"></div>
-          <div class="muted2">
-            Wallet/Withdraw/Clear Saved were moved under the orders (Market) ✅
-          </div>
-        </aside>
-
-        <!-- MARKET PANEL -->
-        <main class="card" id="marketPanel">
-          <div class="marketLayout">
-            <div class="toolbar">
-              <div class="row" style="flex-wrap:wrap">
-                <span class="pill"><b id="count">0</b> offers</span>
-                <span class="pill mono">chainId 3777</span>
-                <span class="pill"><span class="muted2">Activity</span> <span class="mono" id="activityPill">—</span></span>
-              </div>
-
-              <div class="search">
-                <select id="filter">
-                  <option value="all">All</option>
-                  <option value="open">Open</option>
-                  <option value="locked">Locked</option>
-                  <option value="paid">Paid</option>
-                  <option value="disputed">Disputed</option>
-                  <option value="mine">Mine</option>
-                </select>
-                <input id="q" placeholder="Search: id / seller / buyer / txid / network / asset / payTo" />
-                <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
-              </div>
-            </div>
-
-            <ul class="offers" id="offers"></ul>
-
-            <!-- ✅ THIS IS THE PHOTO SECTION (under orders, never cut) -->
-            <div class="marketFooter">
-              <div>
-                <div class="muted2" id="syncInfo">Connect wallet for best sync.</div>
-                <div class="muted2" id="rpcMode">Provider mode: —</div>
-              </div>
-
-              <div class="walletBox">
-                <div class="walletLeft">
-                  <div class="muted">Wallet</div>
-                  <div class="mono" id="meAddr">—</div>
-                  <div class="muted" style="margin-top:6px">Withdrawable</div>
-                  <div class="pill mono" id="withdrawPill">—</div>
-                </div>
-
-                <div class="walletRight">
-                  <button class="btn btn-ok" id="btnWithdraw" style="display:none">Withdraw</button>
-                  <button class="btn btn-ghost" id="btnClearSaved">Clear saved offers (this device)</button>
-                  <div class="row">
-                    <button class="btn btn-ghost" id="prev">◀</button>
-                    <div class="pill" id="pageInfo">1 / 1</div>
-                    <button class="btn btn-ghost" id="next">▶</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- end footer -->
-          </div>
-        </main>
+      <div class="title">
+        <h1>INRI P2P — Escrow Market</h1>
+        <div class="sub">Escrow on-chain • Payment off-chain • Alerts for PAID/DISPUTE • Professional search + counters</div>
       </div>
     </div>
+
+    <div class="row" style="justify-content:flex-end">
+      <!-- ✅ Back button with INRI logo -->
+      <a class="btn btn-ghost" href="https://www.inri.life/" target="_blank" rel="noopener">
+        <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
+        Back to INRI.life
+      </a>
+
+      <div class="pill" id="netPill">Network: —</div>
+      <div class="pill mono" id="contractPill">Contract: —</div>
+      <div class="pill" title="Live activity alerts">
+        Alerts <span class="badge" id="alertBadge" style="display:none">0</span>
+      </div>
+      <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tabRow">
+      <button class="tab active" id="tabCreate">Create</button>
+      <button class="tab" id="tabMarket">Market</button>
+    </div>
+
+    <!-- ✅ counters (fix: includes finalized) -->
+    <div class="row" style="justify-content:flex-end">
+      <span class="pill"><b id="paidCount">0</b> paid</span>
+      <span class="pill"><b id="disputeCount">0</b> disputes</span>
+      <span class="pill"><b id="doneCount">0</b> finalized</span>
+      <button class="btn btn-ghost" id="btnRefreshTop">Refresh</button>
+    </div>
+  </div>
+
+  <div class="panelWrap">
+    <!-- CREATE -->
+    <aside class="card" id="createPanel">
+      <h2>Create Offer</h2>
+
+      <div class="hint">
+        Seller deposits <b>INRI</b>. Buyer pays <b>USDT/USDC</b> off-chain and submits <b>TxID</b>.
+        <br><br>
+        Safety tip: buyer should pay only when status is <b>LOCKED / in progress</b>. :contentReference[oaicite:2]{index=2}
+      </div>
+
+      <div class="field">
+        <label>INRI Amount (native)</label>
+        <input id="inAmount" type="number" step="0.0001" placeholder="e.g. 1000" />
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1;min-width:160px">
+          <label>Pay Asset</label>
+          <select id="payAsset">
+            <option value="USDT">USDT</option>
+            <option value="USDC">USDC</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1;min-width:180px">
+          <label>Pay Network</label>
+          <select id="payNetwork"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Price per 1 INRI (USDT/USDC)</label>
+          <input id="pricePer" type="number" step="0.000001" placeholder="e.g. 0.05" />
+          <div class="muted2">Total = INRI × price</div>
+        </div>
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Total to pay (auto)</label>
+          <div class="pill mono" id="totalPill">—</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Seller Receive Address (on selected network)</label>
+        <input id="payTo" placeholder="0x... / T... / any account id" />
+      </div>
+
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Payment Window (minutes)</label>
+          <input id="payWindow" type="number" step="1" value="30" min="5" max="1440" />
+        </div>
+        <div class="field" style="flex:1;min-width:200px">
+          <label>Preview</label>
+          <div class="pill" id="previewPill">—</div>
+        </div>
+      </div>
+
+      <button class="btn btn-pri" id="btnCreate" style="width:100%">Create Offer (deposit INRI)</button>
+    </aside>
+
+    <!-- MARKET -->
+    <main class="card" id="marketPanel">
+      <div class="toolbar">
+        <div class="row">
+          <span class="pill"><b id="count">0</b> offers</span>
+          <span class="pill mono">chainId 3777</span>
+          <span class="pill"><span class="muted2">Activity</span> <span class="mono" id="activityPill">—</span></span>
+        </div>
+
+        <div class="search">
+          <select id="filter">
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="locked">Locked</option>
+            <option value="paid">Paid</option>
+            <option value="disputed">Disputed</option>
+            <option value="finalized">Finalized</option>
+            <option value="mine">Mine</option>
+          </select>
+          <input id="q" placeholder="Search: id / seller / buyer / txid / network / asset / payTo" />
+          <button class="btn btn-ghost" id="btnRefresh">Refresh</button>
+        </div>
+      </div>
+
+      <ul class="offers" id="offers"></ul>
+
+      <div class="marketFooter">
+        <div>
+          <div class="muted2" id="syncInfo">Tip: Connect wallet for best sync.</div>
+          <div class="muted2" id="rpcMode">Provider mode: —</div>
+        </div>
+
+        <div class="walletBox">
+          <div class="walletLeft">
+            <div class="muted">Wallet</div>
+            <div class="mono" id="meAddr">—</div>
+            <div class="muted" style="margin-top:6px">Withdrawable</div>
+            <div class="pill mono" id="withdrawPill">—</div>
+          </div>
+
+          <div class="walletRight">
+            <button class="btn btn-ok" id="btnWithdraw" style="display:none">Withdraw</button>
+            <button class="btn btn-ghost" id="btnClearSaved">Clear saved offers (this device)</button>
+            <div class="row">
+              <button class="btn btn-ghost" id="prev">◀</button>
+              <div class="pill" id="pageInfo">1 / 1</div>
+              <button class="btn btn-ghost" id="next">▶</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -479,7 +451,7 @@
 
 <div class="backdrop" id="backdrop">
   <div class="modal">
-    <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
       <div>
         <h3 id="mTitle">Offer</h3>
         <div class="sub" id="mSub">—</div>
@@ -489,8 +461,8 @@
       </div>
     </div>
 
-    <div class="modalGrid">
-      <div class="card">
+    <div class="modalGrid" style="margin-top:10px">
+      <div class="card" style="background:rgba(0,0,0,.18)">
         <h2 style="margin:0 0 8px 0">Details</h2>
         <div id="mDetails" class="muted"></div>
         <div class="hr"></div>
@@ -498,7 +470,7 @@
         <div class="row" id="mLogos" style="flex-wrap:wrap;gap:8px;margin-top:8px"></div>
       </div>
 
-      <div class="card">
+      <div class="card" style="background:rgba(0,0,0,.18)">
         <h2 style="margin:0 0 8px 0">Actions</h2>
 
         <div class="field">
@@ -507,7 +479,7 @@
           <div class="muted2">Only the buyer can mark as paid.</div>
         </div>
 
-        <div class="row" style="flex-wrap:wrap">
+        <div class="row">
           <button class="btn btn-pri" id="btnAccept">Accept</button>
           <button class="btn btn-ok" id="btnPaid">I Paid</button>
           <button class="btn btn-ok" id="btnRelease">Release (Seller)</button>
@@ -516,7 +488,7 @@
 
         <div class="hr"></div>
 
-        <div class="row" style="flex-wrap:wrap">
+        <div class="row">
           <button class="btn btn-ghost" id="btnReclaim">Reclaim (Seller)</button>
           <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
         </div>
@@ -570,7 +542,7 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v3";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v4";
 
   const ABI = [
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
@@ -599,67 +571,31 @@
   // =============================
   const $ = (id)=>document.getElementById(id);
   const el = {
-    netPill:$("netPill"),
-    contractPill:$("contractPill"),
-    btnConnect:$("btnConnect"),
-
-    alertBadge:$("alertBadge"),
-    activityPill:$("activityPill"),
-
-    tabCreate:$("tabCreate"),
-    tabMarket:$("tabMarket"),
-    createPanel:$("createPanel"),
-    marketPanel:$("marketPanel"),
+    netPill:$("netPill"), contractPill:$("contractPill"),
+    btnConnect:$("btnConnect"), alertBadge:$("alertBadge"), activityPill:$("activityPill"),
+    tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
+    createPanel:$("createPanel"), marketPanel:$("marketPanel"),
     btnRefreshTop:$("btnRefreshTop"),
 
-    paidCount:$("paidCount"),
-    disputeCount:$("disputeCount"),
+    paidCount:$("paidCount"), disputeCount:$("disputeCount"), doneCount:$("doneCount"),
 
-    inAmount:$("inAmount"),
-    payAsset:$("payAsset"),
-    payNetwork:$("payNetwork"),
-    pricePer:$("pricePer"),
-    totalPill:$("totalPill"),
-    payTo:$("payTo"),
-    payWindow:$("payWindow"),
-    previewPill:$("previewPill"),
-    btnCreate:$("btnCreate"),
+    inAmount:$("inAmount"), payAsset:$("payAsset"), payNetwork:$("payNetwork"),
+    pricePer:$("pricePer"), totalPill:$("totalPill"), payTo:$("payTo"), payWindow:$("payWindow"),
+    previewPill:$("previewPill"), btnCreate:$("btnCreate"),
 
-    meAddr:$("meAddr"),
-    withdrawPill:$("withdrawPill"),
-    btnWithdraw:$("btnWithdraw"),
+    meAddr:$("meAddr"), withdrawPill:$("withdrawPill"), btnWithdraw:$("btnWithdraw"),
+    rpcMode:$("rpcMode"), btnClearSaved:$("btnClearSaved"),
 
-    rpcMode:$("rpcMode"),
-    btnClearSaved:$("btnClearSaved"),
+    filter:$("filter"), q:$("q"), btnRefresh:$("btnRefresh"),
+    offers:$("offers"), count:$("count"), syncInfo:$("syncInfo"),
 
-    filter:$("filter"),
-    q:$("q"),
-    btnRefresh:$("btnRefresh"),
-    offers:$("offers"),
-    count:$("count"),
-    syncInfo:$("syncInfo"),
-
-    prev:$("prev"),
-    next:$("next"),
-    pageInfo:$("pageInfo"),
+    prev:$("prev"), next:$("next"), pageInfo:$("pageInfo"),
 
     toast:$("toast"),
-
-    backdrop:$("backdrop"),
-    mClose:$("mClose"),
-    mTitle:$("mTitle"),
-    mSub:$("mSub"),
-    mDetails:$("mDetails"),
-    mPayHint:$("mPayHint"),
-    mLogos:$("mLogos"),
-    mTxid:$("mTxid"),
-    mNote:$("mNote"),
-    btnAccept:$("btnAccept"),
-    btnPaid:$("btnPaid"),
-    btnRelease:$("btnRelease"),
-    btnDispute:$("btnDispute"),
-    btnReclaim:$("btnReclaim"),
-    btnCancel:$("btnCancel"),
+    backdrop:$("backdrop"), mClose:$("mClose"), mTitle:$("mTitle"), mSub:$("mSub"),
+    mDetails:$("mDetails"), mPayHint:$("mPayHint"), mLogos:$("mLogos"), mTxid:$("mTxid"), mNote:$("mNote"),
+    btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
+    btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel")
   };
 
   for (const n of PAY_NETWORKS){
@@ -673,14 +609,9 @@
   // Providers / State
   // =============================
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
-  let readProvider = rpcProvider;
-  let browserProvider = null;
-  let signer = null;
-  let me = null;
-
+  let readProvider = rpcProvider, browserProvider=null, signer=null, me=null;
   let contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
   let contractWrite = null;
-
   let supportsWithdraw = false;
 
   let offerIds = [];
@@ -697,18 +628,15 @@
   let lastSeenBlock = 0;
   let pollTimer = null;
 
-  // ✅ dynamic page size (guarantee no cut/no scroll)
-  let PAGE_SIZE = 4;
+  // paging
+  const PAGE_SIZE = 8;
 
   // =============================
   // Local storage
   // =============================
   function loadSavedIds(){
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.map(x=>String(x)) : [];
-    }catch{ return []; }
+    try{ const raw = localStorage.getItem(LS_KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.map(x=>String(x)) : []; }
+    catch{ return []; }
   }
   function saveId(idStr){
     const cur = new Set(loadSavedIds());
@@ -732,11 +660,6 @@
     el.alertBadge.textContent = String(alertCount);
     toast(msg, 3200);
   }
-  function clearAlerts(){
-    alertCount = 0;
-    el.alertBadge.style.display = "none";
-    el.alertBadge.textContent = "0";
-  }
 
   const short = (a)=> a ? a.slice(0,6)+"…"+a.slice(-4) : "—";
   const fmtInri = (wei)=> { try{ return ethers.formatEther(wei); }catch{ return String(wei); } };
@@ -750,8 +673,11 @@
     if (st==="LOCKED") return `<span class="tag tag-locked">⏳ LOCKED</span>`;
     if (st==="PAID") return `<span class="tag tag-paid">💠 PAID</span>`;
     if (st==="DISPUTED") return `<span class="tag tag-disputed">⚠ DISPUTE</span>`;
+    if (st==="RELEASED") return `<span class="tag tag-done">✅ RELEASED</span>`;
+    if (st==="CANCELLED") return `<span class="tag tag-done">✖ CANCELLED</span>`;
     return `<span class="tag tag-done">• ${st}</span>`;
   }
+
   const nowSec = ()=> Math.floor(Date.now()/1000);
   function timeLeft(expiresAt){
     const t = Number(expiresAt||0); if (!t) return "—";
@@ -759,6 +685,7 @@
     const m = Math.floor(left/60), s = left % 60;
     return `${m}m ${s}s`;
   }
+
   function imgOrFallback(url, alt){
     if (!url) return `<span class="ico"></span>`;
     return `<span class="ico"><img loading="lazy" src="${url}" alt="${alt}" onerror="this.style.display='none'"></span>`;
@@ -797,21 +724,46 @@
     el.previewPill.textContent = `${amt} INRI${pr}${tt} • ${el.payAsset.value} • ${el.payNetwork.value} • ${mins} min`;
   }
 
-  // ✅ compute how many cards fit inside offers grid (no scroll)
-  function computePageSize(){
-    const cont = el.offers;
-    if (!cont) return;
-
-    const cols = window.innerWidth <= 720 ? 1 : 2;
-    const h = cont.clientHeight || 1;
-
-    // card height estimate (includes gaps); tuned to avoid any overflow
-    const CARD_H = 230;
-    const rows = Math.max(1, Math.floor(h / CARD_H));
-    PAGE_SIZE = Math.max(1, Math.min(12, rows * cols));
-    page = 1;
+  // =============================
+  // Better search (like pro P2P):
+  // - supports searching "0x78a9...dd55" / "78a9" / "dd55" / tokens
+  // - multi-term: "usdt tron 78a9" => all must match
+  // =============================
+  function normalize(s){
+    return String(s||"")
+      .toLowerCase()
+      .replace(/\u2026/g,'...')   // ellipsis
+      .replace(/[^a-z0-9x.\-_\s]/g,' ') // keep 0x
+      .replace(/\s+/g,' ')
+      .trim();
   }
-  window.addEventListener("resize", ()=>{ computePageSize(); render(); });
+  function addrVariants(a){
+    const x = normalize(a);
+    if (!x) return [];
+    const no0x = x.startsWith("0x") ? x.slice(2) : x;
+    const sh = (x.length >= 12) ? (x.slice(0,6) + "..." + x.slice(-4)) : x;
+    const sh2 = (no0x.length >= 10) ? ("0x"+no0x.slice(0,6)+"..."+no0x.slice(-4)) : ("0x"+no0x);
+    return [x,no0x,sh,sh2];
+  }
+  function makeHaystack(o){
+    const meta = unpackPayTo(o.payTo);
+    const parts = [
+      o.id?.toString?.() ?? "",
+      o.payAsset, o.payNetwork,
+      o.txid,
+      o.payTo, meta.address, meta.price, meta.total,
+      ...addrVariants(o.seller),
+      ...addrVariants(o.buyer)
+    ];
+    return normalize(parts.join(" "));
+  }
+  function matchesQuery(o, q){
+    const query = normalize(q);
+    if (!query) return true;
+    const tokens = query.split(" ").filter(Boolean);
+    const hay = makeHaystack(o);
+    return tokens.every(t => hay.includes(t));
+  }
 
   // =============================
   // Tabs
@@ -954,41 +906,28 @@
     offersCache = out;
   }
 
-  // ✅ SEARCH FIX: id/seller/buyer/txid/network/asset/payTo + unpacked payTo parts
-  function norm(s){ return String(s||"").toLowerCase().trim(); }
   function applyFilters(list){
     const f = el.filter.value;
-    const q = norm(el.q.value);
+    const q = el.q.value || "";
 
     let x = list.slice();
     if (f==="open") x = x.filter(o=>o.status===0);
     if (f==="locked") x = x.filter(o=>o.status===1);
     if (f==="paid") x = x.filter(o=>o.status===2);
     if (f==="disputed") x = x.filter(o=>o.status===3);
+    if (f==="finalized") x = x.filter(o=>o.status===4 || o.status===5);
 
     if (f==="mine"){
       if (!me) x = [];
       else{
         const m = me.toLowerCase();
-        x = x.filter(o => norm(o.seller)===m || norm(o.buyer)===m);
+        x = x.filter(o => (o.seller||"").toLowerCase()===m || (o.buyer||"").toLowerCase()===m);
       }
     }
 
     if (q){
-      x = x.filter(o=>{
-        const meta = unpackPayTo(o.payTo);
-        const hay = [
-          o.id?.toString?.() ?? "",
-          o.seller, o.buyer,
-          o.txid,
-          o.payAsset, o.payNetwork,
-          o.payTo,
-          meta.address, meta.price, meta.total
-        ].map(norm).join(" ");
-        return hay.includes(q);
-      });
+      x = x.filter(o => matchesQuery(o, q));
     }
-
     return x;
   }
 
@@ -1000,8 +939,12 @@
   }
 
   function updateCounters(){
-    el.paidCount.textContent = String(offersCache.filter(o=>o.status===2).length);
-    el.disputeCount.textContent = String(offersCache.filter(o=>o.status===3).length);
+    const paid = offersCache.filter(o=>o.status===2).length;
+    const disp = offersCache.filter(o=>o.status===3).length;
+    const done = offersCache.filter(o=>o.status===4 || o.status===5).length; // ✅ finalized (concretizados)
+    el.paidCount.textContent = String(paid);
+    el.disputeCount.textContent = String(disp);
+    el.doneCount.textContent = String(done);
   }
 
   function render(){
@@ -1037,9 +980,9 @@
       const totalLine = meta.total ? `• total ${meta.total} ${o.payAsset}` : "";
 
       li.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
           <div style="min-width:200px">
-            <div class="row" style="gap:8px;flex-wrap:wrap">
+            <div class="row" style="gap:8px">
               ${statusTag(o.status)}
               <span class="tag">${imgOrFallback(assetLogo, o.payAsset)} ${o.payAsset || "—"}</span>
               <span class="tag">${imgOrFallback(netLogo, o.payNetwork)} ${o.payNetwork || "—"}</span>
@@ -1074,8 +1017,7 @@
           <button class="btn btn-pri" data-act="quick" data-id="${o.id.toString()}">${(statusLabel(o.status)==="OPEN" ? "Accept" : "Open")}</button>
         </div>
 
-        <!-- ✅ Logos UNDER the order (won't cut, no scroll) -->
-        <div class="logosUnder">
+        <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap">
           <span class="chip">${imgOrFallback(TOKEN_LOGO.INRI,"INRI")} INRI</span>
           <span class="chip">${imgOrFallback(assetLogo,o.payAsset)} ${o.payAsset || "—"}</span>
           <span class="chip">${imgOrFallback(netLogo,o.payNetwork)} ${net?.label || o.payNetwork || "—"}</span>
@@ -1097,7 +1039,6 @@
     if (!lastSeenBlock && lastBlock) lastSeenBlock = lastBlock;
     el.activityPill.textContent = lastSeenBlock ? ("block "+lastSeenBlock) : (lastBlock ? ("block "+lastBlock) : "—");
 
-    computePageSize();
     render();
     await refreshWithdrawable();
     toast("Updated ✅", 1200);
@@ -1145,7 +1086,6 @@
 
   function startLiveActivity(){
     if (pollTimer) return;
-    clearAlerts();
     pollTimer = setInterval(pollActivity, 9000);
   }
 
@@ -1153,10 +1093,7 @@
   // Modal
   // =============================
   function openModal(){ el.backdrop.style.display="flex"; }
-  function closeModal(){
-    el.backdrop.style.display="none";
-    modalId=null; modalOffer=null; el.mTxid.value="";
-  }
+  function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
 
   function setModalButtonsState(){
     if (!modalOffer){
@@ -1285,9 +1222,7 @@
         }
       }catch(e){ console.warn("Could not parse OfferCreated.", e); }
 
-      el.inAmount.value = "";
-      el.pricePer.value = "";
-      el.payTo.value = "";
+      el.inAmount.value = ""; el.pricePer.value = ""; el.payTo.value = "";
       renderPreview();
 
       await refresh();
@@ -1343,8 +1278,8 @@
     catch(e){ console.error(e); alert("Open offer error: " + (e.shortMessage || e.message || e)); }
   });
 
-  el.mClose.addEventListener("click", closeModal);
-  el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) closeModal(); });
+  el.mClose.addEventListener("click", ()=>{ el.backdrop.style.display="none"; });
+  el.backdrop.addEventListener("click", (e)=>{ if (e.target === el.backdrop) el.backdrop.style.display="none"; });
 
   el.btnAccept.addEventListener("click", async ()=>{
     try{
@@ -1407,7 +1342,7 @@
       const tx = await contractWrite.reclaimIfUnpaid(modalId);
       await tx.wait();
       await refresh();
-      closeModal();
+      el.backdrop.style.display="none";
       toast("Reclaimed ✅");
     }catch(e){ console.error(e); alert("Reclaim error: " + (e.shortMessage || e.message || e)); }
   });
@@ -1420,7 +1355,7 @@
       const tx = await contractWrite.cancelOffer(modalId);
       await tx.wait();
       await refresh();
-      closeModal();
+      el.backdrop.style.display="none";
       toast("Cancelled ✅");
     }catch(e){ console.error(e); alert("Cancel error: " + (e.shortMessage || e.message || e)); }
   });
@@ -1465,6 +1400,41 @@
       toast("Provider error: cannot load offers");
     }
   })();
+
+  // Live activity polling (PAID/DISPUTE), similar to “appeal/dispute status” patterns on big P2P platforms. :contentReference[oaicite:3]{index=3}
+  async function pollActivity(){
+    try{
+      const provider = contractRead.runner.provider;
+      const latest = await provider.getBlockNumber();
+      if (!lastSeenBlock) lastSeenBlock = latest;
+      if (latest <= lastSeenBlock) return;
+
+      const from = lastSeenBlock + 1;
+      const to = latest;
+
+      const tPaid = iface.getEvent("MarkedPaid").topicHash;
+      const tDisp = iface.getEvent("DisputeOpened").topicHash;
+
+      const logs = await provider.getLogs({ address: CONTRACT, fromBlock: from, toBlock: to, topics: [[tPaid, tDisp]] });
+
+      let touched = false;
+      for (const lg of logs){
+        const parsed = iface.parseLog(lg);
+        if (!parsed) continue;
+        if (parsed.name === "MarkedPaid"){ touched = true; bumpAlert(`💠 Offer #${parsed.args.offerId.toString()} marked as PAID`); }
+        if (parsed.name === "DisputeOpened"){ touched = true; bumpAlert(`⚠ Dispute opened on offer #${parsed.args.offerId.toString()}`); }
+      }
+
+      lastSeenBlock = latest;
+      el.activityPill.textContent = "block " + latest;
+      if (touched) await refresh();
+    }catch(e){ /* ignore */ }
+  }
+  function startLiveActivity(){
+    if (pollTimer) return;
+    pollTimer = setInterval(pollActivity, 9000);
+  }
+
 })();
 </script>
 </body>
