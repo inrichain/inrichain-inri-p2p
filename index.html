@@ -39,7 +39,6 @@
       border:1px solid rgba(255,255,255,.10);
       backdrop-filter:blur(10px);
       border-radius:14px;
-      position:sticky; top:0; z-index:50;
     }
     .p2pHero .p2pText{font-family:"Ubuntu",system-ui,sans-serif;font-weight:700;font-size:40px;letter-spacing:.8px;line-height:1;margin:0}
 
@@ -94,7 +93,6 @@
       border:1px solid var(--border);border-radius:var(--radius);
       background:rgba(10,14,30,.55);padding:8px;backdrop-filter:blur(10px);
       flex-wrap:wrap;
-      position:sticky; top:74px; z-index:40;
     }
     .tabRow{display:flex;gap:8px;align-items:center}
     .tab{
@@ -112,11 +110,10 @@
 
     .field{display:flex;flex-direction:column;gap:6px;margin:8px 0}
     label{font-size:11.5px;color:var(--muted)}
-    input,select,textarea{
+    input,select{
       width:100%;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);
       background:rgba(0,0,0,.35);color:var(--text);outline:none;font-size:13px
     }
-    textarea{min-height:76px;resize:vertical}
 
     .hint{
       border:1px solid rgba(59,130,246,.22);background:rgba(59,130,246,.07);
@@ -186,9 +183,18 @@
     .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
 
-    .miniModal{
-      width:min(720px,100%);border-radius:18px;border:1px solid rgba(255,255,255,.14);
-      background:rgba(10,14,30,.92);padding:12px;backdrop-filter:blur(12px);max-height:92vh;overflow:auto
+    /* Network manual modal */
+    .netBackdrop{position:fixed;inset:0;display:none;background:rgba(0,0,0,.75);align-items:center;justify-content:center;z-index:10000;padding:12px}
+    .netModal{
+      width:min(760px,100%);
+      border-radius:18px;border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,14,30,.92);padding:12px;backdrop-filter:blur(12px);
+    }
+    .netModal pre{
+      white-space:pre-wrap;word-break:break-word;
+      background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);
+      padding:10px;border-radius:12px;color:#fff;font-size:12px;
+      max-height:240px;overflow:auto;
     }
   </style>
 </head>
@@ -209,7 +215,7 @@
       </div>
 
       <div class="row" style="justify-content:flex-end">
-        <a class="btn btn-ghost" href="https://www.inri.life/" target="_self" rel="noopener">
+        <a class="btn btn-ghost" href="https://www.inri.life/" target="_self">
           <span class="btnLogo"><img src="https://raw.githubusercontent.com/inrichain/logo-/main/Logo.png" alt="INRI"></span>
           Back to INRI.life
         </a>
@@ -218,11 +224,9 @@
         <div class="pill mono" id="contractPill">Contract: —</div>
         <div class="pill">Alerts <span class="badge" id="alertBadge" style="display:none">0</span></div>
 
-        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open in MetaMask</button>
-        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open in Trust</button>
-        <button class="btn btn-ghost" id="btnOpenCB" style="display:none">Open in Coinbase</button>
+        <button class="btn btn-ghost" id="btnOpenMM" style="display:none">Open MetaMask</button>
+        <button class="btn btn-ghost" id="btnOpenTW" style="display:none">Open Trust</button>
 
-        <button class="btn btn-ghost" id="btnChooseWallet" style="display:none">Choose Wallet</button>
         <button class="btn btn-pri" id="btnConnect">Connect Wallet</button>
       </div>
     </header>
@@ -292,7 +296,7 @@
         </div>
 
         <div class="field">
-          <label>Seller Receive Address (off-chain destination)</label>
+          <label>Seller Receive Address (on selected network)</label>
           <input id="payTo" placeholder="0x... / T... / any account id" />
         </div>
 
@@ -367,7 +371,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Main Offer Modal -->
+  <!-- offer modal -->
   <div class="backdrop" id="backdrop">
     <div class="modal">
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
@@ -435,49 +439,31 @@
     </div>
   </div>
 
-  <!-- Wallet Picker Modal -->
-  <div class="backdrop" id="walletBackdrop" style="display:none">
-    <div class="miniModal">
-      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
+  <!-- network manual modal -->
+  <div class="netBackdrop" id="netBackdrop">
+    <div class="netModal">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
         <div>
-          <h3>Choose a Wallet</h3>
-          <div class="sub">Multiple injected providers detected. Pick one.</div>
-        </div>
-        <button class="btn btn-ghost" id="walletClose">✕</button>
-      </div>
-
-      <div class="hr"></div>
-      <div id="walletList" class="row" style="flex-direction:column;align-items:stretch;gap:8px"></div>
-    </div>
-  </div>
-
-  <!-- Network Help Modal -->
-  <div class="backdrop" id="netBackdrop" style="display:none">
-    <div class="miniModal">
-      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
-        <div>
-          <h3>Switch Network Manually</h3>
-          <div class="sub">Your wallet did not support automatic switch/add. Please switch to INRI Chain manually.</div>
+          <h3 style="margin:0">Switch Network Manually</h3>
+          <div class="muted2" style="margin-top:4px">
+            Your wallet did not support automatic switch/add. Please add/switch to INRI Chain manually using the JSON below.
+          </div>
         </div>
         <button class="btn btn-ghost" id="netClose">✕</button>
       </div>
 
       <div class="hr"></div>
-      <div class="hint">
-        <b>Network Name:</b> INRI CHAIN<br>
-        <b>Chain ID:</b> 3777<br>
-        <b>RPC:</b> https://rpc-chain.inri.life/<br>
-        <b>Currency:</b> INRI (18 decimals)
+
+      <div class="pill" style="margin-bottom:10px">
+        Network Name: <b id="netName">INRI CHAIN</b> • Chain ID: <b id="netId">3777</b> • RPC: <b id="netRpc">https://rpc-chain.inri.life/</b>
       </div>
 
-      <div class="field">
-        <label>Copy/paste network parameters (JSON)</label>
-        <textarea id="netJson" class="mono" readonly></textarea>
-      </div>
+      <div class="muted2" style="margin-bottom:6px">Copy/paste network parameters (JSON):</div>
+      <pre id="netJson"></pre>
 
-      <div class="row" style="justify-content:flex-end">
-        <button class="btn btn-ghost" id="btnCopyNet">Copy</button>
-        <button class="btn btn-pri" id="btnTrySwitchAgain">Try switch again</button>
+      <div class="row" style="justify-content:flex-end;margin-top:10px">
+        <button class="btn btn-ghost" id="netCopy">Copy</button>
+        <button class="btn btn-pri" id="netTry">Try switch again</button>
       </div>
     </div>
   </div>
@@ -485,22 +471,18 @@
 <script>
 (() => {
   // ===== CONFIG =====
-  const CHAIN_ID   = 3777;
-  const CHAIN_HEX  = "0x" + CHAIN_ID.toString(16);
+  const CHAIN_ID = 3777;
+  const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
-  const RPC_URL    = "https://rpc-chain.inri.life/";
-  const CONTRACT   = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
+  const RPC_URL = "https://rpc-chain.inri.life/";
+  const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
   const DAPP_URL = "https://inrichain.github.io/inrichain-inri-p2p/";
   const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, "");
 
-  // Offers persistence & scanning
-  const LS_KEY_IDS       = "inri_p2p_saved_offer_ids_v9";
-  const LS_KEY_SCANBLOCK = "inri_p2p_last_scan_block_v9";
+  const DEFAULT_SCAN_BLOCKS = 300000;
+  const LS_KEY = "inri_p2p_saved_offer_ids_v8_full";
   const PAGE_SIZE = 8;
-  const SCAN_STEP = 180000;      // scan in chunks to avoid provider limits
-  const SCAN_BUFFER = 500;       // re-scan last 500 blocks to not miss logs
-  const MAX_INITIAL_SCAN = 600000; // first load: scan up to last 600k blocks
 
   const LOGOS = {
     NET: {
@@ -532,7 +514,7 @@
   ];
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
-  // ABI
+  // ✅ ABI updated for YOUR contract (owner + mods + voting)
   const ABI = [
     "function owner() view returns (address)",
     "function feeBps() view returns (uint16)",
@@ -573,8 +555,7 @@
   const $ = (id)=>document.getElementById(id);
   const el = {
     netPill:$("netPill"), contractPill:$("contractPill"),
-    btnConnect:$("btnConnect"), btnChooseWallet:$("btnChooseWallet"),
-    btnOpenMM:$("btnOpenMM"), btnOpenTW:$("btnOpenTW"), btnOpenCB:$("btnOpenCB"),
+    btnConnect:$("btnConnect"), btnOpenMM:$("btnOpenMM"), btnOpenTW:$("btnOpenTW"),
     alertBadge:$("alertBadge"), activityPill:$("activityPill"),
     tabCreate:$("tabCreate"), tabMarket:$("tabMarket"),
     createPanel:$("createPanel"), marketPanel:$("marketPanel"),
@@ -607,17 +588,15 @@
     btnOwnerRelease:$("btnOwnerRelease"),
     btnOwnerRefund:$("btnOwnerRefund"),
 
-    // wallet picker
-    walletBackdrop:$("walletBackdrop"),
-    walletClose:$("walletClose"),
-    walletList:$("walletList"),
-
-    // network help
+    // network modal
     netBackdrop:$("netBackdrop"),
     netClose:$("netClose"),
     netJson:$("netJson"),
-    btnCopyNet:$("btnCopyNet"),
-    btnTrySwitchAgain:$("btnTrySwitchAgain"),
+    netCopy:$("netCopy"),
+    netTry:$("netTry"),
+    netName:$("netName"),
+    netId:$("netId"),
+    netRpc:$("netRpc"),
   };
 
   for (const n of PAY_NETWORKS){
@@ -627,55 +606,9 @@
   }
   el.payNetwork.value="TRON";
 
-  // ===== Providers / Wallet detection (EIP-6963 + legacy) =====
-  const detected = []; // { id, name, icon, provider }
-  let selectedInjected = null;
-
-  function addDetected(detail){
-    const p = detail.provider || detail;
-    if (!p) return;
-
-    // try to avoid duplicates
-    if (detected.some(x => x.provider === p)) return;
-
-    const info = detail.info || {};
-    const name = info.name || guessProviderName(p) || "Injected Wallet";
-    const icon = info.icon || "";
-    const id   = info.rdns || info.uuid || name + ":" + detected.length;
-
-    detected.push({ id, name, icon, provider: p });
-  }
-
-  function guessProviderName(p){
-    try{
-      if (p.isMetaMask) return "MetaMask";
-      if (p.isTrust) return "Trust Wallet";
-      if (p.isCoinbaseWallet) return "Coinbase Wallet";
-      if (p.isRabby) return "Rabby";
-      if (p.isOKExWallet) return "OKX Wallet";
-    }catch{}
-    return "";
-  }
-
-  // EIP-6963 discovery
-  window.addEventListener("eip6963:announceProvider", (ev) => addDetected(ev.detail));
-  window.dispatchEvent(new Event("eip6963:requestProvider"));
-
-  // legacy: window.ethereum / window.ethereum.providers
-  function loadLegacy(){
-    const eth = window.ethereum;
-    if (!eth) return;
-
-    if (Array.isArray(eth.providers) && eth.providers.length){
-      for (const p of eth.providers) addDetected(p);
-    } else {
-      addDetected(eth);
-    }
-  }
-
-  // ===== State =====
+  // ===== Providers/State =====
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
-  let readProvider = rpcProvider, browserProvider = null, signer = null, me = null;
+  let readProvider = rpcProvider, browserProvider=null, signer=null, me=null;
   let contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
   let contractWrite = null;
   let supportsWithdraw=false;
@@ -686,10 +619,11 @@
 
   let alertCount=0, lastSeenBlock=0, pollTimer=null;
 
-  // Fee & roles
+  // Fee (read from contract)
   let feeBps = 20;
   let feeRecipient = null;
 
+  // Roles
   let ownerAddr = null;
   let isOwner = false;
   let isMod = false;
@@ -700,6 +634,7 @@
   let modalVotesSeller = 0;
   let modalMyVote = 0;
 
+  // anti double-click
   const txLock = new Set();
   const withLock = async (key, fn) => {
     if(txLock.has(key)) return;
@@ -710,17 +645,19 @@
 
   // ===== Utils =====
   const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
-  const hasInjected = ()=> !!selectedInjected || !!(window.ethereum);
+  const hasProvider = ()=> !!window.ethereum;
 
   const openMetaMaskDapp = ()=>{ window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH; };
   const openTrustDapp = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
-  const openCoinbaseDapp = ()=>{ window.location.href = "https://go.cb-w.com/dapp?url=" + encodeURIComponent(DAPP_URL); };
 
   function maybeShowMobileButtons(){
-    const show = isMobile() && !window.ethereum;
-    el.btnOpenMM.style.display = show ? "inline-flex" : "none";
-    el.btnOpenTW.style.display = show ? "inline-flex" : "none";
-    el.btnOpenCB.style.display = show ? "inline-flex" : "none";
+    if (isMobile() && !hasProvider()){
+      el.btnOpenMM.style.display="inline-flex";
+      el.btnOpenTW.style.display="inline-flex";
+    } else {
+      el.btnOpenMM.style.display="none";
+      el.btnOpenTW.style.display="none";
+    }
   }
 
   function toast(msg, ms=2300){
@@ -736,34 +673,22 @@
     toast(msg, 3200);
   }
 
-  function loadSavedIds(){
+  function prettyError(e){
     try{
-      const raw=localStorage.getItem(LS_KEY_IDS);
-      const arr=raw?JSON.parse(raw):[];
-      return Array.isArray(arr)?arr.map(x=>String(x)):[];
-    }catch{ return []; }
-  }
-  function saveId(idStr){
-    const cur=new Set(loadSavedIds());
-    cur.add(String(idStr));
-    localStorage.setItem(LS_KEY_IDS, JSON.stringify([...cur]));
-  }
-  function clearSaved(){
-    localStorage.removeItem(LS_KEY_IDS);
-    localStorage.removeItem(LS_KEY_SCANBLOCK);
+      if (!e) return "Unknown error";
+      if (typeof e === "string") return e;
+      if (e.shortMessage) return e.shortMessage;
+      if (e.message) return e.message;
+      if (e.error?.message) return e.error.message;
+      return JSON.stringify(e);
+    }catch{
+      return "Unknown error";
+    }
   }
 
-  function getLastScanBlock(){
-    try{
-      const v = localStorage.getItem(LS_KEY_SCANBLOCK);
-      if(!v) return 0;
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    }catch{ return 0; }
-  }
-  function setLastScanBlock(n){
-    try{ localStorage.setItem(LS_KEY_SCANBLOCK, String(n)); }catch{}
-  }
+  function loadSavedIds(){ try{ const raw=localStorage.getItem(LS_KEY); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr.map(x=>String(x)):[]; }catch{ return []; } }
+  function saveId(idStr){ const cur=new Set(loadSavedIds()); cur.add(String(idStr)); localStorage.setItem(LS_KEY, JSON.stringify([...cur])); }
+  function clearSaved(){ localStorage.removeItem(LS_KEY); }
 
   const short=(a)=>a?a.slice(0,6)+"…"+a.slice(-4):"—";
   const fmtInri=(wei)=>{ try{return ethers.formatEther(wei);}catch{return String(wei);} };
@@ -902,131 +827,163 @@
     }
   }
 
-  // ===== Wallet Picker =====
-  function openWalletPicker(){
-    el.walletList.innerHTML = "";
-    for (const w of detected){
-      const b = document.createElement("button");
-      b.className = "btn btn-ghost";
-      b.style.justifyContent = "space-between";
-      b.innerHTML = `
-        <span class="row" style="gap:10px">
-          <span class="btnLogo">${w.icon ? `<img src="${w.icon}" alt="">` : ""}</span>
-          <span>${w.name}</span>
-        </span>
-        <span class="muted2">Select</span>
-      `;
-      b.addEventListener("click", () => {
-        selectedInjected = w.provider;
-        el.walletBackdrop.style.display = "none";
-        toast(`Selected: ${w.name}`);
-        updateWalletButtonsVisibility();
-      });
-      el.walletList.appendChild(b);
+  // ===== Injected Provider selection (fix for wallets that inject multiple providers) =====
+  function getInjectedProvider(){
+    const eth = window.ethereum;
+    if (!eth) return null;
+
+    // Multiple providers case
+    if (Array.isArray(eth.providers) && eth.providers.length) {
+      // Prefer MetaMask if present
+      const mm = eth.providers.find(p => p && (p.isMetaMask || p._metamask));
+      if (mm) return mm;
+
+      // Prefer Coinbase if present
+      const cb = eth.providers.find(p => p && p.isCoinbaseWallet);
+      if (cb) return cb;
+
+      // Otherwise first provider
+      return eth.providers[0];
     }
-    el.walletBackdrop.style.display = "flex";
-  }
-  el.walletClose.addEventListener("click", ()=> el.walletBackdrop.style.display="none");
-  el.walletBackdrop.addEventListener("click", (e)=>{ if(e.target===el.walletBackdrop) el.walletBackdrop.style.display="none"; });
 
-  function updateWalletButtonsVisibility(){
-    // show "Choose Wallet" if more than one provider
-    el.btnChooseWallet.style.display = (detected.length > 1) ? "inline-flex" : "none";
+    return eth;
   }
 
-  // ===== Network Help Modal =====
+  // ===== Network params + Manual modal =====
   const NET_PARAMS = {
     chainId: CHAIN_HEX,
     chainName: CHAIN_NAME,
     rpcUrls: [RPC_URL],
-    nativeCurrency: { name: "INRI", symbol: "INRI", decimals: 18 },
-    blockExplorerUrls: []
+    nativeCurrency: { name: "INRI", symbol: "INRI", decimals: 18 }
+    // blockExplorerUrls: []  // (leave omitted; empty array breaks some wallets)
   };
 
-  function openNetHelp(){
-    el.netJson.value = JSON.stringify(NET_PARAMS, null, 2);
+  function openNetModal(){
+    el.netName.textContent = CHAIN_NAME;
+    el.netId.textContent = String(CHAIN_ID);
+    el.netRpc.textContent = RPC_URL;
+    el.netJson.textContent = JSON.stringify(NET_PARAMS, null, 2);
     el.netBackdrop.style.display = "flex";
   }
-  el.netClose.addEventListener("click", ()=> el.netBackdrop.style.display="none");
-  el.netBackdrop.addEventListener("click", (e)=>{ if(e.target===el.netBackdrop) el.netBackdrop.style.display="none"; });
-  el.btnCopyNet.addEventListener("click", async ()=>{
+  function closeNetModal(){
+    el.netBackdrop.style.display = "none";
+  }
+
+  el.netClose.addEventListener("click", closeNetModal);
+  el.netBackdrop.addEventListener("click", (e)=>{ if(e.target===el.netBackdrop) closeNetModal(); });
+
+  el.netCopy.addEventListener("click", async ()=>{
     try{
-      await navigator.clipboard.writeText(el.netJson.value);
+      await navigator.clipboard.writeText(JSON.stringify(NET_PARAMS, null, 2));
       toast("Copied ✅");
     }catch{
-      toast("Copy failed — select and copy manually");
+      alert("Copy failed. Please copy manually from the text box.");
     }
   });
 
-  // ===== Wallet connect (robust) =====
-  function getInjectedProvider(){
-    return selectedInjected || window.ethereum || null;
-  }
+  // ===== Soft network switching: try, if fails show manual modal (never blocks connect) =====
+  async function ensureNetworkSoft(injected){
+    if(!injected?.request) return;
 
-  async function trySwitchOrAdd(injected){
-    if(!injected) return false;
+    let cur = null;
+    try { cur = await injected.request({ method: "eth_chainId" }); } catch {}
 
-    // some wallets don't implement these methods -> throw -32601 or "unsupported"
+    if(cur && String(cur).toLowerCase() === CHAIN_HEX.toLowerCase()){
+      el.netPill.textContent = `Network: ${CHAIN_NAME}`;
+      return true;
+    }
+
     try{
-      const cur = await injected.request({method:"eth_chainId"});
-      if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()) return true;
-    }catch{}
-
-    // try switch
-    try{
-      await injected.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+      await injected.request({ method:"wallet_switchEthereumChain", params:[{ chainId: CHAIN_HEX }] });
+      el.netPill.textContent = `Network: ${CHAIN_NAME}`;
       return true;
     }catch(e){
-      // if chain not added -> try add
-      const code = e?.code;
-      const msg = (e?.message||"").toLowerCase();
-      const isNotAdded = code === 4902 || msg.includes("4902");
-      const notSupported = code === -32601 || msg.includes("not supported") || msg.includes("unsupported") || msg.includes("does not exist");
-
-      if (isNotAdded){
+      // Chain not added
+      if (e?.code === 4902) {
         try{
           await injected.request({ method:"wallet_addEthereumChain", params:[NET_PARAMS] });
-          // try switch again
-          try{
-            await injected.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
-          }catch{}
+          await injected.request({ method:"wallet_switchEthereumChain", params:[{ chainId: CHAIN_HEX }] });
+          el.netPill.textContent = `Network: ${CHAIN_NAME}`;
           return true;
-        }catch(e2){
-          // add failed
-          openNetHelp();
+        }catch(err){
+          console.warn("add/switch failed:", err);
+          el.netPill.textContent = `Network: switch to ${CHAIN_NAME}`;
+          openNetModal();
           return false;
         }
       }
-
-      if (notSupported){
-        // show manual instructions and continue
-        openNetHelp();
-        return false;
-      }
-
-      // user rejected
-      if (code === 4001) throw e;
-
-      // any other error: show manual help but don't hard fail
-      openNetHelp();
+      // Any other failure: show manual instructions
+      console.warn("switch failed:", e);
+      el.netPill.textContent = `Network: switch to ${CHAIN_NAME}`;
+      openNetModal();
       return false;
     }
   }
 
-  async function ensureNetworkSoft(injected){
-    // "soft": tries, but if fails, does not block connect; just warns
-    const ok = await trySwitchOrAdd(injected);
+  async function requestAccountsEIP1193(injected){
+    if (!injected) throw new Error("No wallet provider found");
+    if (typeof injected.request !== "function") throw new Error("Wallet provider has no request()");
+
     try{
-      const cur = await injected.request({method:"eth_chainId"});
-      if (cur && cur.toLowerCase() === CHAIN_HEX.toLowerCase()){
-        el.netPill.textContent = `Network: ${CHAIN_NAME}`;
-        return true;
+      const accounts = await injected.request({ method: "eth_requestAccounts" });
+      if (!Array.isArray(accounts) || !accounts[0]) throw new Error("No accounts returned by wallet");
+      return accounts;
+    }catch(e){
+      if (e?.code === 4001) throw new Error("User rejected connection");
+      throw new Error(prettyError(e));
+    }
+  }
+
+  // ===== Wallet connect (FIXED) =====
+  async function connect(){
+    const injected = getInjectedProvider();
+
+    if(!injected){
+      if(isMobile()){
+        openMetaMaskDapp();
+        return;
       }
-      el.netPill.textContent = `Network: switch to ${CHAIN_NAME}`;
-      return false;
-    }catch{
-      el.netPill.textContent = `Network: ${ok ? CHAIN_NAME : "—"}`;
-      return ok;
+      alert("No injected wallet found.\nInstall MetaMask/Trust/Coinbase or open this site inside the wallet browser.");
+      return;
+    }
+
+    // Try switch/add but NEVER block connect
+    try { await ensureNetworkSoft(injected); } catch {}
+
+    // Request accounts using EIP-1193 (NOT ethers) — avoids 'could not coalesce error'
+    let accounts;
+    try{
+      accounts = await requestAccountsEIP1193(injected);
+    }catch(e){
+      alert("Connect error: " + prettyError(e));
+      return;
+    }
+
+    try{
+      browserProvider = new ethers.BrowserProvider(injected);
+
+      const addr = accounts[0];
+      signer = await browserProvider.getSigner(addr);
+      me = await signer.getAddress();
+
+      readProvider = browserProvider;
+      contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+      contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
+
+      el.btnConnect.textContent = short(me);
+      el.meAddr.textContent = me;
+      el.rpcMode.textContent = "Provider mode: Wallet Provider (best compatibility)";
+
+      await loadFeeInfo();
+      await loadRoleInfo();
+      await detectWithdrawSupport();
+      await refreshWithdrawable();
+
+      toast("Wallet connected ✅");
+      startLiveActivity();
+    }catch(e){
+      console.error(e);
+      alert("Connect error: " + prettyError(e));
     }
   }
 
@@ -1075,113 +1032,32 @@
     try{ modThreshold = Number(await contractRead.modThreshold()); }catch{ modThreshold = 2; }
   }
 
-  async function connect(){
-    const injected = getInjectedProvider();
-
-    if(!injected){
-      if(isMobile()){
-        // no injected provider in mobile browser => deep link
-        openMetaMaskDapp();
-        return;
-      }
-      alert("No injected wallet found.\nInstall a wallet extension (MetaMask/Trust/Coinbase) or open this site inside the wallet browser.");
-      return;
-    }
-
-    // attempt switch but don't block if unsupported
-    await ensureNetworkSoft(injected);
-
-    browserProvider = new ethers.BrowserProvider(injected);
-    await browserProvider.send("eth_requestAccounts", []);
-    signer = await browserProvider.getSigner();
-    me = await signer.getAddress();
-
-    readProvider = browserProvider;
-    contractRead  = new ethers.Contract(CONTRACT, ABI, readProvider);
-    contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
-
-    el.btnConnect.textContent = short(me);
-    el.meAddr.textContent = me;
-    el.rpcMode.textContent = "Provider mode: Wallet Provider (best compatibility)";
-
-    await loadFeeInfo();
-    await loadRoleInfo();
-    await detectWithdrawSupport();
-    await refreshWithdrawable();
-
-    toast("Wallet connected ✅");
-    startLiveActivity();
-  }
-
-  // ===== Market loading (persistent + incremental logs) =====
+  // ===== Market loading =====
   function mergeIds(aStr,bStr){
     const set=new Set([...aStr.map(String),...bStr.map(String)]);
     return [...set].sort((x,y)=>{ try{ return BigInt(y)>BigInt(x)?1:-1; }catch{ return 0; }});
   }
 
-  async function scanOfferCreatedLogsIncremental(){
-    const provider = contractRead.runner.provider;
-    const latest = await provider.getBlockNumber();
-    lastBlock = latest;
-
-    let from = getLastScanBlock();
-    if (!from || from <= 0){
-      from = Math.max(0, latest - MAX_INITIAL_SCAN);
-    } else {
-      from = Math.max(0, from - SCAN_BUFFER);
-    }
-
-    const topic0 = iface.getEvent("OfferCreated").topicHash;
-    const foundIds = [];
-
-    // scan in chunks
-    let cursor = from;
-    while (cursor <= latest){
-      const to = Math.min(latest, cursor + SCAN_STEP);
-      let logs = [];
-      try{
-        logs = await provider.getLogs({ address: CONTRACT, fromBlock: cursor, toBlock: to, topics: [topic0] });
-      }catch(e){
-        // if RPC/provider can't handle this range, reduce step
-        if ((to - cursor) > 25000){
-          // reduce chunk and retry by splitting
-          const mid = Math.floor((cursor + to)/2);
-          // scan cursor..mid then mid+1..to
-          try{
-            const logsA = await provider.getLogs({ address: CONTRACT, fromBlock: cursor, toBlock: mid, topics:[topic0] });
-            const logsB = await provider.getLogs({ address: CONTRACT, fromBlock: mid+1, toBlock: to, topics:[topic0] });
-            logs = [...logsA, ...logsB];
-          }catch(e2){
-            // give up on this chunk but continue
-            logs = [];
-          }
-        }
-      }
-
-      for (const lg of logs){
-        try{
-          const parsed = iface.parseLog(lg);
-          const id = parsed.args.offerId.toString();
-          foundIds.push(id);
-          saveId(id);
-        }catch{}
-      }
-
-      cursor = to + 1;
-    }
-
-    setLastScanBlock(latest);
-    return foundIds;
-  }
-
   async function loadOfferIds(){
-    const saved = loadSavedIds();
-    let fromLogs = [];
+    const saved=loadSavedIds();
+    let fromLogs=[];
     try{
-      fromLogs = await scanOfferCreatedLogsIncremental();
-    }catch(e){
-      console.warn("Log scan failed, using saved only.", e);
-    }
+      const provider=contractRead.runner.provider;
+      const latest=await provider.getBlockNumber();
+      lastBlock=latest;
+      const from=Math.max(0, latest-DEFAULT_SCAN_BLOCKS);
+
+      const topic0=iface.getEvent("OfferCreated").topicHash;
+      const logs=await provider.getLogs({address:CONTRACT,fromBlock:from,toBlock:latest,topics:[topic0]});
+
+      const seen=new Set();
+      for(const lg of logs){
+        const parsed=iface.parseLog(lg);
+        const id=parsed.args.offerId.toString();
+        if(!seen.has(id)){ seen.add(id); fromLogs.push(id); }
+      }
+    }catch(e){ console.warn("getLogs failed. Showing saved only.", e); }
+
     offerIds = mergeIds(saved, fromLogs).map(x=>BigInt(x));
   }
 
@@ -1262,6 +1138,7 @@
       const net=PAY_NETWORKS.find(n=>n.key===o.payNetwork);
       const netLogo=net?.logo||"";
       const assetLogo=TOKEN_LOGO[o.payAsset]||"";
+
       const meta=unpackPayTo(o.payTo);
 
       const amtInriStr = (()=>{ try{return ethers.formatEther(o.amount);}catch{return "0";} })();
@@ -1312,7 +1189,6 @@
     toast("Syncing…");
     await loadFeeInfo();
     if(me) await loadRoleInfo();
-
     await loadOfferIds();
     await loadOffersDetails();
 
@@ -1505,39 +1381,13 @@
   // ===== Events =====
   el.btnOpenMM.addEventListener("click", openMetaMaskDapp);
   el.btnOpenTW.addEventListener("click", openTrustDapp);
-  el.btnOpenCB.addEventListener("click", openCoinbaseDapp);
 
-  el.btnChooseWallet.addEventListener("click", openWalletPicker);
-  el.btnTrySwitchAgain.addEventListener("click", async ()=>{
-    try{
-      const injected = getInjectedProvider();
-      if(!injected) return;
-      await trySwitchOrAdd(injected);
-      await ensureNetworkSoft(injected);
-      toast("Check your wallet network ✅");
-    }catch(e){
-      toast("Switch attempt failed");
-    }
-  });
+  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: "+prettyError(e)); } });
 
-  el.btnConnect.addEventListener("click", async ()=>{
-    try{ await connect(); }
-    catch(e){
-      console.error(e);
-      const msg = e?.shortMessage || e?.message || String(e);
-      alert("Connect error: " + msg);
-    }
-  });
+  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+prettyError(e)); } });
+  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+prettyError(e)); } });
 
-  el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+(e.shortMessage||e.message||e)); } });
-  el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+(e.shortMessage||e.message||e)); } });
-
-  el.btnClearSaved.addEventListener("click", ()=>{
-    if(!confirm("Clear saved offers from this device?")) return;
-    clearSaved();
-    toast("Saved cleared ✅");
-    refresh().catch(()=>{});
-  });
+  el.btnClearSaved.addEventListener("click", ()=>{ if(!confirm("Clear saved offers from this device?")) return; clearSaved(); toast("Saved cleared ✅"); refresh().catch(()=>{}); });
 
   el.prev.addEventListener("click", ()=>{ page=Math.max(1,page-1); render(); });
   el.next.addEventListener("click", ()=>{ page=Math.min(totalPages,page+1); render(); });
@@ -1557,7 +1407,20 @@
     const btn=ev.target.closest("button[data-act]");
     if(!btn) return;
     const id=btn.getAttribute("data-id");
-    try{ await showOffer(id); }catch(e){ console.error(e); alert("Open offer error: "+(e.shortMessage||e.message||e)); }
+    try{ await showOffer(id); }catch(e){ console.error(e); alert("Open offer error: "+prettyError(e)); }
+  });
+
+  // network modal "try again"
+  el.netTry.addEventListener("click", async ()=>{
+    try{
+      const injected = getInjectedProvider();
+      if(!injected) return;
+      await ensureNetworkSoft(injected);
+      closeNetModal();
+      toast("Try connect now ✅");
+    }catch(e){
+      alert("Switch error: " + prettyError(e));
+    }
   });
 
   el.btnCreate.addEventListener("click", async ()=>{
@@ -1565,23 +1428,11 @@
       try{
         await requireConnected();
 
-        // IMPORTANT: if wallet is on wrong chain, contract tx will fail.
-        // We show a helpful modal instead of a generic error.
-        const injected = getInjectedProvider();
-        if(injected){
-          try{
-            const cid = await injected.request({method:"eth_chainId"});
-            if(!cid || cid.toLowerCase() !== CHAIN_HEX.toLowerCase()){
-              openNetHelp();
-              throw new Error("Please switch to INRI CHAIN (3777) in your wallet.");
-            }
-          }catch{}
-        }
-
         const amt=(el.inAmount.value||"").trim();
         const payTo=(el.payTo.value||"").trim();
         const mins=Number(el.payWindow.value||30);
         const price=(el.pricePer.value||"").trim();
+
         const total=calcTotalOffchain();
 
         if(!amt || Number(amt)<=0) throw new Error("Invalid INRI amount");
@@ -1610,7 +1461,7 @@
         await refresh();
         toast("Offer created ✅");
         if(window.innerWidth<=980) showTab("market");
-      }catch(e){ console.error(e); alert("Create error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Create error: "+prettyError(e)); }
     });
   });
 
@@ -1623,7 +1474,7 @@
         await tx.wait();
         await refreshWithdrawable();
         toast("Withdraw complete ✅");
-      }catch(e){ console.error(e); alert("Withdraw error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Withdraw error: "+prettyError(e)); }
     });
   });
 
@@ -1637,7 +1488,7 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Accepted ✅");
-      }catch(e){ console.error(e); alert("Accept error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Accept error: "+prettyError(e)); }
     });
   });
 
@@ -1655,7 +1506,7 @@
         el.filter.value="paid"; page=1; render();
         await showOffer(modalId.toString());
         toast("Marked PAID ✅");
-      }catch(e){ console.error(e); alert("Mark Paid error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Mark Paid error: "+prettyError(e)); }
     });
   });
 
@@ -1669,7 +1520,7 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Released ✅");
-      }catch(e){ console.error(e); alert("Release error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Release error: "+prettyError(e)); }
     });
   });
 
@@ -1685,7 +1536,7 @@
         el.filter.value="disputed"; page=1; render();
         await showOffer(modalId.toString());
         toast("Dispute opened ✅");
-      }catch(e){ console.error(e); alert("Dispute error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Dispute error: "+prettyError(e)); }
     });
   });
 
@@ -1699,7 +1550,7 @@
         await refresh();
         closeModal();
         toast("Reclaimed ✅");
-      }catch(e){ console.error(e); alert("Reclaim error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Reclaim error: "+prettyError(e)); }
     });
   });
 
@@ -1714,11 +1565,11 @@
         await refresh();
         closeModal();
         toast("Cancelled ✅");
-      }catch(e){ console.error(e); alert("Cancel error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Cancel error: "+prettyError(e)); }
     });
   });
 
-  // MOD voting
+  // Mod voting
   el.btnModVoteBuyer.addEventListener("click", async ()=>{
     await withLock("modVote1", async ()=>{
       try{
@@ -1737,7 +1588,7 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Vote sent ✅");
-      }catch(e){ console.error(e); alert("Vote error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Vote error: "+prettyError(e)); }
     });
   });
 
@@ -1759,11 +1610,11 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Vote sent ✅");
-      }catch(e){ console.error(e); alert("Vote error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Vote error: "+prettyError(e)); }
     });
   });
 
-  // OWNER resolve
+  // Owner resolve
   el.btnOwnerRelease.addEventListener("click", async ()=>{
     await withLock("ownerRelease", async ()=>{
       try{
@@ -1780,7 +1631,7 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Resolved ✅");
-      }catch(e){ console.error(e); alert("Owner resolve error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Owner resolve error: "+prettyError(e)); }
     });
   });
 
@@ -1800,11 +1651,11 @@
         await refresh();
         await showOffer(modalId.toString());
         toast("Resolved ✅");
-      }catch(e){ console.error(e); alert("Owner resolve error: "+(e.shortMessage||e.message||e)); }
+      }catch(e){ console.error(e); alert("Owner resolve error: "+prettyError(e)); }
     });
   });
 
-  // tick update each second
+  // live tick
   setInterval(() => {
     if (offersCache && offersCache.length) render();
     if (modalOffer) setModalButtonsState();
@@ -1817,41 +1668,32 @@
     showTab("create");
     maybeShowMobileButtons();
 
-    // detect providers
-    loadLegacy();
-    updateWalletButtonsVisibility();
-
-    // initial net pill
+    // show network pill best effort
     try{
       const injected = getInjectedProvider();
-      if (injected){
-        const cid = await injected.request({method:"eth_chainId"});
-        el.netPill.textContent=(cid && cid.toLowerCase()===CHAIN_HEX.toLowerCase())
+      if (injected?.request){
+        const cid=await injected.request({method:"eth_chainId"});
+        el.netPill.textContent=(cid && String(cid).toLowerCase()===CHAIN_HEX.toLowerCase())
           ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
       } else {
         el.netPill.textContent="Network: (no wallet)";
       }
     }catch{ el.netPill.textContent="Network: —"; }
 
-    // public RPC status
     try{
       await rpcProvider.getBlockNumber();
-      el.rpcMode.textContent="Provider mode: Public RPC OK (read-only)";
+      el.rpcMode.textContent="Provider mode: Public RPC OK";
       contractRead=new ethers.Contract(CONTRACT, ABI, rpcProvider);
       readProvider=rpcProvider;
     }catch(e){
-      console.warn("Public RPC blocked.", e);
+      console.warn("Public RPC blocked (CORS).", e);
       el.rpcMode.textContent="Provider mode: Public RPC blocked (use Connect Wallet)";
     }
 
     await loadFeeInfo();
 
     try{ await refresh(); }
-    catch(e){
-      console.error(e);
-      el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh.";
-      toast("Provider error: cannot load offers");
-    }
+    catch(e){ console.error(e); el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
   })();
 })();
 </script>
