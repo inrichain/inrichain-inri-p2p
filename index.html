@@ -33,6 +33,7 @@
     .top,.tabs,.card,.toast,.modal,.offer{box-shadow:none!important}
 
     .wrap{max-width:1180px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+
     .p2pHero{
       width:100%;display:flex;justify-content:center;align-items:center;
       padding:18px 12px 12px;background:rgba(10,14,30,.55);
@@ -85,6 +86,7 @@
     .btn-ghost{background:rgba(255,255,255,.06)}
     .btn-bad{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.35)}
     .btn-ok{background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.35)}
+    .btn-warn{background:rgba(245,158,11,.16);border:1px solid rgba(245,158,11,.35)}
 
     .btnLogo{
       width:18px;height:18px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);
@@ -186,18 +188,7 @@
     .modal .sub{color:var(--muted);font-size:11.5px;margin-top:3px}
     .modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(max-width:920px){.modalGrid{grid-template-columns:1fr}}
-
-    /* Dispute tools box inside modal (right side) */
-    .toolsBox{
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.03);
-      border-radius:14px;
-      padding:10px;
-      margin-top:10px;
-    }
-    .toolsTitle{font-weight:900;font-size:12.5px;margin-bottom:6px}
-    .toolsRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .toolsMeta{font-size:11.5px;color:var(--muted2);line-height:1.35}
+    .mini{font-size:11px;color:var(--muted2);line-height:1.35}
   </style>
 </head>
 
@@ -417,21 +408,27 @@
             <button class="btn btn-bad" id="btnCancel">Cancel (Seller)</button>
           </div>
 
-          <!-- ✅ DISPUTE TOOLS (como na sua imagem) -->
-          <div class="toolsBox" id="toolsBox" style="display:none">
-            <div class="toolsTitle">Moderator / Owner dispute tools</div>
-            <div class="toolsMeta" id="toolsMeta">—</div>
-            <div class="hr"></div>
-            <div class="toolsRow">
-              <button class="btn btn-ok" id="btnVoteRelease">Vote: Release to Buyer</button>
-              <button class="btn btn-bad" id="btnVoteRefund">Vote: Refund to Seller</button>
+          <div class="hr"></div>
+
+          <!-- ✅ DISPUTE TOOLS (OWNER + MODS) -->
+          <div class="card" style="background:rgba(0,0,0,.12)">
+            <div class="muted" style="margin-bottom:6px">Moderator / Owner dispute tools</div>
+            <div class="mini" id="mRoleLine">Role: —</div>
+            <div class="mini" id="mModsLine">Mods: — • Threshold: — • Votes: buyer — / seller — • You voted: —</div>
+
+            <div class="row" style="margin-top:10px">
+              <button class="btn btn-warn" id="btnVoteBuyer">Vote: Release to Buyer</button>
+              <button class="btn btn-warn" id="btnVoteSeller">Vote: Refund to Seller</button>
             </div>
-            <div class="hr"></div>
-            <div class="toolsRow">
+
+            <div class="row" style="margin-top:10px">
               <button class="btn btn-ok" id="btnOwnerRelease">OWNER: Release</button>
               <button class="btn btn-bad" id="btnOwnerRefund">OWNER: Refund</button>
             </div>
-            <div class="muted2" id="toolsHint" style="margin-top:8px">—</div>
+
+            <div class="mini" style="margin-top:8px">
+              Owner can resolve anytime. Mods can vote only if enabled. (Contract functions: <span class="mono">resolveDisputeOwner</span> / <span class="mono">voteDispute</span>)
+            </div>
           </div>
 
           <div class="hr"></div>
@@ -450,50 +447,22 @@
   const CHAIN_HEX  = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
 
-  // ✅ seu RPC Singapore (coloque aqui em primeiro)
+  // ✅ Put your RPC(s) here (Singapore / global). First working one will be used for READ.
   const RPC_URLS = [
     "https://rpc-chain.inri.life/",
-    "https://rpc.inri.life/",
+    // "https://<your-singapore-rpc>/",
+    // "https://<backup-rpc>/",
   ];
 
+  // ✅ Your deployed contract address (INRIP2PEscrowSafe)
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
-  const DAPP_URL = "https://inrichain.github.io/inrichain-inri-p2p/";
+  const DAPP_URL = "https://p2p.inri.life/";
   const DAPP_HOSTPATH = DAPP_URL.replace(/^https?:\/\//, "");
 
   const DEFAULT_SCAN_BLOCKS = 300000;
-  const LS_KEY = "inri_p2p_saved_offer_ids_v10_disputeTools";
+  const LS_KEY = "inri_p2p_saved_offer_ids_v10_safe";
   const PAGE_SIZE = 8;
-
-  // ==========================================================
-  // ✅ DISPUTE FN NAMES (IMPORTANTE)
-  //
-  // Cada contrato usa nomes diferentes.
-  // Esse código TENTA vários nomes.
-  // Se no seu contrato o nome for outro, você troca AQUI.
-  //
-  // - vote release/refund: funções de moderador (votação)
-  // - owner release/refund: funções do owner (resolve direto)
-  // - getters: modsEnabled / threshold / votes / hasVoted / owner
-  // ==========================================================
-  const DISPUTE_FN = {
-    // getters (opcionais)
-    owner: ["owner"],
-    modsEnabled: ["modsEnabled", "moderatorsEnabled", "modsEnabled_"],
-    threshold: ["threshold", "voteThreshold", "modsThreshold"],
-    votes: ["votes", "getVotes", "votesOf"],           // returns (buyerVotes, sellerVotes) OR similar
-    hasVoted: ["hasVoted", "voted", "didVote"],        // (offerId, voter) -> bool
-
-    // actions (tentados em ordem)
-    voteRelease: ["voteReleaseToBuyer", "voteBuyer", "voteRelease", "voteReleaseBuyer"],
-    voteRefund:  ["voteRefundToSeller", "voteSeller", "voteRefund", "voteRefundSeller"],
-
-    ownerRelease: ["ownerRelease", "ownerResolveRelease", "resolveReleaseToBuyer", "resolveDisputeRelease", "resolveDisputeToBuyer"],
-    ownerRefund:  ["ownerRefund", "ownerResolveRefund", "resolveRefundToSeller", "resolveDisputeRefund", "resolveDisputeToSeller"],
-
-    // fallback único (se seu contrato tiver UMA função tipo resolveDispute(offerId, toBuyer))
-    resolveBoolean: ["resolveDispute", "ownerResolve", "resolve"], // (offerId, bool toBuyer)
-  };
 
   // =======================
   // Logos
@@ -529,11 +498,34 @@
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
   // =======================
-  // ABI (base) + dispute candidates (chamadas por tentativa)
+  // ABI (MATCHES YOUR CONTRACT)
   // =======================
   const ABI = [
+    // config / fee
+    "function owner() view returns (address)",
     "function feeBps() view returns (uint16)",
     "function feeRecipient() view returns (address)",
+    "function minPayWindowSec() view returns (uint32)",
+    "function maxPayWindowSec() view returns (uint32)",
+
+    // withdraw
+    "function withdraw()",
+    "function pendingWithdrawals(address) view returns (uint256)",
+
+    // moderation
+    "function moderatorsEnabled() view returns (bool)",
+    "function modThreshold() view returns (uint8)",
+    "function isModerator(address) view returns (bool)",
+    "function modVote(uint256,address) view returns (uint8)",
+    "function votesToBuyer(uint256) view returns (uint8)",
+    "function votesToSeller(uint256) view returns (uint8)",
+    "function voteDispute(uint256 offerId,uint8 vote)",
+
+    // offers
+    "function nextOfferId() view returns (uint256)",
+    "function offers(uint256) view returns (address seller,address buyer,uint256 amount,uint64 createdAt,uint64 expiresAt,uint32 payWindowSec,uint8 status,string payAsset,string payNetwork,string payTo,string txid)",
+
+    // core
     "function createOffer(uint32 payWindowSec,string payAsset,string payNetwork,string payTo) payable returns (uint256)",
     "function cancelOffer(uint256 offerId)",
     "function acceptOffer(uint256 offerId)",
@@ -541,60 +533,17 @@
     "function reclaimIfUnpaid(uint256 offerId)",
     "function releaseToBuyer(uint256 offerId)",
     "function openDispute(uint256 offerId)",
-    "function withdraw()",
-    "function pendingWithdrawals(address) view returns (uint256)",
-    "function offers(uint256) view returns (address seller,address buyer,uint256 amount,uint64 createdAt,uint64 expiresAt,uint32 payWindowSec,uint8 status,string payAsset,string payNetwork,string payTo,string txid)",
+    "function resolveDisputeOwner(uint256 offerId,bool releaseToBuyerFlag)",
+
+    // events
     "event OfferCreated(uint256 indexed offerId,address indexed seller,uint256 amount,uint32 payWindowSec,string payAsset,string payNetwork,string payTo)",
     "event MarkedPaid(uint256 indexed offerId,address indexed buyer,string txid)",
     "event DisputeOpened(uint256 indexed offerId,address indexed buyer)",
-    "event Released(uint256 indexed offerId,address indexed buyer,uint256 netToBuyer,uint256 feeAmount)"
-  ];
-
-  // Candidate fragments for dispute tooling (ONLY for encoding attempts)
-  const DISPUTE_ABI_CANDIDATES = [
-    // getters
-    "function owner() view returns (address)",
-    "function modsEnabled() view returns (bool)",
-    "function moderatorsEnabled() view returns (bool)",
-    "function threshold() view returns (uint8)",
-    "function voteThreshold() view returns (uint8)",
-    "function votes(uint256) view returns (uint8 buyer,uint8 seller)",
-    "function getVotes(uint256) view returns (uint8 buyer,uint8 seller)",
-    "function votesOf(uint256) view returns (uint8 buyer,uint8 seller)",
-    "function hasVoted(uint256,address) view returns (bool)",
-    "function voted(uint256,address) view returns (bool)",
-    "function didVote(uint256,address) view returns (bool)",
-
-    // votes
-    "function voteReleaseToBuyer(uint256)",
-    "function voteBuyer(uint256)",
-    "function voteRelease(uint256)",
-    "function voteReleaseBuyer(uint256)",
-    "function voteRefundToSeller(uint256)",
-    "function voteSeller(uint256)",
-    "function voteRefund(uint256)",
-    "function voteRefundSeller(uint256)",
-
-    // owner resolves
-    "function ownerRelease(uint256)",
-    "function ownerResolveRelease(uint256)",
-    "function resolveReleaseToBuyer(uint256)",
-    "function resolveDisputeRelease(uint256)",
-    "function resolveDisputeToBuyer(uint256)",
-    "function ownerRefund(uint256)",
-    "function ownerResolveRefund(uint256)",
-    "function resolveRefundToSeller(uint256)",
-    "function resolveDisputeRefund(uint256)",
-    "function resolveDisputeToSeller(uint256)",
-
-    // single boolean resolver
-    "function resolveDispute(uint256,bool)",
-    "function ownerResolve(uint256,bool)",
-    "function resolve(uint256,bool)",
+    "event Released(uint256 indexed offerId,address indexed buyer,uint256 netToBuyer,uint256 feeAmount)",
+    "event DisputeResolved(uint256 indexed offerId,bool releasedToBuyer)"
   ];
 
   const iface = new ethers.Interface(ABI);
-  const disputeIface = new ethers.Interface(DISPUTE_ABI_CANDIDATES);
 
   // =======================
   // DOM
@@ -628,11 +577,10 @@
     btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel"),
 
     // dispute tools
-    toolsBox:$("toolsBox"),
-    toolsMeta:$("toolsMeta"),
-    toolsHint:$("toolsHint"),
-    btnVoteRelease:$("btnVoteRelease"),
-    btnVoteRefund:$("btnVoteRefund"),
+    mRoleLine:$("mRoleLine"),
+    mModsLine:$("mModsLine"),
+    btnVoteBuyer:$("btnVoteBuyer"),
+    btnVoteSeller:$("btnVoteSeller"),
     btnOwnerRelease:$("btnOwnerRelease"),
     btnOwnerRefund:$("btnOwnerRefund"),
   };
@@ -645,11 +593,14 @@
   el.payNetwork.value="TRON";
 
   // =======================
-  // Wallet discovery (EIP-6963)
+  // Wallet Detection (ANY wallet)
+  // - window.ethereum (legacy)
+  // - EIP-6963 (best coverage)
   // =======================
   let discoveredProviders = []; // { info, provider }
   function discoverWallets(){
     discoveredProviders = [];
+
     window.addEventListener("eip6963:announceProvider", (event) => {
       try{
         const { info, provider } = event.detail || {};
@@ -658,6 +609,7 @@
         discoveredProviders.push({ info, provider });
       }catch{}
     });
+
     window.dispatchEvent(new Event("eip6963:requestProvider"));
   }
 
@@ -665,59 +617,44 @@
     const byName = (name) => discoveredProviders.find(p => (p.info?.name||"").toLowerCase().includes(name));
     const mm = byName("metamask");
     const tw = byName("trust");
+    const rabby = byName("rabby");
     const cb = byName("coinbase");
     const okx = byName("okx");
-    const rabby = byName("rabby");
 
     const best = mm || tw || rabby || cb || okx || discoveredProviders[0];
     if(best?.provider) return best.provider;
-
     if(window.ethereum) return window.ethereum;
     return null;
   }
 
   // =======================
-  // Providers (RPC read-only + wallet write)
+  // Providers
   // =======================
   let rpcProvider = null;
   let activeRpcUrl = null;
 
   let browserProvider=null, signer=null, me=null;
-  let readProvider=null;     // ALWAYS rpcProvider
-  let contractRead=null;     // ALWAYS rpcProvider
-  let contractWrite=null;    // wallet signer
+  let readProvider=null;
+  let contractRead=null;
+  let contractWrite=null;
 
   let supportsWithdraw=false;
+
+  // contract info
+  let feeBps = 20;
+  let feeRecipient = null;
+  let ownerAddr = null;
+  let modsEnabled = false;
+  let modThreshold = 2;
 
   // market state
   let offerIds=[], offersCache=[];
   let page=1, totalPages=1, lastBlock=0;
   let modalId=null, modalOffer=null;
   let alertCount=0, lastSeenBlock=0, pollTimer=null;
-  let feeBps = 20;
-  let feeRecipient = null;
-
-  // dispute state (detected)
-  const disputeSupport = {
-    ok: false,
-    owner: null,
-    modsEnabled: null,
-    threshold: null,
-    votes: null,       // {buyer, seller}
-    hasVoted: null,    // bool (for current user)
-    canVote: false,
-    canOwner: false,
-    fn: {
-      voteRelease: null,
-      voteRefund: null,
-      ownerRelease: null,
-      ownerRefund: null,
-      resolveBoolean: null,
-    }
-  };
 
   // =======================
-  // Anti Double-Click / Spam Guard
+  // Guard
   // =======================
   const guard = {
     locks: new Set(),
@@ -764,9 +701,8 @@
     el.alertBadge.textContent=String(alertCount);
     toast(msg, 3200);
   }
-
   function prettyErr(e){
-    return (e?.shortMessage || e?.message || String(e||"Error")).slice(0,220);
+    return (e?.shortMessage || e?.reason || e?.message || String(e||"Error")).slice(0,240);
   }
 
   function loadSavedIds(){
@@ -939,7 +875,7 @@
   }
 
   // =======================
-  // Wallet connect + network
+  // Wallet connect (ANY wallet)
   // =======================
   let walletListenersAttached = false;
 
@@ -964,10 +900,7 @@
           }]
         });
         await prov.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
-      } else {
-        // não trava a conexão, mas alerta
-        toast("Wallet could not switch network automatically. Please switch to INRI CHAIN manually.", 4000);
-      }
+      } else throw e;
     }
     el.netPill.textContent=`Network: ${CHAIN_NAME}`;
   }
@@ -976,7 +909,7 @@
     if(walletListenersAttached) return;
     walletListenersAttached = true;
 
-    prov.on?.("accountsChanged", (accs)=>{
+    prov.on?.("accountsChanged", (accs)=> {
       try{
         if(!accs || !accs.length){
           me=null; signer=null; contractWrite=null;
@@ -1018,11 +951,12 @@
     });
   }
 
-  async function loadFeeInfo(){
-    try{ feeBps = Number(await contractRead.feeBps()); }
-    catch{ feeBps = 20; }
-    try{ feeRecipient = await contractRead.feeRecipient(); }
-    catch{ feeRecipient = null; }
+  async function loadContractInfo(){
+    try{ feeBps = Number(await contractRead.feeBps()); }catch{ feeBps = 20; }
+    try{ feeRecipient = await contractRead.feeRecipient(); }catch{ feeRecipient = null; }
+    try{ ownerAddr = await contractRead.owner(); }catch{ ownerAddr = null; }
+    try{ modsEnabled = await contractRead.moderatorsEnabled(); }catch{ modsEnabled = false; }
+    try{ modThreshold = Number(await contractRead.modThreshold()); }catch{ modThreshold = 2; }
     renderPreview();
   }
 
@@ -1055,11 +989,12 @@
     const prov = pickBestProvider();
     if(!prov){
       if(isMobile()){ openMetaMaskDapp(); return; }
-      alert("No wallet provider found. Install a wallet extension (MetaMask/Trust/Rabby/Coinbase/OKX) or open this site inside a wallet browser.");
+      alert("No wallet provider found. Install a wallet (MetaMask/Trust/Rabby/Coinbase/OKX) or open this site inside a wallet browser.");
       return;
     }
 
     if(!rpcProvider) await buildRpcProvider();
+
     await ensureNetwork(prov);
 
     browserProvider = new ethers.BrowserProvider(prov);
@@ -1067,7 +1002,7 @@
     signer = await browserProvider.getSigner();
     me = await signer.getAddress();
 
-    readProvider = rpcProvider || browserProvider;
+    readProvider = rpcProvider || browserProvider; // if RPC dead, fallback to wallet
     contractRead  = new ethers.Contract(CONTRACT, ABI, readProvider);
     contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
 
@@ -1080,194 +1015,13 @@
 
     attachWalletListeners(prov);
 
-    await loadFeeInfo();
+    await loadContractInfo();
     await detectWithdrawSupport();
     await refreshWithdrawable();
 
     toast("Wallet connected ✅");
     startLiveActivity();
     await refreshMarket();
-  }
-
-  // =======================
-  // ✅ Dispute Tools detection + calls
-  // =======================
-  async function tryReadFirst(fnNames, args=[]){
-    if(!fnNames || !fnNames.length) return { ok:false };
-    for(const name of fnNames){
-      try{
-        const data = disputeIface.encodeFunctionData(name, args);
-        const res = await readProvider.call({ to: CONTRACT, data });
-        const decoded = disputeIface.decodeFunctionResult(name, res);
-        return { ok:true, name, value: decoded };
-      }catch(e){}
-    }
-    return { ok:false };
-  }
-
-  async function trySendFirst(fnNames, args=[], valueWei=0n){
-    if(!fnNames || !fnNames.length) return { ok:false };
-    for(const name of fnNames){
-      try{
-        const data = disputeIface.encodeFunctionData(name, args);
-        const tx = await signer.sendTransaction({ to: CONTRACT, data, value: valueWei });
-        await tx.wait();
-        return { ok:true, name };
-      }catch(e){}
-    }
-    return { ok:false };
-  }
-
-  function resetDisputeSupport(){
-    disputeSupport.ok=false;
-    disputeSupport.owner=null;
-    disputeSupport.modsEnabled=null;
-    disputeSupport.threshold=null;
-    disputeSupport.votes=null;
-    disputeSupport.hasVoted=null;
-    disputeSupport.canVote=false;
-    disputeSupport.canOwner=false;
-    disputeSupport.fn.voteRelease=null;
-    disputeSupport.fn.voteRefund=null;
-    disputeSupport.fn.ownerRelease=null;
-    disputeSupport.fn.ownerRefund=null;
-    disputeSupport.fn.resolveBoolean=null;
-  }
-
-  async function detectDisputeToolsForOffer(offerIdBig){
-    resetDisputeSupport();
-
-    // precisa do readProvider
-    if(!readProvider) return;
-
-    // owner
-    const own = await tryReadFirst(DISPUTE_FN.owner, []);
-    if(own.ok){
-      disputeSupport.owner = own.value?.[0] || null;
-    }
-
-    // modsEnabled / threshold (opcionais)
-    const meb = await tryReadFirst(DISPUTE_FN.modsEnabled, []);
-    if(meb.ok){
-      disputeSupport.modsEnabled = Boolean(meb.value?.[0]);
-    }
-    const thr = await tryReadFirst(DISPUTE_FN.threshold, []);
-    if(thr.ok){
-      disputeSupport.threshold = Number(thr.value?.[0]);
-    }
-
-    // votes
-    const v = await tryReadFirst(DISPUTE_FN.votes, [offerIdBig]);
-    if(v.ok){
-      const buyerVotes = Number(v.value?.[0] ?? 0);
-      const sellerVotes = Number(v.value?.[1] ?? 0);
-      disputeSupport.votes = { buyer: buyerVotes, seller: sellerVotes };
-    }
-
-    // hasVoted (se tiver)
-    if(me){
-      const hv = await tryReadFirst(DISPUTE_FN.hasVoted, [offerIdBig, me]);
-      if(hv.ok){
-        disputeSupport.hasVoted = Boolean(hv.value?.[0]);
-      }
-    }
-
-    // Decide se tem suporte (pelos métodos)
-    // (Não dá pra “ver” se existe sem tentar, então aqui só marca como habilitado
-    // se conseguir enviar quando clicar. Mas a UI aparece se status == DISPUTED/PAID.)
-    disputeSupport.ok = true;
-
-    // “permissões” (aproximação)
-    disputeSupport.canOwner = (me && disputeSupport.owner && me.toLowerCase()===disputeSupport.owner.toLowerCase());
-    disputeSupport.canVote = (me && disputeSupport.modsEnabled===true && disputeSupport.canOwner===false); // mods (se existe)
-  }
-
-  function renderDisputeToolsUI(){
-    // Mostra somente quando offer estiver DISPUTED (ou PAID, se você quiser)
-    if(!modalOffer){
-      el.toolsBox.style.display="none";
-      return;
-    }
-
-    const st=statusLabel(modalOffer.status);
-    const show = (st==="DISPUTED"); // se quiser PAID também: (st==="DISPUTED" || st==="PAID")
-    if(!show){
-      el.toolsBox.style.display="none";
-      return;
-    }
-
-    // Mostra box; se contrato não suportar, ainda mostra mensagem “not supported”
-    el.toolsBox.style.display="block";
-
-    const role =
-      disputeSupport.canOwner ? "OWNER" :
-      (disputeSupport.canVote ? "MOD" : "USER");
-
-    const modsTxt = (disputeSupport.modsEnabled===null) ? "unknown" : (disputeSupport.modsEnabled ? "ENABLED" : "DISABLED");
-    const thrTxt  = (disputeSupport.threshold===null) ? "?" : disputeSupport.threshold;
-    const bv = disputeSupport.votes?.buyer ?? "?";
-    const sv = disputeSupport.votes?.seller ?? "?";
-    const votedTxt = (disputeSupport.hasVoted===null) ? "unknown" : (disputeSupport.hasVoted ? "yes" : "no");
-
-    el.toolsMeta.textContent =
-      `Role: ${role} • Mods: ${modsTxt} • Threshold: ${thrTxt} • Votes: buyer ${bv} / seller ${sv} • You voted: ${votedTxt}`;
-
-    // enable rules
-    el.btnVoteRelease.disabled = !disputeSupport.canVote || disputeSupport.hasVoted===true;
-    el.btnVoteRefund.disabled  = !disputeSupport.canVote || disputeSupport.hasVoted===true;
-
-    el.btnOwnerRelease.disabled = !disputeSupport.canOwner;
-    el.btnOwnerRefund.disabled  = !disputeSupport.canOwner;
-
-    el.toolsHint.textContent =
-      "If buttons fail, your contract uses different function names. Update DISPUTE_FN at the top.";
-  }
-
-  async function doVoteRelease(){
-    await requireConnected();
-    toast("Voting release…");
-    // try direct voteRelease methods
-    let r = await trySendFirst(DISPUTE_FN.voteRelease, [modalId]);
-    if(!r.ok) throw new Error("voteRelease function not found on contract.");
-    toast("Vote submitted ✅");
-    await refreshMarket();
-    await showOffer(modalId.toString());
-  }
-  async function doVoteRefund(){
-    await requireConnected();
-    toast("Voting refund…");
-    let r = await trySendFirst(DISPUTE_FN.voteRefund, [modalId]);
-    if(!r.ok) throw new Error("voteRefund function not found on contract.");
-    toast("Vote submitted ✅");
-    await refreshMarket();
-    await showOffer(modalId.toString());
-  }
-
-  async function doOwnerRelease(){
-    await requireConnected();
-    toast("Owner release…");
-    // try ownerRelease methods
-    let r = await trySendFirst(DISPUTE_FN.ownerRelease, [modalId]);
-    if(!r.ok){
-      // fallback: resolveDispute(offerId,true)
-      const rb = await trySendFirst(DISPUTE_FN.resolveBoolean, [modalId, true]);
-      if(!rb.ok) throw new Error("Owner release function not found on contract.");
-    }
-    toast("Resolved ✅");
-    await refreshMarket();
-    await showOffer(modalId.toString());
-  }
-  async function doOwnerRefund(){
-    await requireConnected();
-    toast("Owner refund…");
-    let r = await trySendFirst(DISPUTE_FN.ownerRefund, [modalId]);
-    if(!r.ok){
-      const rb = await trySendFirst(DISPUTE_FN.resolveBoolean, [modalId, false]);
-      if(!rb.ok) throw new Error("Owner refund function not found on contract.");
-    }
-    toast("Resolved ✅");
-    await refreshMarket();
-    await showOffer(modalId.toString());
   }
 
   // =======================
@@ -1382,7 +1136,6 @@
       const assetLogo=TOKEN_LOGO[o.payAsset]||"";
 
       const meta=unpackPayTo(o.payTo);
-
       const amtInriStr = (()=>{ try{return ethers.formatEther(o.amount);}catch{return "0";} })();
       const feeInri = calcFeeInriFromInriAmount(amtInriStr);
       const netInri = calcNetInri(amtInriStr, feeInri);
@@ -1444,7 +1197,7 @@
       }
     }
 
-    await loadFeeInfo();
+    await loadContractInfo();
     await loadOfferIds();
     await loadOffersDetails();
 
@@ -1498,13 +1251,79 @@
   // Modal
   // =======================
   function openModal(){ el.backdrop.style.display="flex"; }
-  function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; el.toolsBox.style.display="none"; }
+  function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
   el.mClose.addEventListener("click", closeModal);
   el.backdrop.addEventListener("click", (e)=>{ if(e.target===el.backdrop) closeModal(); });
+
+  async function updateDisputeToolingUI(){
+    // defaults hidden
+    el.btnOwnerRelease.style.display="none";
+    el.btnOwnerRefund.style.display="none";
+    el.btnVoteBuyer.style.display="none";
+    el.btnVoteSeller.style.display="none";
+
+    let role = "GUEST";
+    let youVoted = "—";
+    let votesB = "—", votesS = "—";
+    let mods = "—", thr = "—";
+
+    const st = modalOffer ? statusLabel(modalOffer.status) : "—";
+    if(!modalOffer || !contractRead){
+      el.mRoleLine.textContent = "Role: —";
+      el.mModsLine.textContent = "Mods: — • Threshold: — • Votes: buyer — / seller — • You voted: —";
+      return;
+    }
+
+    // load on demand
+    if(!ownerAddr || ownerAddr===ethers.ZeroAddress){
+      try{ ownerAddr = await contractRead.owner(); }catch{}
+    }
+    try{ modsEnabled = await contractRead.moderatorsEnabled(); }catch{}
+    try{ modThreshold = Number(await contractRead.modThreshold()); }catch{}
+
+    const isOwner = me && ownerAddr && me.toLowerCase()===ownerAddr.toLowerCase();
+    let isMod = false;
+    if(me){
+      try{ isMod = await contractRead.isModerator(me); }catch{ isMod=false; }
+    }
+
+    if(isOwner) role = "OWNER";
+    else if(isMod) role = "MODERATOR";
+    else if(me) role = "USER";
+
+    // votes (only meaningful in DISPUTED)
+    if(st==="DISPUTED"){
+      try{ votesB = String(await contractRead.votesToBuyer(modalId)); }catch{}
+      try{ votesS = String(await contractRead.votesToSeller(modalId)); }catch{}
+      try{
+        const v = me ? Number(await contractRead.modVote(modalId, me)) : 0;
+        youVoted = v===0 ? "no" : (v===1 ? "release" : "refund");
+      }catch{ youVoted="—"; }
+    }
+
+    mods = modsEnabled ? "ENABLED" : "DISABLED";
+    thr = String(modThreshold);
+
+    el.mRoleLine.textContent = `Role: ${role} • Owner: ${ownerAddr ? short(ownerAddr) : "—"}`;
+    el.mModsLine.textContent = `Mods: ${mods} • Threshold: ${thr} • Votes: buyer ${votesB} / seller ${votesS} • You voted: ${youVoted}`;
+
+    // show/hide buttons
+    if(st==="DISPUTED"){
+      if(isOwner){
+        el.btnOwnerRelease.style.display="inline-flex";
+        el.btnOwnerRefund.style.display="inline-flex";
+      }
+      if(modsEnabled && isMod){
+        el.btnVoteBuyer.style.display="inline-flex";
+        el.btnVoteSeller.style.display="inline-flex";
+      }
+    }
+  }
 
   function setModalButtonsState(){
     if(!modalOffer){
       el.btnAccept.disabled=el.btnPaid.disabled=el.btnRelease.disabled=el.btnDispute.disabled=el.btnCancel.disabled=el.btnReclaim.disabled=true;
+      el.btnOwnerRelease.disabled=el.btnOwnerRefund.disabled=el.btnVoteBuyer.disabled=el.btnVoteSeller.disabled=true;
       return;
     }
     const st=statusLabel(modalOffer.status);
@@ -1517,6 +1336,12 @@
     el.btnDispute.disabled = !(st==="PAID" && me && isBuyer);
     el.btnCancel.disabled = !(st==="OPEN" && me && isSeller);
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
+
+    // dispute buttons enablement is checked again on click (but keep sensible)
+    el.btnOwnerRelease.disabled = !(st==="DISPUTED" && me);
+    el.btnOwnerRefund.disabled  = !(st==="DISPUTED" && me);
+    el.btnVoteBuyer.disabled    = !(st==="DISPUTED" && me);
+    el.btnVoteSeller.disabled   = !(st==="DISPUTED" && me);
 
     const note=[];
     note.push(`Status: ${st}`);
@@ -1592,14 +1417,8 @@
     `;
 
     setModalButtonsState();
-
-    // ✅ detect dispute tools for this offer (safe / no crash)
-    try{
-      await detectDisputeToolsForOffer(modalId);
-    }catch{}
-
-    renderDisputeToolsUI();
     openModal();
+    await updateDisputeToolingUI();
   }
 
   async function requireConnected(){
@@ -1610,7 +1429,7 @@
   }
 
   // =======================
-  // Actions (guarded)
+  // Transactions
   // =======================
   async function txCreate(){
     await requireConnected();
@@ -1727,6 +1546,28 @@
     toast("Cancelled ✅");
   }
 
+  // ✅ owner resolve dispute
+  async function txOwnerResolve(releaseToBuyerFlag){
+    await requireConnected();
+    toast(releaseToBuyerFlag ? "OWNER: releasing…" : "OWNER: refunding…");
+    const tx = await contractWrite.resolveDisputeOwner(modalId, !!releaseToBuyerFlag);
+    await tx.wait();
+    await refreshMarket();
+    await showOffer(modalId.toString());
+    toast("Dispute resolved ✅");
+  }
+
+  // ✅ moderator vote
+  async function txVote(vote){ // 1=buyer,2=seller
+    await requireConnected();
+    toast(vote===1 ? "Voting release to buyer…" : "Voting refund to seller…");
+    const tx = await contractWrite.voteDispute(modalId, vote);
+    await tx.wait();
+    await refreshMarket();
+    await showOffer(modalId.toString());
+    toast("Vote submitted ✅");
+  }
+
   // =======================
   // Events
   // =======================
@@ -1798,22 +1639,28 @@
     try{ await txCancel(); }catch(e){ console.error(e); alert("Cancel error: "+prettyErr(e)); }
   }));
 
-  // ✅ dispute tools buttons
-  el.btnVoteRelease.addEventListener("click", ()=>guard.run("voteRelease:"+String(modalId||""), el.btnVoteRelease, async ()=>{
-    try{ await doVoteRelease(); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
+  // ✅ dispute tools
+  el.btnOwnerRelease.addEventListener("click", ()=>guard.run("ownerRel:"+String(modalId||""), el.btnOwnerRelease, async ()=>{
+    try{
+      if(!confirm("OWNER: Release to buyer?")) return;
+      await txOwnerResolve(true);
+    }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
   }));
-  el.btnVoteRefund.addEventListener("click", ()=>guard.run("voteRefund:"+String(modalId||""), el.btnVoteRefund, async ()=>{
-    try{ await doVoteRefund(); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
+  el.btnOwnerRefund.addEventListener("click", ()=>guard.run("ownerRef:"+String(modalId||""), el.btnOwnerRefund, async ()=>{
+    try{
+      if(!confirm("OWNER: Refund to seller?")) return;
+      await txOwnerResolve(false);
+    }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
   }));
-  el.btnOwnerRelease.addEventListener("click", ()=>guard.run("ownerRelease:"+String(modalId||""), el.btnOwnerRelease, async ()=>{
-    try{ await doOwnerRelease(); }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
+  el.btnVoteBuyer.addEventListener("click", ()=>guard.run("voteB:"+String(modalId||""), el.btnVoteBuyer, async ()=>{
+    try{ await txVote(1); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
   }));
-  el.btnOwnerRefund.addEventListener("click", ()=>guard.run("ownerRefund:"+String(modalId||""), el.btnOwnerRefund, async ()=>{
-    try{ await doOwnerRefund(); }catch(e){ console.error(e); alert("Owner resolve error: "+prettyErr(e)); }
+  el.btnVoteSeller.addEventListener("click", ()=>guard.run("voteS:"+String(modalId||""), el.btnVoteSeller, async ()=>{
+    try{ await txVote(2); }catch(e){ console.error(e); alert("Vote error: "+prettyErr(e)); }
   }));
 
   // =======================
-  // Live Time Left (NO heavy rerender)
+  // Live Time Left (lightweight)
   // =======================
   setInterval(() => {
     document.querySelectorAll(".timeLeftCell").forEach(node=>{
@@ -1821,10 +1668,7 @@
       const ex = Number(node.getAttribute("data-expires")||0);
       node.textContent = timeLeftForOffer(st, ex);
     });
-    if(modalOffer){
-      setModalButtonsState();
-      renderDisputeToolsUI();
-    }
+    if(modalOffer) setModalButtonsState();
   }, 1000);
 
   // =======================
@@ -1852,7 +1696,7 @@
     await buildRpcProvider();
 
     if(contractRead){
-      await loadFeeInfo();
+      await loadContractInfo();
       try{ await refreshMarket(); }
       catch(e){
         console.error(e);
