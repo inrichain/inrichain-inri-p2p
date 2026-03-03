@@ -394,8 +394,8 @@
             <button class="btn btn-bad" id="btnDispute">Open Dispute</button>
           </div>
 
-          <!-- ✅ MODERATOR / OWNER DISPUTE PANEL -->
           <div class="hr"></div>
+
           <div class="row" id="modBox" style="display:none;align-items:flex-start">
             <div style="flex:1;min-width:220px">
               <div class="pill">Moderator / Owner dispute tools</div>
@@ -410,7 +410,6 @@
               <button class="btn btn-bad" id="btnOwnerRefund">OWNER: Refund</button>
             </div>
           </div>
-          <!-- ✅ END MOD PANEL -->
 
           <div class="hr"></div>
 
@@ -433,6 +432,8 @@
   const CHAIN_HEX = "0x" + CHAIN_ID.toString(16);
   const CHAIN_NAME = "INRI CHAIN";
   const RPC_URL = "https://rpc-chain.inri.life/";
+  // If you have a public explorer URL, put it here (optional). If not, keep it "".
+  const EXPLORER_URL = ""; // e.g. "https://scan.inri.life"
   const CONTRACT = "0xF6e3Daf7D6787dFd6dbb538b9ee35BF38Fb98f01";
 
   const DAPP_URL = "https://inrichain.github.io/inrichain-inri-p2p/";
@@ -472,10 +473,9 @@
   ];
   const TOKEN_LOGO = { USDT:LOGOS.TOKEN.USDT, USDC:LOGOS.TOKEN.USDC, INRI:LOGOS.TOKEN.INRI };
 
-  // ✅ ABI updated for YOUR contract (owner + mods + voting)
+  // ✅ ABI for your contract
   const ABI = [
     "function owner() view returns (address)",
-
     "function feeBps() view returns (uint16)",
     "function feeRecipient() view returns (address)",
 
@@ -539,7 +539,6 @@
     btnAccept:$("btnAccept"), btnPaid:$("btnPaid"), btnRelease:$("btnRelease"), btnDispute:$("btnDispute"),
     btnReclaim:$("btnReclaim"), btnCancel:$("btnCancel"),
 
-    // ✅ mod/owner panel
     modBox:$("modBox"),
     modInfo:$("modInfo"),
     btnModVoteBuyer:$("btnModVoteBuyer"),
@@ -556,36 +555,51 @@
   }
   el.payNetwork.value="TRON";
 
+  // ===== Provider picking (fixes "unknown RPC error" on some wallets) =====
+  function pickEthereumProvider(){
+    const eth = window.ethereum;
+    if(!eth) return null;
+
+    // Some wallets expose multiple providers
+    const providers = Array.isArray(eth.providers) ? eth.providers : null;
+    if(providers && providers.length){
+      // Prefer MetaMask if exists, else first that has request
+      const mm = providers.find(p => p && p.isMetaMask && typeof p.request === "function");
+      if(mm) return mm;
+      const any = providers.find(p => p && typeof p.request === "function");
+      if(any) return any;
+    }
+
+    if(typeof eth.request === "function") return eth;
+    return null;
+  }
+
   // ===== State / Providers =====
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL, CHAIN_ID);
   let readProvider = rpcProvider, browserProvider=null, signer=null, me=null;
   let contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
   let contractWrite = null;
-  let supportsWithdraw=false;
 
+  let supportsWithdraw=false;
   let offerIds=[], offersCache=[];
   let page=1, totalPages=1, lastBlock=0;
   let modalId=null, modalOffer=null;
 
   let alertCount=0, lastSeenBlock=0, pollTimer=null;
 
-  // Fee (read from contract)
   let feeBps = 20;
   let feeRecipient = null;
 
-  // ✅ Roles / Moderation state
   let ownerAddr = null;
   let isOwner = false;
   let isMod = false;
   let modsEnabled = false;
   let modThreshold = 2;
 
-  // modal-specific moderation numbers
   let modalVotesBuyer = 0;
   let modalVotesSeller = 0;
   let modalMyVote = 0;
 
-  // simple anti double-click spam for tx buttons
   const txLock = new Set();
   const withLock = async (key, fn) => {
     if(txLock.has(key)) return;
@@ -596,7 +610,7 @@
 
   // ===== Utils =====
   const isMobile = ()=> /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||"");
-  const hasProvider = ()=> !!window.ethereum;
+  const hasProvider = ()=> !!pickEthereumProvider();
 
   const openMetaMaskDapp = ()=>{ window.location.href = "https://metamask.app.link/dapp/" + DAPP_HOSTPATH; };
   const openTrustDapp = ()=>{ window.location.href = "https://link.trustwallet.com/open_url?url=" + encodeURIComponent(DAPP_URL); };
@@ -765,28 +779,195 @@
     }
   }
 
-  // ===== Wallet connect =====
-  async function ensureNetwork(){
-    const cur=await window.ethereum.request({method:"eth_chainId"});
+  // ===== Wallet connect (robust) =====
+  function niceRpcError(e){
+    const msg = (e && (e.shortMessage || e.message)) ? (e.shortMessage || e.message) : String(e || "");
+    // Common metamask / wallet errors
+    if(String(msg).toLowerCase().includes("user rejected")) return "User rejected the request.";
+    if(String(msg).includes("4902")) return "Network not found in wallet.";
+    if(String(msg).toLowerCase().includes("unknown rpc error")) return "Wallet returned an unknown RPC error (usually switch/add not supported).";
+    return msg;
+  }
+
+  async function ensureNetwork(eth){
+    // Some wallets throw -32603 on switch/add even if they "support" it.
+    const cur = await eth.request({method:"eth_chainId"});
     if(cur && cur.toLowerCase()===CHAIN_HEX.toLowerCase()){
       el.netPill.textContent=`Network: ${CHAIN_NAME}`;
+      return true;
+    }
+
+    // Try switch
+    try{
+      await eth.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+      el.netPill.textContent=`Network: ${CHAIN_NAME}`;
+      return true;
+    }catch(e1){
+      // Try add chain (more compatible payload)
+      // IMPORTANT: Some wallets fail if blockExplorerUrls is [].
+      const addParamsBase = {
+        chainId: CHAIN_HEX,
+        chainName: CHAIN_NAME,
+        rpcUrls: [RPC_URL],
+        nativeCurrency: { name:"INRI", symbol:"INRI", decimals:18 }
+      };
+      // Add explorer only if you have it
+      if(EXPLORER_URL && typeof EXPLORER_URL === "string" && EXPLORER_URL.startsWith("http")){
+        addParamsBase.blockExplorerUrls = [EXPLORER_URL];
+      }
+
+      // Only add if error is 4902 OR any switch fail (some wallets lie)
+      try{
+        await eth.request({method:"wallet_addEthereumChain", params:[addParamsBase]});
+        // try switch again (some wallets require)
+        try{
+          await eth.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+        }catch{}
+        const after = await eth.request({method:"eth_chainId"});
+        const ok = after && after.toLowerCase()===CHAIN_HEX.toLowerCase();
+        el.netPill.textContent = ok ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
+        return ok;
+      }catch(e2){
+        // FINAL: give up switching, keep read-only
+        el.netPill.textContent = `Network: switch to ${CHAIN_NAME}`;
+        console.warn("Network switch/add failed", e1, e2);
+        return false;
+      }
+    }
+  }
+
+  function resetWalletState(reason){
+    signer = null;
+    browserProvider = null;
+    contractWrite = null;
+    me = null;
+    isOwner = false;
+    isMod = false;
+    el.btnConnect.textContent = "Connect Wallet";
+    el.meAddr.textContent = "—";
+    supportsWithdraw = false;
+    el.btnWithdraw.style.display = "none";
+    el.withdrawPill.textContent = "—";
+    if(reason) toast(reason, 2600);
+
+    // Always keep read-only working
+    readProvider = rpcProvider;
+    contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+    el.rpcMode.textContent = "Provider mode: Public RPC (read-only)";
+  }
+
+  async function connect(){
+    const eth = pickEthereumProvider();
+    if(!eth){
+      if(isMobile()){ openMetaMaskDapp(); return; }
+      alert("No wallet provider found. Install a wallet extension (MetaMask/Trust/OKX/etc.) or open in wallet browser.");
       return;
     }
+
+    // Ask accounts first (most compatible)
     try{
-      await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
+      await eth.request({method:"eth_requestAccounts"});
     }catch(e){
-      if(e && e.code===4902){
-        await window.ethereum.request({
-          method:"wallet_addEthereumChain",
-          params:[{
-            chainId:CHAIN_HEX, chainName:CHAIN_NAME, rpcUrls:[RPC_URL],
-            nativeCurrency:{name:"INRI",symbol:"INRI",decimals:18}, blockExplorerUrls:[]
-          }]
-        });
-        await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]});
-      } else throw e;
+      throw new Error("Connect request failed: " + niceRpcError(e));
     }
-    el.netPill.textContent=`Network: ${CHAIN_NAME}`;
+
+    // Make BrowserProvider with the exact provider object (important!)
+    browserProvider = new ethers.BrowserProvider(eth);
+
+    // Try ensure network (if fails, we still connect but READ-ONLY + warn)
+    const netOk = await ensureNetwork(eth);
+
+    // Get signer/address (may fail if wallet is on wrong chain in some wallets)
+    try{
+      signer = await browserProvider.getSigner();
+      me = await signer.getAddress();
+    }catch(e){
+      // If wallet refuses signer due to chain mismatch, fallback to read-only
+      resetWalletState("Wallet connected, but not on INRI network. Switch network inside wallet.");
+      return;
+    }
+
+    // Use wallet provider for reads too (best), but only if correct chain
+    if(netOk){
+      readProvider = browserProvider;
+      contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+      contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
+      el.netPill.textContent = `Network: ${CHAIN_NAME}`;
+      el.rpcMode.textContent = "Provider mode: Wallet Provider";
+    } else {
+      // Can't switch/add → keep read-only, but still show address
+      readProvider = rpcProvider;
+      contractRead = new ethers.Contract(CONTRACT, ABI, readProvider);
+      contractWrite = null; // disable writes safely
+      el.netPill.textContent = `Network: switch to ${CHAIN_NAME}`;
+      el.rpcMode.textContent = "Provider mode: Public RPC (wallet cannot switch/add network)";
+      toast("Your wallet could not switch/add INRI automatically. Please switch network manually in wallet.", 4200);
+    }
+
+    el.btnConnect.textContent = short(me);
+    el.meAddr.textContent = me;
+
+    await loadFeeInfo();
+    await loadRoleInfo();
+    await detectWithdrawSupport();
+    await refreshWithdrawable();
+
+    // Attach listeners (fix “disconnect and break”)
+    try{
+      eth.removeListener?.("accountsChanged", onAccountsChanged);
+      eth.removeListener?.("chainChanged", onChainChanged);
+      eth.removeListener?.("disconnect", onDisconnect);
+
+      eth.on?.("accountsChanged", onAccountsChanged);
+      eth.on?.("chainChanged", onChainChanged);
+      eth.on?.("disconnect", onDisconnect);
+    }catch{}
+
+    toast("Wallet connected ✅");
+    startLiveActivity();
+  }
+
+  async function onAccountsChanged(accounts){
+    if(!accounts || !accounts.length){
+      resetWalletState("Wallet disconnected.");
+      return;
+    }
+    // Reconnect silently
+    try{
+      await connect();
+      await refresh();
+    }catch{
+      resetWalletState("Wallet changed. Please reconnect.");
+    }
+  }
+
+  async function onChainChanged(){
+    // Some wallets require full reload
+    try{
+      await connect();
+      await refresh();
+    }catch{
+      resetWalletState("Network changed. Please reconnect.");
+    }
+  }
+
+  function onDisconnect(){
+    resetWalletState("Wallet disconnected.");
+  }
+
+  async function requireConnectedForWrite(){
+    if(!me || !browserProvider) await connect();
+    if(!contractWrite){
+      throw new Error("Wallet is not on INRI network (3777). Switch network in your wallet to transact.");
+    }
+    // Re-get signer to avoid stale disconnect
+    try{
+      signer = await browserProvider.getSigner();
+      contractWrite = new ethers.Contract(CONTRACT, ABI, signer);
+    }catch{
+      resetWalletState("Wallet session expired. Connect again.");
+      throw new Error("Wallet session expired. Connect again.");
+    }
   }
 
   async function detectWithdrawSupport(){
@@ -830,39 +1011,8 @@
     if(me && ownerAddr) isOwner = ownerAddr.toLowerCase() === me.toLowerCase();
 
     try{ isMod = !!(await contractRead.isModerator(me || ethers.ZeroAddress)); }catch{ isMod = false; }
-
     try{ modsEnabled = !!(await contractRead.moderatorsEnabled()); }catch{ modsEnabled = false; }
     try{ modThreshold = Number(await contractRead.modThreshold()); }catch{ modThreshold = 2; }
-  }
-
-  async function connect(){
-    if(!hasProvider()){
-      if(isMobile()){ openMetaMaskDapp(); return; }
-      alert("No wallet provider found. Install MetaMask (desktop extension) or open in MetaMask mobile browser.");
-      return;
-    }
-
-    await ensureNetwork();
-    browserProvider=new ethers.BrowserProvider(window.ethereum);
-    await browserProvider.send("eth_requestAccounts", []);
-    signer=await browserProvider.getSigner();
-    me=await signer.getAddress();
-
-    readProvider=browserProvider;
-    contractRead=new ethers.Contract(CONTRACT, ABI, readProvider);
-    contractWrite=new ethers.Contract(CONTRACT, ABI, signer);
-
-    el.btnConnect.textContent=short(me);
-    el.meAddr.textContent=me;
-    el.rpcMode.textContent="Provider mode: Wallet Provider (no CORS)";
-
-    await loadFeeInfo();
-    await loadRoleInfo(); // ✅ important for moderator/owner tools
-    await detectWithdrawSupport();
-    await refreshWithdrawable();
-
-    toast("Wallet connected ✅");
-    startLiveActivity();
   }
 
   // ===== Market loading =====
@@ -1021,7 +1171,7 @@
   async function refresh(){
     toast("Syncing…");
     await loadFeeInfo();
-    if(me) await loadRoleInfo(); // keep roles fresh
+    if(me) await loadRoleInfo();
     await loadOfferIds();
     await loadOffersDetails();
 
@@ -1068,8 +1218,6 @@
   }
   function startLiveActivity(){ if(pollTimer) return; pollTimer=setInterval(pollActivity, 9000); }
 
-  async function requireConnected(){ if(!me) await connect(); if(!contractWrite) throw new Error("Not connected."); }
-
   // ===== Modal =====
   function openModal(){ el.backdrop.style.display="flex"; }
   function closeModal(){ el.backdrop.style.display="none"; modalId=null; modalOffer=null; el.mTxid.value=""; }
@@ -1094,21 +1242,15 @@
     el.btnCancel.disabled = !(st==="OPEN" && me && isSeller);
     el.btnReclaim.disabled = !(st==="LOCKED" && me && isSeller && Number(modalOffer.expiresAt)>0 && nowSec()>Number(modalOffer.expiresAt));
 
-    // ✅ show mod panel only in DISPUTED
     const showDisputeTools = (st==="DISPUTED");
     el.modBox.style.display = showDisputeTools ? "flex" : "none";
-
-    // owner tools
     el.ownerBox.style.display = (showDisputeTools && !!me && isOwner) ? "flex" : "none";
 
-    // mod voting tools: only if modsEnabled + isMod + disputed
     const canVote = showDisputeTools && !!me && isMod && modsEnabled;
     const alreadyVoted = (modalMyVote !== 0);
-
     el.btnModVoteBuyer.disabled = !canVote || alreadyVoted;
     el.btnModVoteSeller.disabled = !canVote || alreadyVoted;
 
-    // info line
     const roleTxt = isOwner ? "OWNER" : (isMod ? "MODERATOR" : "Viewer");
     const enabledTxt = modsEnabled ? "enabled" : "disabled";
     const myVoteTxt = modalMyVote===0 ? "not voted" : (modalMyVote===1 ? "voted RELEASE" : "voted REFUND");
@@ -1149,10 +1291,8 @@
       payAsset:o.payAsset, payNetwork:o.payNetwork, payTo:o.payTo, txid:o.txid
     };
 
-    // keep roles fresh for modal
     if(me) await loadRoleInfo();
 
-    // load votes if disputed
     if(statusLabel(modalOffer.status)==="DISPUTED"){
       await loadModalVotes(modalId);
     } else {
@@ -1222,7 +1362,10 @@
   el.btnOpenMM.addEventListener("click", openMetaMaskDapp);
   el.btnOpenTW.addEventListener("click", openTrustDapp);
 
-  el.btnConnect.addEventListener("click", async ()=>{ try{ await connect(); }catch(e){ console.error(e); alert("Connect error: "+(e.shortMessage||e.message||e)); } });
+  el.btnConnect.addEventListener("click", async ()=>{
+    try{ await connect(); }
+    catch(e){ console.error(e); alert("Connect error: " + niceRpcError(e)); }
+  });
 
   el.btnRefresh.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+(e.shortMessage||e.message||e)); } });
   el.btnRefreshTop.addEventListener("click", async ()=>{ try{ await refresh(); }catch(e){ console.error(e); alert("Refresh error: "+(e.shortMessage||e.message||e)); } });
@@ -1253,7 +1396,7 @@
   el.btnCreate.addEventListener("click", async ()=>{
     await withLock("create", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
 
         const amt=(el.inAmount.value||"").trim();
         const payTo=(el.payTo.value||"").trim();
@@ -1295,7 +1438,7 @@
   el.btnWithdraw.addEventListener("click", async ()=>{
     await withLock("withdraw", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         toast("Withdrawing…");
         const tx=await contractWrite.withdraw();
         await tx.wait();
@@ -1308,7 +1451,7 @@
   el.btnAccept.addEventListener("click", async ()=>{
     await withLock("accept", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         toast("Accepting…");
         const tx=await contractWrite.acceptOffer(modalId);
         await tx.wait();
@@ -1322,7 +1465,7 @@
   el.btnPaid.addEventListener("click", async ()=>{
     await withLock("paid", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         const txid=(el.mTxid.value||"").trim();
         if(txid.length<6) throw new Error("TxID too short");
         toast("Marking PAID…");
@@ -1340,7 +1483,7 @@
   el.btnRelease.addEventListener("click", async ()=>{
     await withLock("release", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         toast("Releasing…");
         const tx=await contractWrite.releaseToBuyer(modalId);
         await tx.wait();
@@ -1354,7 +1497,7 @@
   el.btnDispute.addEventListener("click", async ()=>{
     await withLock("dispute", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         toast("Opening dispute…");
         const tx=await contractWrite.openDispute(modalId);
         await tx.wait();
@@ -1370,7 +1513,7 @@
   el.btnReclaim.addEventListener("click", async ()=>{
     await withLock("reclaim", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         toast("Reclaiming…");
         const tx=await contractWrite.reclaimIfUnpaid(modalId);
         await tx.wait();
@@ -1384,7 +1527,7 @@
   el.btnCancel.addEventListener("click", async ()=>{
     await withLock("cancel", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         if(!confirm("Cancel this offer? (Only while OPEN)")) return;
         toast("Cancelling…");
         const tx=await contractWrite.cancelOffer(modalId);
@@ -1396,11 +1539,10 @@
     });
   });
 
-  // ✅ MOD voting
   el.btnModVoteBuyer.addEventListener("click", async ()=>{
     await withLock("modVote1", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         await loadRoleInfo();
         if(!modsEnabled) throw new Error("Moderators are disabled.");
         if(!isMod) throw new Error("You are not a moderator.");
@@ -1422,7 +1564,7 @@
   el.btnModVoteSeller.addEventListener("click", async ()=>{
     await withLock("modVote2", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         await loadRoleInfo();
         if(!modsEnabled) throw new Error("Moderators are disabled.");
         if(!isMod) throw new Error("You are not a moderator.");
@@ -1441,11 +1583,10 @@
     });
   });
 
-  // ✅ OWNER resolve (always works even if mods disabled)
   el.btnOwnerRelease.addEventListener("click", async ()=>{
     await withLock("ownerRelease", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         await loadRoleInfo();
         if(!isOwner) throw new Error("Not owner.");
         if(statusLabel(modalOffer.status)!=="DISPUTED") throw new Error("Offer is not disputed.");
@@ -1465,7 +1606,7 @@
   el.btnOwnerRefund.addEventListener("click", async ()=>{
     await withLock("ownerRefund", async ()=>{
       try{
-        await requireConnected();
+        await requireConnectedForWrite();
         await loadRoleInfo();
         if(!isOwner) throw new Error("Not owner.");
         if(statusLabel(modalOffer.status)!=="DISPUTED") throw new Error("Offer is not disputed.");
@@ -1482,7 +1623,6 @@
     });
   });
 
-  // live ticking update each second (list + modal note)
   setInterval(() => {
     if (offersCache && offersCache.length) render();
     if (modalOffer) setModalButtonsState();
@@ -1496,29 +1636,28 @@
     maybeShowMobileButtons();
 
     try{
-      if (hasProvider()){
-        const cid=await window.ethereum.request({method:"eth_chainId"});
-        el.netPill.textContent=(cid && cid.toLowerCase()===CHAIN_HEX.toLowerCase())
-          ? `Network: ${CHAIN_NAME}` : `Network: switch to ${CHAIN_NAME}`;
-      } else {
-        el.netPill.textContent="Network: (no wallet)";
-      }
+      // Read-only network pill
+      el.netPill.textContent = hasProvider() ? `Network: connect wallet` : `Network: (no wallet)`;
     }catch{ el.netPill.textContent="Network: —"; }
 
     try{
       await rpcProvider.getBlockNumber();
-      el.rpcMode.textContent="Provider mode: Public RPC OK";
+      el.rpcMode.textContent="Provider mode: Public RPC OK (read-only)";
       contractRead=new ethers.Contract(CONTRACT, ABI, rpcProvider);
       readProvider=rpcProvider;
     }catch(e){
-      console.warn("Public RPC blocked (CORS).", e);
-      el.rpcMode.textContent="Provider mode: Public RPC blocked (use Connect Wallet)";
+      console.warn("Public RPC blocked.", e);
+      el.rpcMode.textContent="Provider mode: Public RPC blocked (connect wallet)";
     }
 
     await loadFeeInfo();
 
     try{ await refresh(); }
-    catch(e){ console.error(e); el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh."; toast("Provider error: cannot load offers"); }
+    catch(e){
+      console.error(e);
+      el.syncInfo.textContent="Could not load offers. Connect wallet and click Refresh.";
+      toast("Provider error: cannot load offers");
+    }
   })();
 })();
 </script>
